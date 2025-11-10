@@ -1,0 +1,7 @@
+
+
+# But keep this .gitignore
+!.gitignore
+
+spend.json
+usage-limits-cache.json

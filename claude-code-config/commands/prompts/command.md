@@ -10,25 +10,39 @@ You need to ULTRA THINK.
 
 ## Workflow
 
-1. **RESEARCH SLASH COMMANDS**: Understand the system
-   - Fetch official documentation from https://docs.claude.com/en/docs/claude-code/slash-commands
+1. **MANDATORY RESEARCH**: Study proven prompt patterns FIRST
+   - **ABSOLUTELY REQUIRED**: Read `@prompts/create-prompt.md` completely - this is NON-NEGOTIABLE
+   - **CRITICAL**: Understand all 6 essential techniques ranked by effectiveness
+   - **MASTER TEMPLATE**: Memorize the XML structure and core principles
+   - **FORBIDDEN**: Never create command prompts without reading the guide first
+
+2. **RESEARCH SLASH COMMANDS**: Understand the system
+   - Fetch official documentation from https://code.claude.com/docs/en/slash-commands
    - Review existing commands in `commands/` directory for patterns
    - **CRITICAL**: Always consult documentation for latest best practices
 
-2. **PARSE ARGUMENTS**: Determine action type
+3. **PARSE ARGUMENTS**: Determine action type
    - `create <name>`: New command from template
    - `refactor @path`: Enhance existing command
    - `update @path`: Modify specific sections
 
-3. **CHOOSE PATTERN**: Select appropriate format based on docs and examples
+4. **APPLY CORE PRINCIPLES**: Use essential techniques from master template
+   - **BE CLEAR AND DIRECT**: Remove fluff, use plain language
+   - **PROVIDE EXAMPLES**: Include command-specific examples when helpful
+   - **ENABLE REASONING**: Add structured thinking for complex commands
+   - **USE PROPER STRUCTURE**: Follow command patterns with clear sections
+   - **ASSIGN SPECIFIC ROLE**: Make Claude an expert in the command's domain
+   - **CONTROL OUTPUT FORMAT**: Specify exact workflow and execution steps
+
+5. **CHOOSE PATTERN**: Select appropriate format based on docs and examples
    - **Numbered workflow** for process-heavy commands (EPCT, commit, CI)
    - **Reference/docs** for CLI wrapper commands (neon-cli, vercel-cli)
    - **Simple sections** for analysis commands (deep-code-analysis)
 
-4. **WRITE/UPDATE FILE**: Save to commands/ directory
+6. **WRITE/UPDATE FILE**: Save to commands/ directory
    - New commands: `commands/<name>.md`
    - Updates: Preserve all existing content and structure
-   - **ALWAYS**: Follow patterns from official documentation
+   - **ALWAYS**: Follow patterns from official documentation and master template
 
 ## Command Patterns
 
@@ -251,11 +265,15 @@ Only include if command takes arguments:
 
 ## Execution Rules
 
+- **RESEARCH FIRST**: Always read `@prompts/create-prompt.md` before creating any command prompt
+- **APPLY MASTER TEMPLATE**: Use core principles from the master guide
 - **Commands are stateful** - can reference previous steps
 - **Use numbered workflows** for clear sequence
 - **Include exact commands** not abstractions
 - **Add verification steps** after actions
 - **Define failure behavior** (retry, stop, ask)
+- **BE SPECIFIC**: Avoid generic roles, use expert specialists
+- **PROVIDE EXAMPLES**: Include command-specific examples when helpful
 
 ## Priority
 

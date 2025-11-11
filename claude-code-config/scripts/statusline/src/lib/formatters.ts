@@ -1,4 +1,4 @@
-import type { Separator, StatuslineConfig } from "../../statusline.config";
+import type { StatuslineConfig } from "../../statusline.config";
 import type { GitStatus } from "./git";
 
 export const colors = {
@@ -9,6 +9,14 @@ export const colors = {
 	ORANGE: "\x1b[38;5;208m",
 	GRAY: "\x1b[0;90m",
 	LIGHT_GRAY: "\x1b[0;37m",
+	CYAN: "\x1b[0;36m",
+	BLUE: "\x1b[0;34m",
+	BG_BLACK: "\x1b[40m",
+	BG_DARK_GRAY: "\x1b[100m",
+	BG_GRAY: "\x1b[47m",
+	BG_BLUE: "\x1b[44m",
+	BG_PURPLE: "\x1b[45m",
+	BG_CYAN: "\x1b[46m",
 	RESET: "\x1b[0m",
 } as const;
 
@@ -153,10 +161,24 @@ function getProgressBarColor(
 	return colors.RED;
 }
 
+function getProgressBarBackground(
+	background: "none" | "dark" | "gray" | "light" | "blue" | "purple" | "cyan",
+): string {
+	if (background === "none") return "";
+	if (background === "dark") return colors.BG_BLACK;
+	if (background === "gray") return colors.BG_DARK_GRAY;
+	if (background === "light") return colors.BG_GRAY;
+	if (background === "blue") return colors.BG_BLUE;
+	if (background === "purple") return colors.BG_PURPLE;
+	if (background === "cyan") return colors.BG_CYAN;
+	return "";
+}
+
 export function formatProgressBarFilled(
 	percentage: number,
 	length: number,
 	colorMode: "progressive" | "green" | "yellow" | "red",
+	background: "none" | "dark" | "gray" | "light" | "blue" | "purple" | "cyan",
 ): string {
 	const filled = Math.round((percentage / 100) * length);
 	const empty = length - filled;
@@ -164,14 +186,16 @@ export function formatProgressBarFilled(
 	const filledBar = "█".repeat(filled);
 	const emptyBar = "░".repeat(empty);
 	const barColor = getProgressBarColor(percentage, colorMode);
+	const bgColor = getProgressBarBackground(background);
 
-	return `${barColor}${filledBar}${colors.GRAY}${emptyBar}${colors.RESET}`;
+	return `${barColor}${filledBar}${bgColor}${colors.GRAY}${emptyBar}${colors.RESET}`;
 }
 
 export function formatProgressBarRectangle(
 	percentage: number,
 	length: number,
 	colorMode: "progressive" | "green" | "yellow" | "red",
+	background: "none" | "dark" | "gray" | "light" | "blue" | "purple" | "cyan",
 ): string {
 	const filled = Math.round((percentage / 100) * length);
 	const empty = length - filled;
@@ -179,18 +203,18 @@ export function formatProgressBarRectangle(
 	const filledBar = "▰".repeat(filled);
 	const emptyBar = "▱".repeat(empty);
 	const barColor = getProgressBarColor(percentage, colorMode);
+	const bgColor = getProgressBarBackground(background);
 
-	return `${barColor}${filledBar}${colors.GRAY}${emptyBar}${colors.RESET}`;
+	return `${barColor}${filledBar}${bgColor}${colors.GRAY}${emptyBar}${colors.RESET}`;
 }
 
 export function formatProgressBarBraille(
 	percentage: number,
 	length: number,
 	colorMode: "progressive" | "green" | "yellow" | "red",
+	background: "none" | "dark" | "gray" | "light" | "blue" | "purple" | "cyan",
 ): string {
-	const brailleChars = [
-		"⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"
-	];
+	const brailleChars = ["⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"];
 
 	const totalSteps = length * (brailleChars.length - 1);
 	const currentStep = Math.round((percentage / 100) * totalSteps);
@@ -200,14 +224,17 @@ export function formatProgressBarBraille(
 	const emptyBlocks = length - fullBlocks - (partialIndex > 0 ? 1 : 0);
 
 	const barColor = getProgressBarColor(percentage, colorMode);
+	const bgColor = getProgressBarBackground(background);
 
-	let bar = "⣿".repeat(fullBlocks);
-	if (partialIndex > 0) {
-		bar += brailleChars[partialIndex];
-	}
-	bar += "⣀".repeat(Math.max(0, emptyBlocks));
+	const fullPart = `${barColor}${"⣿".repeat(fullBlocks)}`;
+	const partialPart =
+		partialIndex > 0 ? `${barColor}${brailleChars[partialIndex]}` : "";
+	const emptyPart =
+		emptyBlocks > 0
+			? `${bgColor}${colors.GRAY}${"⣀".repeat(emptyBlocks)}${colors.RESET}`
+			: "";
 
-	return `${barColor}${bar}${colors.RESET}`;
+	return `${fullPart}${partialPart}${emptyPart}`;
 }
 
 export function formatProgressBar(
@@ -215,14 +242,20 @@ export function formatProgressBar(
 	length: 5 | 10 | 15,
 	style: "filled" | "rectangle" | "braille",
 	colorMode: "progressive" | "green" | "yellow" | "red",
+	background: "none" | "dark" | "gray" | "light" | "blue" | "purple" | "cyan",
 ): string {
 	if (style === "rectangle") {
-		return formatProgressBarRectangle(percentage, length, colorMode);
+		return formatProgressBarRectangle(
+			percentage,
+			length,
+			colorMode,
+			background,
+		);
 	}
 	if (style === "braille") {
-		return formatProgressBarBraille(percentage, length, colorMode);
+		return formatProgressBarBraille(percentage, length, colorMode, background);
 	}
-	return formatProgressBarFilled(percentage, length, colorMode);
+	return formatProgressBarFilled(percentage, length, colorMode, background);
 }
 
 export function formatSession(
@@ -257,6 +290,7 @@ export function formatSession(
 				config.percentage.progressBar.length,
 				config.percentage.progressBar.style,
 				config.percentage.progressBar.color,
+				config.percentage.progressBar.background,
 			);
 			sessionItems.push(
 				`${bar} ${percentage}${colors.GRAY}%${colors.LIGHT_GRAY}`,

@@ -1,6 +1,6 @@
 {
 	"session_id": "06a7b019-03f8-4083-a9db-410d95cb01e6",
-	"transcript_path": "/Users/melvynx/.claude/projects/-Users-melvynx--claude/06a7b019-03f8-4083-a9db-410d95cb01e6.jsonl",
+	"transcript_path": "/Users/melvynx/.claude/scripts/statusline/fixtures/mock-transcript.jsonl",
 	"cwd": "/Users/melvynx/.claude",
 	"model": {
 		"id": "claude-sonnet-4-5-20250929",

@@ -2,6 +2,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { HookInput } from "./types";
+import { updatePeriodCost } from "./usage-limits";
 
 export interface SpendSession {
 	id: string;
@@ -62,9 +63,14 @@ export async function saveSession(input: HookInput): Promise<void> {
 	const data = await loadSpendData();
 	const isoDate = new Date().toISOString().split("T")[0];
 
+	const existingSession = data.sessions.find((s) => s.id === input.session_id);
+	const oldCost = existingSession?.cost ?? 0;
+	const newCost = input.cost.total_cost_usd;
+	const costDelta = newCost - oldCost;
+
 	const session: SpendSession = {
 		id: input.session_id,
-		cost: input.cost.total_cost_usd,
+		cost: newCost,
 		date: isoDate,
 		duration_ms: input.cost.total_duration_ms,
 		lines_added: input.cost.total_lines_added,
@@ -83,6 +89,10 @@ export async function saveSession(input: HookInput): Promise<void> {
 	}
 
 	await saveSpendData(data);
+
+	if (costDelta > 0) {
+		await updatePeriodCost(costDelta);
+	}
 }
 
 export function filterSessionsByDate(
@@ -116,4 +126,15 @@ export function getTodayStart(): Date {
 export function getMonthStart(): Date {
 	const today = new Date();
 	return new Date(today.getFullYear(), today.getMonth(), 1);
+}
+
+export async function getTodayCost(): Promise<number> {
+	try {
+		const data = await loadSpendData();
+		const today = getTodayStart();
+		const todaySessions = filterSessionsByDate(data.sessions, today);
+		return calculateTotalCost(todaySessions);
+	} catch {
+		return 0;
+	}
 }

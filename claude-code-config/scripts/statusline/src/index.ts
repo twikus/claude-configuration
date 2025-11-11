@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import type { StatuslineConfig } from "../statusline.config";
 import { defaultConfig } from "../statusline.config";
 import { getContextData } from "./lib/context";
@@ -14,9 +16,20 @@ import {
 	formatSession,
 } from "./lib/formatters";
 import { getGitStatus } from "./lib/git";
-import { saveSession } from "./lib/spend";
+import { getTodayCost, saveSession } from "./lib/spend";
 import type { HookInput } from "./lib/types";
-import { getUsageLimits } from "./lib/usage-limits";
+import { getCurrentPeriodCost, getUsageLimits } from "./lib/usage-limits";
+
+const CONFIG_FILE_PATH = join(import.meta.dir, "..", "statusline.config.json");
+
+async function loadConfig(): Promise<StatuslineConfig> {
+	try {
+		const content = await readFile(CONFIG_FILE_PATH, "utf-8");
+		return JSON.parse(content);
+	} catch {
+		return defaultConfig;
+	}
+}
 
 function buildFirstLine(
 	branch: string,
@@ -35,6 +48,25 @@ function buildFirstLine(
 	return `${colors.LIGHT_GRAY}${branch} ${sep} ${dirPath} ${sep} ${modelName}${colors.RESET}`;
 }
 
+function shouldShowWeeklyUsage(
+	weeklyConfig: StatuslineConfig["weeklyUsage"],
+	fiveHourUtilization: number | null,
+): boolean {
+	if (weeklyConfig.enabled === true) {
+		return true;
+	}
+
+	if (weeklyConfig.enabled === false) {
+		return false;
+	}
+
+	if (weeklyConfig.enabled === "90%" && fiveHourUtilization !== null) {
+		return fiveHourUtilization >= 90;
+	}
+
+	return false;
+}
+
 function buildSecondLine(
 	sessionCost: string,
 	_sessionDuration: string,
@@ -43,8 +75,14 @@ function buildSecondLine(
 	contextPercentage: number,
 	fiveHourUtilization: number | null,
 	fiveHourReset: string | null,
+	sevenDayUtilization: number | null,
+	sevenDayReset: string | null,
+	periodCost: number,
+	todayCost: number,
 	sessionConfig: StatuslineConfig["session"],
 	limitsConfig: StatuslineConfig["limits"],
+	weeklyConfig: StatuslineConfig["weeklyUsage"],
+	dailySpendConfig: StatuslineConfig["dailySpend"],
 	separator: string,
 ): string {
 	let line = formatSession(
@@ -55,13 +93,15 @@ function buildSecondLine(
 		sessionConfig,
 	);
 
+	const sep = `${colors.GRAY}${separator}`;
+
 	if (
 		limitsConfig.enabled &&
 		limitsConfig.percentage.enabled &&
 		fiveHourUtilization !== null &&
 		fiveHourReset
 	) {
-		const sep = `${colors.GRAY}${separator}`;
+		let limitsDisplay = "";
 
 		if (limitsConfig.percentage.progressBar.enabled) {
 			const bar = formatProgressBar(
@@ -69,22 +109,59 @@ function buildSecondLine(
 				limitsConfig.percentage.progressBar.length,
 				limitsConfig.percentage.progressBar.style,
 				limitsConfig.percentage.progressBar.color,
+				limitsConfig.percentage.progressBar.background,
 			);
 
-			if (limitsConfig.showTimeLeft) {
-				const resetTime = formatResetTime(fiveHourReset);
-				line += ` ${sep} L: ${bar} ${colors.LIGHT_GRAY}${fiveHourUtilization}${colors.GRAY}% ${colors.GRAY}(${resetTime} left)`;
+			limitsDisplay = `${bar} ${colors.LIGHT_GRAY}${fiveHourUtilization}${colors.GRAY}%`;
+		} else {
+			limitsDisplay = `${colors.LIGHT_GRAY}${fiveHourUtilization}${colors.GRAY}%`;
+		}
+
+		if (limitsConfig.showCost && periodCost > 0) {
+			limitsDisplay += ` ${colors.GRAY}$${formatCost(periodCost)}`;
+		}
+
+		if (limitsConfig.showTimeLeft) {
+			const resetTime = formatResetTime(fiveHourReset);
+			limitsDisplay += ` ${colors.GRAY}(${resetTime})`;
+		}
+
+		line += ` ${sep} L: ${limitsDisplay}`;
+	}
+
+	if (
+		shouldShowWeeklyUsage(weeklyConfig, fiveHourUtilization) &&
+		weeklyConfig.percentage.enabled &&
+		sevenDayUtilization !== null &&
+		sevenDayReset
+	) {
+		if (weeklyConfig.percentage.progressBar.enabled) {
+			const bar = formatProgressBar(
+				sevenDayUtilization,
+				weeklyConfig.percentage.progressBar.length,
+				weeklyConfig.percentage.progressBar.style,
+				weeklyConfig.percentage.progressBar.color,
+				weeklyConfig.percentage.progressBar.background,
+			);
+
+			if (weeklyConfig.showTimeLeft) {
+				const resetTime = formatResetTime(sevenDayReset);
+				line += ` ${sep} W: ${bar} ${colors.LIGHT_GRAY}${sevenDayUtilization}${colors.GRAY}% ${colors.GRAY}(${resetTime})`;
 			} else {
-				line += ` ${sep} L: ${bar} ${colors.LIGHT_GRAY}${fiveHourUtilization}${colors.GRAY}%`;
+				line += ` ${sep} W: ${bar} ${colors.LIGHT_GRAY}${sevenDayUtilization}${colors.GRAY}%`;
 			}
 		} else {
-			if (limitsConfig.showTimeLeft) {
-				const resetTime = formatResetTime(fiveHourReset);
-				line += ` ${sep} L:${colors.LIGHT_GRAY} ${fiveHourUtilization}${colors.GRAY}% ${colors.GRAY}(${resetTime} left)`;
+			if (weeklyConfig.showTimeLeft) {
+				const resetTime = formatResetTime(sevenDayReset);
+				line += ` ${sep} W:${colors.LIGHT_GRAY} ${sevenDayUtilization}${colors.GRAY}% ${colors.GRAY}(${resetTime})`;
 			} else {
-				line += ` ${sep} L:${colors.LIGHT_GRAY} ${fiveHourUtilization}${colors.GRAY}%`;
+				line += ` ${sep} W:${colors.LIGHT_GRAY} ${sevenDayUtilization}${colors.GRAY}%`;
 			}
 		}
+	}
+
+	if (dailySpendConfig.enabled && todayCost > 0) {
+		line += ` ${sep} D:${colors.LIGHT_GRAY} $${formatCost(todayCost)}`;
 	}
 
 	line += colors.RESET;
@@ -95,24 +172,27 @@ function buildSecondLine(
 async function main() {
 	try {
 		const input: HookInput = await Bun.stdin.json();
+		const config = await loadConfig();
 
 		await saveSession(input);
 
 		const git = await getGitStatus();
-		const branch = formatBranch(git, defaultConfig.git);
+		const branch = formatBranch(git, config.git);
 		const dirPath = formatPath(
 			input.workspace.current_dir,
-			defaultConfig.pathDisplayMode,
+			config.pathDisplayMode,
 		);
 
 		const contextData = await getContextData({
 			transcriptPath: input.transcript_path,
-			maxContextTokens: defaultConfig.context.maxContextTokens,
-			autocompactBufferTokens: defaultConfig.context.autocompactBufferTokens,
-			useUsableContextOnly: defaultConfig.context.useUsableContextOnly,
-			overheadTokens: defaultConfig.context.overheadTokens,
+			maxContextTokens: config.context.maxContextTokens,
+			autocompactBufferTokens: config.context.autocompactBufferTokens,
+			useUsableContextOnly: config.context.useUsableContextOnly,
+			overheadTokens: config.context.overheadTokens,
 		});
 		const usageLimits = await getUsageLimits();
+		const periodCost = await getCurrentPeriodCost();
+		const todayCost = await getTodayCost();
 
 		const sessionCost = formatCost(input.cost.total_cost_usd);
 		const sessionDuration = formatDuration(input.cost.total_duration_ms);
@@ -121,26 +201,32 @@ async function main() {
 			branch,
 			dirPath,
 			input.model.display_name,
-			defaultConfig.showSonnetModel,
-			defaultConfig.separator,
+			config.showSonnetModel,
+			config.separator,
 		);
 		const secondLine = buildSecondLine(
 			sessionCost,
 			sessionDuration,
 			contextData.tokens,
-			defaultConfig.context.maxContextTokens,
+			config.context.maxContextTokens,
 			contextData.percentage,
 			usageLimits.five_hour?.utilization ?? null,
 			usageLimits.five_hour?.resets_at ?? null,
-			defaultConfig.session,
-			defaultConfig.limits,
-			defaultConfig.separator,
+			usageLimits.seven_day?.utilization ?? null,
+			usageLimits.seven_day?.resets_at ?? null,
+			periodCost,
+			todayCost,
+			config.session,
+			config.limits,
+			config.weeklyUsage,
+			config.dailySpend,
+			config.separator,
 		);
 
-		if (defaultConfig.oneLine) {
-			const sep = ` ${colors.GRAY}${defaultConfig.separator}${colors.LIGHT_GRAY} `;
+		if (config.oneLine) {
+			const sep = ` ${colors.GRAY}${config.separator}${colors.LIGHT_GRAY} `;
 			console.log(`${firstLine}${sep}${secondLine}`);
-			console.log(""); // Empty second line for spacing
+			console.log("");
 		} else {
 			console.log(firstLine);
 			console.log(secondLine);

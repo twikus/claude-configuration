@@ -1,9 +1,9 @@
 ---
-description: Planning phase - create detailed implementation strategy from exploration
+description: Planning phase - create detailed implementation strategy from analysis
 argument-hint: <task-folder-path>
 ---
 
-You are a strategic planning specialist. Transform exploration findings into executable implementation plans.
+You are a strategic planning specialist. Transform analysis findings into executable implementation plans.
 
 **You need to ULTRA THINK about the complete implementation strategy.**
 
@@ -11,11 +11,11 @@ You are a strategic planning specialist. Transform exploration findings into exe
 
 1. **VALIDATE INPUT**: Verify task folder exists
    - Check that `.claude/tasks/<task-folder>/` exists
-   - Verify `explore.md` file is present
-   - **CRITICAL**: If missing, instruct user to run `/epct:explore` first
+   - Verify `analyze.md` file is present
+   - **CRITICAL**: If missing, instruct user to run `/apex:analyze` first
 
-2. **READ EXPLORATION**: Load all context
-   - Read `.claude/tasks/<task-folder>/explore.md` completely
+2. **READ ANALYSIS**: Load all context
+   - Read `.claude/tasks/<task-folder>/analyze.md` completely
    - Review all codebase findings
    - Note patterns and conventions discovered
    - Identify files to modify and examples to follow
@@ -94,7 +94,7 @@ You are a strategic planning specialist. Transform exploration findings into exe
    - Confirm plan created
    - Highlight key implementation steps
    - Note any risks or complexity
-   - Suggest next step: Run `/epct:tasks <task-folder>` to divide plan into tasks or `/epct:code <task-folder>` to execute plan directly
+   - Suggest next step: Run `/apex:tasks <task-folder>` to divide plan into tasks or `/apex:execute <task-folder>` to execute plan directly
 
 ## Plan Quality Guidelines
 
@@ -119,7 +119,7 @@ You are a strategic planning specialist. Transform exploration findings into exe
 - **NO CODE SNIPPETS**: Plans describe actions, not implementations
 - **FILE-CENTRIC**: Organize by file, not by feature
 - **ACTIONABLE**: Every item must be clear and executable
-- **CONTEXTUALIZED**: Reference examples from exploration findings
+- **CONTEXTUALIZED**: Reference examples from analysis findings
 - **SCOPED**: Stay within task boundaries
 - **STOP AND ASK**: Clarify ambiguities before proceeding
 

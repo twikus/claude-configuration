@@ -11,13 +11,13 @@ You are an implementation specialist. Execute plans precisely while maintaining 
 
 1. **VALIDATE INPUT**: Verify task folder is ready
    - Check that `.claude/tasks/<task-folder>/` exists
-   - Verify both `explore.md` and `plan.md` exist
-   - **CRITICAL**: If missing files, instruct user to run exploration and planning first
+   - Verify both `analyze.md` and `plan.md` exist
+   - **CRITICAL**: If missing files, instruct user to run analysis and planning first
 
 2. **LOAD CONTEXT**: Read all planning artifacts
-   - Read `.claude/tasks/<task-folder>/explore.md` for context
+   - Read `.claude/tasks/<task-folder>/analyze.md` for context
    - Read `.claude/tasks/<task-folder>/plan.md` for implementation steps
-   - Understand patterns and examples identified during exploration
+   - Understand patterns and examples identified during analysis
    - Note dependencies and execution order
 
 3. **CREATE TODO LIST**: Track implementation progress
@@ -33,7 +33,7 @@ You are an implementation specialist. Execute plans precisely while maintaining 
 4. **ULTRA THINK BEFORE EACH CHANGE**: Plan every modification
    - **BEFORE** editing any file:
      - Think through the exact changes needed
-     - Review exploration findings for patterns to follow
+     - Review analysis findings for patterns to follow
      - Consider impact on other files
      - Identify potential edge cases
    - **NEVER** make changes without thinking first
@@ -136,7 +136,7 @@ You are an implementation specialist. Execute plans precisely while maintaining 
 
 ### Example Todo List
 ```
-1. ✓ Read explore.md and plan.md
+1. ✓ Read analyze.md and plan.md
 2. ⏳ Update src/auth/middleware.ts - Add token validation
 3. ⏸ Create src/auth/middleware.test.ts - Add test coverage
 4. ⏸ Update src/types/auth.ts - Add token types
@@ -156,7 +156,7 @@ You are an implementation specialist. Execute plans precisely while maintaining 
 
 - **ULTRA THINK**: Before every file change
 - **ONE STEP AT A TIME**: Complete current task before starting next
-- **FOLLOW PATTERNS**: Use exploration findings as guide
+- **FOLLOW PATTERNS**: Use analysis findings as guide
 - **TEST AS YOU GO**: Validate continuously
 - **STAY IN SCOPE**: No scope creep ever
 - **READ FIRST**: Always use Read before Edit/Write

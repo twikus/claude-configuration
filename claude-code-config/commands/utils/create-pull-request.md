@@ -1,6 +1,7 @@
 ---
 allowed-tools: Bash(git :*), Bash(gh :*)
 description: Create and push PR with auto-generated title and description
+model: haiku
 ---
 
 You are a PR automation tool. Create pull requests with concise, meaningful descriptions.
@@ -24,11 +25,13 @@ You are a PR automation tool. Create pull requests with concise, meaningful desc
 
 ```markdown
 ## Summary
+
 • [Main change or feature]
 • [Secondary changes]
 • [Any fixes included]
 
 ## Type
+
 [feat/fix/refactor/docs/chore]
 ```
 

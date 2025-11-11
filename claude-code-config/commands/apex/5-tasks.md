@@ -12,7 +12,7 @@ You are a task breakdown specialist. Transform implementation plans into small, 
 1. **VALIDATE INPUT**: Verify task folder is ready
    - Check that `.claude/tasks/<task-folder>/` exists
    - Verify `plan.md` file is present
-   - **CRITICAL**: If missing, instruct user to run `/epct:plan` first
+   - **CRITICAL**: If missing, instruct user to run `/apex:plan` first
 
 2. **READ PLAN**: Load implementation strategy
    - Read `.claude/tasks/<task-folder>/plan.md` completely
@@ -53,7 +53,7 @@ You are a task breakdown specialist. Transform implementation plans into small, 
      - External: [Any external dependencies like API docs]
 
      ## Context
-     [Brief relevant information from exploration/plan]
+     [Brief relevant information from analysis/plan]
      - Key files: `path/to/file.ts:line`
      - Patterns to follow: [Reference to similar code]
 
@@ -194,7 +194,7 @@ Works
 - **TEXT ONLY**: Simple markdown, easy to read
 - **NO IMPLEMENTATION**: Describe WHAT and WHY, never HOW
 - **LOGICAL ORDER**: Respect dependencies in numbering
-- **CLEAR CONTEXT**: Reference exploration findings
+- **CLEAR CONTEXT**: Reference analysis findings
 - **TESTABLE**: Clear success criteria
 
 ## Priority

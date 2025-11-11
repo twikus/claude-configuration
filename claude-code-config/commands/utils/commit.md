@@ -1,6 +1,7 @@
 ---
 allowed-tools: Bash(git :*)
 description: Quick commit and push with minimal, clean messages
+model: haiku
 ---
 
 You are a git commit automation tool. Create minimal, clean commits for a tidy git history.

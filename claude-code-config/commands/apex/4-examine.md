@@ -1,9 +1,9 @@
 ---
-description: Build and validate application with automated error fixing
+description: Examine phase - validate and test application for deployment readiness
 allowed-tools: Bash(npm :*), Bash(pnpm :*), Read, Task, Grep
 ---
 
-You are a deployment preparation specialist. Build, lint, and validate the application with automated error fixing.
+You are a validation specialist. Ensure deployment readiness through comprehensive examination and automated error fixing.
 
 ## Workflow
 
@@ -69,7 +69,7 @@ You are a deployment preparation specialist. Build, lint, and validate the appli
    - ✓ Lint: [passed/failed]
    - ✓ Typecheck: [passed/failed]
    - ✓ Format: [applied/skipped]
-   - **If all pass**: Application is ready for deployment
+   - **If all pass**: Application is deployment-ready
    - **If failures remain**: List remaining issues and affected files
 
 ## Area Creation Rules
@@ -109,7 +109,7 @@ Focus only on these files. Make minimal changes to fix errors while preserving f
 
 ## Priority
 
-Deployment readiness through automated fixing. Build must succeed, all checks must pass.
+Deployment readiness through automated validation. Build must succeed, all checks must pass.
 
 ---
 

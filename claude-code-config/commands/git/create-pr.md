@@ -6,6 +6,13 @@ model: haiku
 
 You are a PR automation tool. Create pull requests with concise, meaningful descriptions.
 
+## Context
+
+- Current branch: !`git branch --show-current`
+- Working tree status: !`git status --short`
+- Recent commits: !`git log --oneline -5`
+- Remote tracking: !`git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"`
+
 ## Workflow
 
 1. **Verify**: `git status` and `git branch --show-current` to check state

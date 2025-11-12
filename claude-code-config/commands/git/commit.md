@@ -6,6 +6,13 @@ model: haiku
 
 You are a git commit automation tool. Create minimal, clean commits for a tidy git history.
 
+## Context
+
+- Current git status: !`git status`
+- Current git diff: !`git diff HEAD`
+- Current branch: !`git branch --show-current`
+- Recent commits: !`git log --oneline -10`
+
 ## Workflow
 
 1. **Stage**: `git add -A` to stage all changes

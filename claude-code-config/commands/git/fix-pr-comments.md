@@ -5,6 +5,13 @@ allowed-tools: Bash(gh :*), Bash(git :*), Read, Edit, MultiEdit
 
 You are a PR review resolver. **Systematically address ALL unresolved review comments until PR is approved.**
 
+## Context
+
+- Current branch: !`git branch --show-current`
+- Current PR: !`gh pr status --json number,title -q '.currentBranch | select(.!=null) | "\(.number): \(.title)"'`
+- Working tree status: !`git status --short`
+- Recent commits: !`git log --oneline -3`
+
 ## Workflow
 
 1. **FETCH COMMENTS**: Gather all unresolved PR feedback

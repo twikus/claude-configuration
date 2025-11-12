@@ -11,22 +11,26 @@ You need to ULTRA THINK.
 ## Workflow
 
 1. **MANDATORY RESEARCH**: Study proven prompt patterns FIRST
+
    - **ABSOLUTELY REQUIRED**: Read `@prompts/create-prompt.md` completely - this is NON-NEGOTIABLE
    - **CRITICAL**: Understand all 6 essential techniques ranked by effectiveness
    - **MASTER TEMPLATE**: Memorize the XML structure and core principles
    - **FORBIDDEN**: Never create command prompts without reading the guide first
 
 2. **RESEARCH SLASH COMMANDS**: Understand the system
+
    - Fetch official documentation from https://code.claude.com/docs/en/slash-commands
    - Review existing commands in `commands/` directory for patterns
    - **CRITICAL**: Always consult documentation for latest best practices
 
 3. **PARSE ARGUMENTS**: Determine action type
+
    - `create <name>`: New command from template
    - `refactor @path`: Enhance existing command
    - `update @path`: Modify specific sections
 
 4. **APPLY CORE PRINCIPLES**: Use essential techniques from master template
+
    - **BE CLEAR AND DIRECT**: Remove fluff, use plain language
    - **PROVIDE EXAMPLES**: Include command-specific examples when helpful
    - **ENABLE REASONING**: Add structured thinking for complex commands
@@ -35,6 +39,7 @@ You need to ULTRA THINK.
    - **CONTROL OUTPUT FORMAT**: Specify exact workflow and execution steps
 
 5. **CHOOSE PATTERN**: Select appropriate format based on docs and examples
+
    - **Numbered workflow** for process-heavy commands (EPCT, commit, CI)
    - **Reference/docs** for CLI wrapper commands (neon-cli, vercel-cli)
    - **Simple sections** for analysis commands (deep-code-analysis)
@@ -61,6 +66,7 @@ You are a [role]. [Mission statement].
 ## Workflow
 
 1. **ACTION NAME**: Brief description
+
    - Specific step with `exact command`
    - **CRITICAL**: Important constraint
 
@@ -158,6 +164,68 @@ You are a [analyst role]. [Purpose statement].
 - Guidelines and constraints
 ```
 
+## Argument Handling
+
+Commands can accept and use arguments in multiple ways:
+
+### All Arguments: $ARGUMENTS
+
+Access all command arguments as a single string:
+
+```markdown
+---
+argument-hint: <query> [options]
+description: Search codebase with custom options
+---
+
+Search for: $ARGUMENTS
+```
+
+When user runs `/search react hooks --case-sensitive`, `$ARGUMENTS` = `"react hooks --case-sensitive"`
+
+### Positional Arguments: $1, $2, $3...
+
+Access individual arguments by position:
+
+```markdown
+---
+argument-hint: [pr-number] [priority] [assignee]
+description: Review pull request with priority and assignee
+---
+
+Review PR #$1 with priority $2 and assign to $3.
+Focus on security, performance, and code style.
+```
+
+When user runs `/review 123 high alice`, variables are:
+
+- `$1` = `"123"`
+- `$2` = `"high"`
+- `$3` = `"alice"`
+
+### Bash Command Execution: !\`command\`
+
+Execute bash commands inline within command prompts using the syntax `!\`command\``:
+
+```markdown
+---
+description: Show current branch and recent commits
+---
+
+Current branch: !\`git branch --show-current\`
+Last commit: !\`git log -1 --oneline\`
+
+Analyze the changes in this branch.
+```
+
+**Use cases**:
+
+- Get dynamic values (branch names, file counts, etc.)
+- Check environment state
+- Validate preconditions
+
+**IMPORTANT**: If command takes arguments, ALWAYS use `$ARGUMENTS` or positional arguments (`$1`, `$2`, etc.) to access them.
+
 ## Command Patterns by Type
 
 ### Git Operations (commit, PR)
@@ -166,10 +234,12 @@ You are a [analyst role]. [Purpose statement].
 ## Workflow
 
 1. **STAGE**: Prepare changes
+
    - `git add -A` or selective staging
    - `git status` to verify
 
 2. **COMMIT**: Create commit
+
    - Generate message following convention
    - `git commit -m "type: description"`
 
@@ -184,9 +254,11 @@ You are a [analyst role]. [Purpose statement].
 ## Workflow
 
 1. **WAIT**: Initial delay if needed
+
    - `sleep 30` for CI to start
 
 2. **MONITOR**: Watch status
+
    - `gh run list` to find runs
    - `gh run watch <id>` to monitor
 
@@ -202,14 +274,17 @@ You are a [analyst role]. [Purpose statement].
 ## Workflow
 
 1. **EXPLORE**: Gather information
+
    - Search with parallel agents
    - Find relevant files
 
 2. **PLAN**: Create strategy
+
    - Document approach
    - Post plan as comment if GitHub issue
 
 3. **CODE**: Implement changes
+
    - Follow existing patterns
    - Stay in scope
 
@@ -224,10 +299,12 @@ You are a [analyst role]. [Purpose statement].
 ## Workflow
 
 1. **PARSE**: Get arguments from $ARGUMENTS
+
    - Validate input format
    - Extract parameters
 
 2. **EXECUTE**: Run CLI command
+
    - `cli-tool command --flags`
    - Handle output
 

@@ -1,3 +1,9 @@
+---
+description: Reference guide for creating effective prompts using proven techniques
+type: reference
+usage: Used by command.md and agent.md for prompt creation patterns
+---
+
 # Master Prompt Creation Guide
 
 Essential techniques ranked by effectiveness:

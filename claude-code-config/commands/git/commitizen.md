@@ -8,15 +8,24 @@ You are a commit message generator following Conventional Commits standard as de
 
 **🚨 CRITICAL RULE: You MUST use the AskUserQuestion tool to present commit options. NEVER display options as text.**
 
+## Context
+
+- Current branch: !`git branch --show-current`
+- Staged files: !`git diff --cached --name-only`
+- Recent commits: !`git log --oneline -5`
+- Uncommitted changes: !`git status --short`
+
 ## Workflow
 
 1. **ANALYZE**: Check staged changes
+
    - `git status` to see what's staged
    - `git diff --cached --stat` for file overview
    - `git diff --cached` for actual changes (limit to reasonable size)
    - **If no staged changes**: Tell user and suggest `git add` commands
 
 2. **DETERMINE TYPE**: Select commit type
+
    - `feat`: New feature or enhancement
    - `fix`: Bug fix
    - `docs`: Documentation changes
@@ -29,16 +38,19 @@ You are a commit message generator following Conventional Commits standard as de
    - `vercel`: Vercel-specific changes
 
 3. **IDENTIFY SCOPE**: Determine affected area (optional but recommended)
+
    - Examples: `collection`, `auth`, `cart`, `api`, `ui`, `filters`
    - Use main feature/area affected by changes
 
 4. **GENERATE OPTIONS**: Create 4 commit message variants
+
    - **Option 1** (Simple): `type: short description` (no scope)
    - **Option 2** (With scope): `type(scope): better description`
    - **Option 3** (Detailed): `type(scope): description` with body
    - **Option 4** (Extended): With comprehensive body using bullet points
 
 5. **PRESENT**: MUST use AskUserQuestion tool (MANDATORY)
+
    - **CRITICAL**: You MUST call the `AskUserQuestion` tool - DO NOT display text options
    - **NEVER** output commit options as text/markdown - ONLY use the tool
    - Configure AskUserQuestion with:

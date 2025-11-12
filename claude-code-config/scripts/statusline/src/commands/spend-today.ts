@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import { table } from "table";
 import { formatCost, formatDuration } from "../lib/formatters";
 import {
 	calculateTotalCost,
@@ -28,15 +29,21 @@ async function main() {
 	console.log(`Total Duration: ${formatDuration(totalDuration)}`);
 	console.log(`\n📝 Sessions:\n`);
 
-	for (const session of todaySessions) {
-		console.log(
-			`  • $${formatCost(session.cost)} (${formatDuration(session.duration_ms)})`,
-		);
-		console.log(`    ${session.cwd}`);
-		console.log(
-			`    +${session.lines_added} -${session.lines_removed} lines\n`,
-		);
-	}
+	const filteredSessions = todaySessions
+		.filter((session) => session.cost >= 0.1)
+		.sort((a, b) => b.cost - a.cost);
+
+	const tableData = [
+		["Cost", "Duration", "Changes", "Directory"],
+		...filteredSessions.map((session) => [
+			`$${formatCost(session.cost)}`,
+			formatDuration(session.duration_ms),
+			`+${session.lines_added} -${session.lines_removed}`,
+			session.cwd.replace(/^\/Users\/[^/]+\//, "~/"),
+		]),
+	];
+
+	console.log(table(tableData));
 }
 
 main();

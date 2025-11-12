@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import { table } from "table";
 import { formatCost, formatDuration } from "../lib/formatters";
 import {
 	calculateTotalCost,
@@ -44,17 +45,22 @@ async function main() {
 
 	const sortedDates = Object.keys(sessionsByDate).sort();
 
-	for (const date of sortedDates) {
-		const sessions = sessionsByDate[date];
-		const dayCost = calculateTotalCost(sessions);
-		const dayDuration = calculateTotalDuration(sessions);
+	const tableData = [
+		["Date", "Cost", "Duration", "Sessions"],
+		...sortedDates.map((date) => {
+			const sessions = sessionsByDate[date];
+			const dayCost = calculateTotalCost(sessions);
+			const dayDuration = calculateTotalDuration(sessions);
+			return [
+				date,
+				`$${formatCost(dayCost)}`,
+				formatDuration(dayDuration),
+				sessions.length.toString(),
+			];
+		}),
+	];
 
-		console.log(
-			`  ${date}: $${formatCost(dayCost)} (${formatDuration(dayDuration)}) - ${sessions.length} session(s)`,
-		);
-	}
-
-	console.log("");
+	console.log(table(tableData));
 }
 
 main();

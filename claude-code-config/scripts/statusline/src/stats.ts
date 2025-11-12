@@ -7,28 +7,18 @@ async function main() {
 	const stats = await getDailyUsageStats();
 
 	if (stats.totalDays === 0) {
-		console.log(`${colors.YELLOW}No usage data available yet.${colors.RESET}`);
-		console.log(
-			`${colors.GRAY}Data will be collected as you use Claude Code.${colors.RESET}`,
-		);
+		console.log(colors.yellow("No usage data available yet."));
+		console.log(colors.gray("Data will be collected as you use Claude Code."));
 		return;
 	}
 
-	console.log(`${colors.LIGHT_GRAY}Daily Usage Statistics${colors.RESET}\n`);
-	console.log(
-		`${colors.GRAY}Average:${colors.RESET} ${colors.LIGHT_GRAY}${stats.average.toFixed(1)}%${colors.RESET}`,
-	);
-	console.log(
-		`${colors.GRAY}Total days:${colors.RESET} ${colors.LIGHT_GRAY}${stats.totalDays}${colors.RESET}`,
-	);
-	console.log(
-		`${colors.GRAY}Total sessions:${colors.RESET} ${colors.LIGHT_GRAY}${stats.totalSessions}${colors.RESET}`,
-	);
-	console.log(
-		`${colors.GRAY}Total cost:${colors.RESET} ${colors.LIGHT_GRAY}$${stats.totalCost.toFixed(2)}${colors.RESET}\n`,
-	);
+	console.log(`${colors.lightGray("Daily Usage Statistics")}\n`);
+	console.log(`${colors.gray("Average:")} ${stats.average.toFixed(1)}%`);
+	console.log(`${colors.gray("Total days:")} ${stats.totalDays}`);
+	console.log(`${colors.gray("Total sessions:")} ${stats.totalSessions}`);
+	console.log(`${colors.gray("Total cost:")} $${stats.totalCost.toFixed(2)}\n`);
 
-	console.log(`${colors.GRAY}Recent usage (last 7 days):${colors.RESET}`);
+	console.log(colors.gray("Recent usage (last 7 days):"));
 	const recent = stats.dailyAverages.slice(0, 7);
 
 	for (const day of recent) {
@@ -36,22 +26,22 @@ async function main() {
 			month: "short",
 			day: "numeric",
 		});
-		const bar = formatProgressBar(
-			day.average,
-			10,
-			"braille",
-			"progressive",
-			"none",
-		);
+		const bar = formatProgressBar({
+			percentage: day.average,
+			length: 10,
+			style: "braille",
+			colorMode: "progressive",
+			background: "none",
+		});
 
 		const sessionsInfo =
 			day.sessionCount > 1
-				? `${colors.GRAY}(${day.sessionCount} periods: avg ${day.average.toFixed(0)}%, max ${day.max}%, min ${day.min}% | $${day.totalCost.toFixed(2)})${colors.RESET}`
-				: `${colors.LIGHT_GRAY}${day.average.toFixed(0)}% | $${day.totalCost.toFixed(2)}${colors.RESET}`;
+				? colors.gray(
+						`(${day.sessionCount} periods: avg ${day.average.toFixed(0)}%, max ${day.max}%, min ${day.min}% | $${day.totalCost.toFixed(2)})`,
+					)
+				: `${day.average.toFixed(0)}% | $${day.totalCost.toFixed(2)}`;
 
-		console.log(
-			`  ${colors.GRAY}${date.padEnd(8)}${colors.RESET} ${bar} ${sessionsInfo}`,
-		);
+		console.log(`  ${colors.gray(date.padEnd(8))} ${bar} ${sessionsInfo}`);
 	}
 }
 

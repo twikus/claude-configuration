@@ -45,6 +45,16 @@ const menuOptions: MenuOption[] = [
 		indent: 1,
 	},
 	{
+		path: "session.duration",
+		label: "Duration display",
+		type: "boolean",
+		getValue: (c) => c.session.duration.enabled,
+		toggle: (c) => {
+			c.session.duration.enabled = !c.session.duration.enabled;
+		},
+		indent: 1,
+	},
+	{
 		path: "session.tokens",
 		label: "Tokens count",
 		type: "boolean",
@@ -85,6 +95,17 @@ const menuOptions: MenuOption[] = [
 			c.session.percentage.enabled = !c.session.percentage.enabled;
 		},
 		indent: 1,
+	},
+	{
+		path: "session.percentage.showValue",
+		label: "Show percentage value",
+		type: "boolean",
+		getValue: (c) => c.session.percentage.showValue,
+		toggle: (c) => {
+			c.session.percentage.showValue = !c.session.percentage.showValue;
+		},
+		indent: 2,
+		hidden: (c) => !c.session.percentage.enabled,
 	},
 	{
 		path: "session.percentage.progressBar",
@@ -176,6 +197,16 @@ const menuOptions: MenuOption[] = [
 			!c.session.percentage.enabled ||
 			!c.session.percentage.progressBar.enabled,
 	},
+	{
+		path: "context.useUsableContextOnly",
+		label: "Add 45k auto-compact buffer",
+		type: "boolean",
+		getValue: (c) => c.context.useUsableContextOnly,
+		toggle: (c) => {
+			c.context.useUsableContextOnly = !c.context.useUsableContextOnly;
+		},
+		indent: 1,
+	},
 
 	// LIMITS SECTION
 	{
@@ -219,6 +250,17 @@ const menuOptions: MenuOption[] = [
 		},
 		indent: 1,
 		hidden: (c) => !c.limits.enabled,
+	},
+	{
+		path: "limits.percentage.showValue",
+		label: "Show percentage value",
+		type: "boolean",
+		getValue: (c) => c.limits.percentage.showValue,
+		toggle: (c) => {
+			c.limits.percentage.showValue = !c.limits.percentage.showValue;
+		},
+		indent: 2,
+		hidden: (c) => !c.limits.enabled || !c.limits.percentage.enabled,
 	},
 	{
 		path: "limits.percentage.progressBar",
@@ -385,6 +427,18 @@ const menuOptions: MenuOption[] = [
 		hidden: (c) => c.weeklyUsage.enabled === false,
 	},
 	{
+		path: "weeklyUsage.percentage.showValue",
+		label: "Show percentage value",
+		type: "boolean",
+		getValue: (c) => c.weeklyUsage.percentage.showValue,
+		toggle: (c) => {
+			c.weeklyUsage.percentage.showValue = !c.weeklyUsage.percentage.showValue;
+		},
+		indent: 2,
+		hidden: (c) =>
+			c.weeklyUsage.enabled === false || !c.weeklyUsage.percentage.enabled,
+	},
+	{
 		path: "weeklyUsage.percentage.progressBar",
 		label: "Progress bar",
 		type: "boolean",
@@ -519,6 +573,17 @@ const menuOptions: MenuOption[] = [
 		hidden: (c) => !c.git.enabled,
 	},
 	{
+		path: "git.showChanges",
+		label: "Show line changes (+33 -44)",
+		type: "boolean",
+		getValue: (c) => c.git.showChanges,
+		toggle: (c) => {
+			c.git.showChanges = !c.git.showChanges;
+		},
+		indent: 1,
+		hidden: (c) => !c.git.enabled,
+	},
+	{
 		path: "git.showStaged",
 		label: "Show staged files count",
 		type: "boolean",
@@ -634,15 +699,13 @@ function renderMenu(config: StatuslineConfig, selectedIndex: number): string {
 
 			if (option.getValue && option.toggle) {
 				const value = option.getValue(config);
-				const status = value
-					? `${colors.GREEN}ON${colors.RESET}`
-					: `${colors.RED}OFF${colors.RESET}`;
-				const cursor = isSelected ? `${colors.YELLOW}❯ ${colors.RESET}` : "  ";
-				const labelColor = isSelected ? colors.YELLOW : colors.PURPLE;
-				output += `${cursor}${labelColor}▌${option.label} ${colors.GRAY}[${status}${colors.GRAY}]${colors.RESET}\n`;
+				const status = value ? colors.green("ON") : colors.red("OFF");
+				const cursor = isSelected ? `${colors.yellow("❯ ")}` : "  ";
+				const labelColor = isSelected ? colors.yellow : colors.purple;
+				output += `${cursor}${labelColor(`▌${option.label}`)} ${colors.gray("[")}${status}${colors.gray("]")}\n`;
 			} else {
-				const labelColor = colors.PURPLE;
-				output += `  ${labelColor}▌${option.label}${colors.RESET}\n`;
+				const labelColor = colors.purple;
+				output += `  ${labelColor(`▌${option.label}`)}\n`;
 			}
 			return;
 		}
@@ -651,23 +714,19 @@ function renderMenu(config: StatuslineConfig, selectedIndex: number): string {
 		let display = "";
 
 		if (option.type === "boolean") {
-			const checkbox = value
-				? `${colors.GREEN}☑${colors.RESET}`
-				: `${colors.GRAY}☐${colors.RESET}`;
+			const checkbox = value ? colors.green("☑") : colors.gray("☐");
 			display = `${checkbox} ${option.label}`;
 		} else if (option.type === "cycle") {
-			display = `${option.label} ${colors.GRAY}[${colors.YELLOW}${value}${colors.GRAY}]${colors.RESET}`;
+			display = `${option.label} ${colors.gray("[")}${colors.yellow(value as string)}${colors.gray("]")}`;
 		}
 
-		const cursor = isSelected ? `${colors.YELLOW}›${colors.RESET}` : " ";
-		const color = colors.LIGHT_GRAY;
+		const cursor = isSelected ? colors.yellow("›") : " ";
+		const color = colors.lightGray;
 
 		const arrows =
-			isSelected && option.type === "cycle"
-				? ` ${colors.GRAY}←→${colors.RESET}`
-				: "";
+			isSelected && option.type === "cycle" ? ` ${colors.gray("←→")}` : "";
 
-		output += `${cursor} ${color}${indent}${display}${colors.RESET}${arrows}\n`;
+		output += `${cursor} ${color(`${indent}${display}`)}${arrows}\n`;
 	});
 
 	return output;
@@ -699,16 +758,18 @@ async function main() {
 	process.stdout.write("\x1b[?25l");
 
 	while (true) {
-		const { combined } = await renderStatusline(fixture, config);
+		const { output: combined } = await renderStatusline(fixture, config);
 
 		const menu = renderMenu(config, selectedIndex);
 
 		const output = [
-			`${colors.PURPLE}━━━ PREVIEW${colors.RESET}`,
+			colors.purple("━━━ PREVIEW"),
 			combined,
 			"",
 			menu,
-			`${colors.GRAY}↑↓ navigate · space toggle · ←→ cycle · s save · r reset · q quit${colors.RESET}`,
+			colors.gray(
+				"↑↓ navigate · space toggle · ←→ cycle · s save · r reset · q quit",
+			),
 		].join("\n");
 
 		process.stdout.write("\x1b[2J");
@@ -761,9 +822,7 @@ async function main() {
 			await saveConfig(config);
 			process.stdout.write("\x1b[2J");
 			process.stdout.write("\x1b[H");
-			console.log(
-				`${colors.GREEN}✓ Configuration saved to ${CONFIG_FILE_PATH}${colors.RESET}`,
-			);
+			console.log(colors.green(`✓ Configuration saved to ${CONFIG_FILE_PATH}`));
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 		} else if (key.toLowerCase() === "q" || key === "\u0003") {
 			await saveConfig(config);
@@ -772,7 +831,7 @@ async function main() {
 			process.stdout.write("\x1b[?25h");
 			console.clear();
 			console.log(
-				`${colors.GREEN}✓ Configuration saved! Thanks for exploring!${colors.RESET}\n`,
+				`${colors.green("✓ Configuration saved! Thanks for exploring!")}\n`,
 			);
 			process.exit(0);
 		}

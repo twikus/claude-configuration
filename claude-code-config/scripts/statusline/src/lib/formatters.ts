@@ -1,23 +1,36 @@
+import pc from "picocolors";
 import type { StatuslineConfig } from "../../statusline.config";
 import type { GitStatus } from "./git";
 
+type ColorFunction = (text: string | number) => string;
+
+const pico = pc.createColors(true);
+
 export const colors = {
-	GREEN: "\x1b[0;32m",
-	RED: "\x1b[0;31m",
-	PURPLE: "\x1b[0;35m",
-	YELLOW: "\x1b[0;33m",
-	ORANGE: "\x1b[38;5;208m",
-	GRAY: "\x1b[0;90m",
-	LIGHT_GRAY: "\x1b[0;37m",
-	CYAN: "\x1b[0;36m",
-	BLUE: "\x1b[0;34m",
-	BG_BLACK: "\x1b[40m",
-	BG_DARK_GRAY: "\x1b[100m",
-	BG_GRAY: "\x1b[47m",
-	BG_BLUE: "\x1b[44m",
-	BG_PURPLE: "\x1b[45m",
-	BG_CYAN: "\x1b[46m",
-	RESET: "\x1b[0m",
+	green: pico.green as ColorFunction,
+	red: pico.red as ColorFunction,
+	purple: pico.magenta as ColorFunction,
+	yellow: pico.yellow as ColorFunction,
+	orange: ((text: string | number) =>
+		`\x1b[38;5;208m${text}\x1b[0m`) as ColorFunction,
+	gray: pico.gray as ColorFunction,
+	lightGray: pico.whiteBright as ColorFunction,
+	cyan: pico.cyan as ColorFunction,
+	blue: pico.blue as ColorFunction,
+	bgBlack: pico.bgBlack as ColorFunction,
+	bgBlackBright: pico.bgBlackBright as ColorFunction,
+	bgWhite: pico.bgWhite as ColorFunction,
+	bgBlue: pico.bgBlue as ColorFunction,
+	bgMagenta: pico.bgMagenta as ColorFunction,
+	bgCyan: pico.bgCyan as ColorFunction,
+	dim: pico.dim as ColorFunction,
+	bold: pico.bold as ColorFunction,
+	hidden: pico.hidden as ColorFunction,
+	italic: pico.italic as ColorFunction,
+	underline: pico.underline as ColorFunction,
+	strikethrough: pico.strikethrough as ColorFunction,
+	reset: pico.reset as ColorFunction,
+	inverse: pico.inverse as ColorFunction,
 } as const;
 
 export function formatBranch(
@@ -27,14 +40,14 @@ export function formatBranch(
 	let result = "";
 
 	if (gitConfig.showBranch) {
-		result = git.branch;
+		result = colors.lightGray(git.branch);
 	}
 
 	if (git.hasChanges) {
 		const changes: string[] = [];
 
 		if (gitConfig.showDirtyIndicator) {
-			result += `${colors.PURPLE}*${colors.RESET}`;
+			result += colors.purple("*");
 		}
 
 		if (gitConfig.showChanges) {
@@ -42,19 +55,19 @@ export function formatBranch(
 			const totalDeleted = git.staged.deleted + git.unstaged.deleted;
 
 			if (totalAdded > 0) {
-				changes.push(`${colors.GREEN}+${totalAdded}${colors.RESET}`);
+				changes.push(colors.green(`+${totalAdded}`));
 			}
 			if (totalDeleted > 0) {
-				changes.push(`${colors.RED}-${totalDeleted}${colors.RESET}`);
+				changes.push(colors.red(`-${totalDeleted}`));
 			}
 		}
 
 		if (gitConfig.showStaged && git.staged.files > 0) {
-			changes.push(`${colors.GRAY}~${git.staged.files}${colors.RESET}`);
+			changes.push(colors.gray(`~${git.staged.files}`));
 		}
 
 		if (gitConfig.showUnstaged && git.unstaged.files > 0) {
-			changes.push(`${colors.YELLOW}~${git.unstaged.files}${colors.RESET}`);
+			changes.push(colors.yellow(`~${git.unstaged.files}`));
 		}
 
 		if (changes.length > 0) {
@@ -101,16 +114,16 @@ export function formatTokens(tokens: number, showDecimals = true): string {
 		const number = showDecimals
 			? value.toFixed(1)
 			: Math.round(value).toString();
-		return `${number}${colors.GRAY}m${colors.LIGHT_GRAY}`;
+		return `${colors.lightGray(number)}${colors.gray("m")}`;
 	}
 	if (tokens >= 1000) {
 		const value = tokens / 1000;
 		const number = showDecimals
 			? value.toFixed(1)
 			: Math.round(value).toString();
-		return `${number}${colors.GRAY}k${colors.LIGHT_GRAY}`;
+		return `${colors.lightGray(number)}${colors.gray("k")}`;
 	}
-	return tokens.toString();
+	return colors.lightGray(tokens.toString());
 }
 
 export function formatDuration(ms: number): string {
@@ -149,29 +162,29 @@ export function formatResetTime(resetsAt: string): string {
 function getProgressBarColor(
 	percentage: number,
 	colorMode: "progressive" | "green" | "yellow" | "red",
-): string {
+): ColorFunction {
 	if (colorMode === "progressive") {
-		if (percentage < 50) return colors.GRAY;
-		if (percentage < 70) return colors.YELLOW;
-		if (percentage < 90) return colors.ORANGE;
-		return colors.RED;
+		if (percentage < 50) return colors.gray;
+		if (percentage < 70) return colors.yellow;
+		if (percentage < 90) return colors.orange;
+		return colors.red;
 	}
-	if (colorMode === "green") return colors.GREEN;
-	if (colorMode === "yellow") return colors.YELLOW;
-	return colors.RED;
+	if (colorMode === "green") return colors.green;
+	if (colorMode === "yellow") return colors.yellow;
+	return colors.red;
 }
 
 function getProgressBarBackground(
 	background: "none" | "dark" | "gray" | "light" | "blue" | "purple" | "cyan",
-): string {
-	if (background === "none") return "";
-	if (background === "dark") return colors.BG_BLACK;
-	if (background === "gray") return colors.BG_DARK_GRAY;
-	if (background === "light") return colors.BG_GRAY;
-	if (background === "blue") return colors.BG_BLUE;
-	if (background === "purple") return colors.BG_PURPLE;
-	if (background === "cyan") return colors.BG_CYAN;
-	return "";
+): ColorFunction | null {
+	if (background === "none") return null;
+	if (background === "dark") return colors.bgBlack;
+	if (background === "gray") return colors.bgBlackBright;
+	if (background === "light") return colors.bgWhite;
+	if (background === "blue") return colors.bgBlue;
+	if (background === "purple") return colors.bgMagenta;
+	if (background === "cyan") return colors.bgCyan;
+	return null;
 }
 
 export function formatProgressBarFilled(
@@ -185,10 +198,15 @@ export function formatProgressBarFilled(
 
 	const filledBar = "█".repeat(filled);
 	const emptyBar = "░".repeat(empty);
-	const barColor = getProgressBarColor(percentage, colorMode);
-	const bgColor = getProgressBarBackground(background);
+	const colorFn = getProgressBarColor(percentage, colorMode);
+	const bgFn = getProgressBarBackground(background);
 
-	return `${barColor}${filledBar}${bgColor}${colors.GRAY}${emptyBar}${colors.RESET}`;
+	const coloredFilled = colorFn(filledBar);
+	const coloredEmpty = bgFn
+		? bgFn(colors.gray(emptyBar))
+		: colors.gray(emptyBar);
+
+	return `${coloredFilled}${coloredEmpty}`;
 }
 
 export function formatProgressBarRectangle(
@@ -202,10 +220,15 @@ export function formatProgressBarRectangle(
 
 	const filledBar = "▰".repeat(filled);
 	const emptyBar = "▱".repeat(empty);
-	const barColor = getProgressBarColor(percentage, colorMode);
-	const bgColor = getProgressBarBackground(background);
+	const colorFn = getProgressBarColor(percentage, colorMode);
+	const bgFn = getProgressBarBackground(background);
 
-	return `${barColor}${filledBar}${bgColor}${colors.GRAY}${emptyBar}${colors.RESET}`;
+	const coloredFilled = colorFn(filledBar);
+	const coloredEmpty = bgFn
+		? bgFn(colors.gray(emptyBar))
+		: colors.gray(emptyBar);
+
+	return `${coloredFilled}${coloredEmpty}`;
 }
 
 export function formatProgressBarBraille(
@@ -223,27 +246,35 @@ export function formatProgressBarBraille(
 	const partialIndex = currentStep % (brailleChars.length - 1);
 	const emptyBlocks = length - fullBlocks - (partialIndex > 0 ? 1 : 0);
 
-	const barColor = getProgressBarColor(percentage, colorMode);
-	const bgColor = getProgressBarBackground(background);
+	const colorFn = getProgressBarColor(percentage, colorMode);
+	const bgFn = getProgressBarBackground(background);
 
-	const fullPart = `${barColor}${"⣿".repeat(fullBlocks)}`;
+	const fullPart = colorFn("⣿".repeat(fullBlocks));
 	const partialPart =
-		partialIndex > 0 ? `${barColor}${brailleChars[partialIndex]}` : "";
+		partialIndex > 0 ? colorFn(brailleChars[partialIndex]) : "";
 	const emptyPart =
 		emptyBlocks > 0
-			? `${bgColor}${colors.GRAY}${"⣀".repeat(emptyBlocks)}${colors.RESET}`
+			? bgFn
+				? bgFn(colors.gray("⣀".repeat(emptyBlocks)))
+				: colors.gray("⣀".repeat(emptyBlocks))
 			: "";
 
 	return `${fullPart}${partialPart}${emptyPart}`;
 }
 
-export function formatProgressBar(
-	percentage: number,
-	length: 5 | 10 | 15,
-	style: "filled" | "rectangle" | "braille",
-	colorMode: "progressive" | "green" | "yellow" | "red",
-	background: "none" | "dark" | "gray" | "light" | "blue" | "purple" | "cyan",
-): string {
+export function formatProgressBar({
+	percentage,
+	length,
+	style,
+	colorMode,
+	background,
+}: {
+	percentage: number;
+	length: 5 | 10 | 15;
+	style: "filled" | "rectangle" | "braille";
+	colorMode: "progressive" | "green" | "yellow" | "red";
+	background: "none" | "dark" | "gray" | "light" | "blue" | "purple" | "cyan";
+}): string {
 	if (style === "rectangle") {
 		return formatProgressBarRectangle(
 			percentage,
@@ -260,6 +291,7 @@ export function formatProgressBar(
 
 export function formatSession(
 	cost: string,
+	duration: string,
 	tokensUsed: number,
 	tokensMax: number,
 	percentage: number,
@@ -268,36 +300,46 @@ export function formatSession(
 	const sessionItems: string[] = [];
 
 	if (config.cost.enabled) {
-		sessionItems.push(`$${cost}`);
+		sessionItems.push(`${colors.gray("$")}${colors.lightGray(cost)}`);
 	}
 
 	if (config.tokens.enabled) {
 		const formattedUsed = formatTokens(tokensUsed, config.tokens.showDecimals);
 		if (config.tokens.showMax) {
 			const formattedMax = formatTokens(tokensMax, config.tokens.showDecimals);
-			sessionItems.push(
-				`${formattedUsed}${colors.GRAY}/${formattedMax}${colors.LIGHT_GRAY}`,
-			);
+			sessionItems.push(`${formattedUsed}${colors.gray("/")}${formattedMax}`);
 		} else {
 			sessionItems.push(formattedUsed);
 		}
 	}
 
 	if (config.percentage.enabled) {
+		const parts: string[] = [];
+
 		if (config.percentage.progressBar.enabled) {
-			const bar = formatProgressBar(
+			const bar = formatProgressBar({
 				percentage,
-				config.percentage.progressBar.length,
-				config.percentage.progressBar.style,
-				config.percentage.progressBar.color,
-				config.percentage.progressBar.background,
-			);
-			sessionItems.push(
-				`${bar} ${percentage}${colors.GRAY}%${colors.LIGHT_GRAY}`,
-			);
-		} else {
-			sessionItems.push(`${percentage}${colors.GRAY}%${colors.LIGHT_GRAY}`);
+				length: config.percentage.progressBar.length,
+				style: config.percentage.progressBar.style,
+				colorMode: config.percentage.progressBar.color,
+				background: config.percentage.progressBar.background,
+			});
+			parts.push(bar);
 		}
+
+		if (config.percentage.showValue) {
+			parts.push(
+				`${colors.lightGray(percentage.toString())}${colors.gray("%")}`,
+			);
+		}
+
+		if (parts.length > 0) {
+			sessionItems.push(parts.join(" "));
+		}
+	}
+
+	if (config.duration.enabled) {
+		sessionItems.push(colors.gray(`(${duration})`));
 	}
 
 	if (sessionItems.length === 0) {
@@ -305,7 +347,7 @@ export function formatSession(
 	}
 
 	const infoSep = config.infoSeparator
-		? ` ${colors.GRAY}${config.infoSeparator}${colors.LIGHT_GRAY} `
+		? ` ${colors.gray(config.infoSeparator)} `
 		: " ";
-	return `${colors.GRAY}S:${colors.LIGHT_GRAY} ${sessionItems.join(infoSep)}`;
+	return `${colors.gray("S:")} ${sessionItems.join(infoSep)}`;
 }

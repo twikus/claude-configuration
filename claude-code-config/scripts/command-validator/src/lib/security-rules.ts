@@ -1,3 +1,5 @@
+import { homedir } from "node:os";
+import { join } from "node:path";
 import type { SecurityRules } from "./types";
 
 export const SECURITY_RULES: SecurityRules = {
@@ -126,7 +128,7 @@ export const SECURITY_RULES: SecurityRules = {
 	],
 
 	SAFE_RM_PATHS: [
-		"/Users/melvynx/Developer/",
+		join(homedir(), "Developer/"),
 		"/tmp/",
 		"/var/tmp/",
 		`${process.cwd()}/`,

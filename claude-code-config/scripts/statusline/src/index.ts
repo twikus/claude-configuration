@@ -31,142 +31,154 @@ async function loadConfig(): Promise<StatuslineConfig> {
 	}
 }
 
-function buildFirstLine(
-	branch: string,
-	dirPath: string,
-	modelName: string,
-	showSonnetModel: boolean,
-	separator: string,
-): string {
-	const isSonnet = modelName.toLowerCase().includes("sonnet");
-	const sep = `${colors.GRAY}${separator}${colors.LIGHT_GRAY}`;
-
-	if (isSonnet && !showSonnetModel) {
-		return `${colors.LIGHT_GRAY}${branch} ${sep} ${dirPath}${colors.RESET}`;
-	}
-
-	return `${colors.LIGHT_GRAY}${branch} ${sep} ${dirPath} ${sep} ${modelName}${colors.RESET}`;
+export interface UsageLimit {
+	utilization: number;
+	resets_at: string | null;
 }
 
-function shouldShowWeeklyUsage(
+export interface StatuslineData {
+	branch: string;
+	dirPath: string;
+	modelName: string;
+	sessionCost: string;
+	sessionDuration: string;
+	contextTokens: number;
+	contextPercentage: number;
+	usageLimits: {
+		five_hour: UsageLimit | null;
+		seven_day: UsageLimit | null;
+	};
+	periodCost: number;
+	todayCost: number;
+}
+
+function shouldShowWeekly(
 	weeklyConfig: StatuslineConfig["weeklyUsage"],
 	fiveHourUtilization: number | null,
 ): boolean {
-	if (weeklyConfig.enabled === true) {
-		return true;
-	}
-
-	if (weeklyConfig.enabled === false) {
-		return false;
-	}
-
+	if (weeklyConfig.enabled === true) return true;
+	if (weeklyConfig.enabled === false) return false;
 	if (weeklyConfig.enabled === "90%" && fiveHourUtilization !== null) {
 		return fiveHourUtilization >= 90;
 	}
-
 	return false;
 }
 
-function buildSecondLine(
-	sessionCost: string,
-	_sessionDuration: string,
-	tokensUsed: number,
-	tokensMax: number,
-	contextPercentage: number,
-	fiveHourUtilization: number | null,
-	fiveHourReset: string | null,
-	sevenDayUtilization: number | null,
-	sevenDayReset: string | null,
-	periodCost: number,
-	todayCost: number,
-	sessionConfig: StatuslineConfig["session"],
-	limitsConfig: StatuslineConfig["limits"],
-	weeklyConfig: StatuslineConfig["weeklyUsage"],
-	dailySpendConfig: StatuslineConfig["dailySpend"],
-	separator: string,
+export function renderStatusline(
+	data: StatuslineData,
+	config: StatuslineConfig,
 ): string {
-	let line = formatSession(
-		sessionCost,
-		tokensUsed,
-		tokensMax,
-		contextPercentage,
-		sessionConfig,
+	const sep = colors.gray(config.separator);
+	const parts: string[] = [];
+
+	const isSonnet = data.modelName.toLowerCase().includes("sonnet");
+	if (isSonnet && !config.showSonnetModel) {
+		parts.push(`${data.branch} ${sep} ${colors.lightGray(data.dirPath)}`);
+	} else {
+		parts.push(
+			`${data.branch} ${sep} ${colors.lightGray(data.dirPath)} ${sep} ${colors.lightGray(data.modelName)}`,
+		);
+	}
+
+	const sessionPart = formatSession(
+		data.sessionCost,
+		data.sessionDuration,
+		data.contextTokens,
+		config.context.maxContextTokens,
+		data.contextPercentage,
+		config.session,
 	);
+	parts.push(sessionPart);
 
-	const sep = `${colors.GRAY}${separator}`;
+	const fiveHour = data.usageLimits.five_hour;
+	if (config.limits.enabled && config.limits.percentage.enabled && fiveHour) {
+		const limitsParts: string[] = [];
 
-	if (
-		limitsConfig.enabled &&
-		limitsConfig.percentage.enabled &&
-		fiveHourUtilization !== null &&
-		fiveHourReset
-	) {
-		let limitsDisplay = "";
-
-		if (limitsConfig.percentage.progressBar.enabled) {
-			const bar = formatProgressBar(
-				fiveHourUtilization,
-				limitsConfig.percentage.progressBar.length,
-				limitsConfig.percentage.progressBar.style,
-				limitsConfig.percentage.progressBar.color,
-				limitsConfig.percentage.progressBar.background,
+		if (config.limits.showCost && data.periodCost > 0) {
+			limitsParts.push(
+				`${colors.gray("$")}${colors.lightGray(formatCost(data.periodCost))}`,
 			);
-
-			limitsDisplay = `${bar} ${colors.LIGHT_GRAY}${fiveHourUtilization}${colors.GRAY}%`;
-		} else {
-			limitsDisplay = `${colors.LIGHT_GRAY}${fiveHourUtilization}${colors.GRAY}%`;
 		}
 
-		if (limitsConfig.showCost && periodCost > 0) {
-			limitsDisplay += ` ${colors.GRAY}$${formatCost(periodCost)}`;
+		if (config.limits.percentage.progressBar.enabled) {
+			const bar = formatProgressBar({
+				percentage: fiveHour.utilization,
+				length: config.limits.percentage.progressBar.length,
+				style: config.limits.percentage.progressBar.style,
+				colorMode: config.limits.percentage.progressBar.color,
+				background: config.limits.percentage.progressBar.background,
+			});
+			limitsParts.push(bar);
 		}
 
-		if (limitsConfig.showTimeLeft) {
-			const resetTime = formatResetTime(fiveHourReset);
-			limitsDisplay += ` ${colors.GRAY}(${resetTime})`;
-		}
-
-		line += ` ${sep} L: ${limitsDisplay}`;
-	}
-
-	if (
-		shouldShowWeeklyUsage(weeklyConfig, fiveHourUtilization) &&
-		weeklyConfig.percentage.enabled &&
-		sevenDayUtilization !== null &&
-		sevenDayReset
-	) {
-		if (weeklyConfig.percentage.progressBar.enabled) {
-			const bar = formatProgressBar(
-				sevenDayUtilization,
-				weeklyConfig.percentage.progressBar.length,
-				weeklyConfig.percentage.progressBar.style,
-				weeklyConfig.percentage.progressBar.color,
-				weeklyConfig.percentage.progressBar.background,
+		if (config.limits.percentage.showValue) {
+			limitsParts.push(
+				`${colors.lightGray(fiveHour.utilization.toString())}${colors.gray("%")}`,
 			);
+		}
 
-			if (weeklyConfig.showTimeLeft) {
-				const resetTime = formatResetTime(sevenDayReset);
-				line += ` ${sep} W: ${bar} ${colors.LIGHT_GRAY}${sevenDayUtilization}${colors.GRAY}% ${colors.GRAY}(${resetTime})`;
-			} else {
-				line += ` ${sep} W: ${bar} ${colors.LIGHT_GRAY}${sevenDayUtilization}${colors.GRAY}%`;
-			}
-		} else {
-			if (weeklyConfig.showTimeLeft) {
-				const resetTime = formatResetTime(sevenDayReset);
-				line += ` ${sep} W:${colors.LIGHT_GRAY} ${sevenDayUtilization}${colors.GRAY}% ${colors.GRAY}(${resetTime})`;
-			} else {
-				line += ` ${sep} W:${colors.LIGHT_GRAY} ${sevenDayUtilization}${colors.GRAY}%`;
-			}
+		if (config.limits.showTimeLeft && fiveHour.resets_at) {
+			const resetTime = formatResetTime(fiveHour.resets_at);
+			limitsParts.push(colors.gray(`(${resetTime})`));
+		}
+
+		if (limitsParts.length > 0) {
+			parts.push(`${colors.gray("L:")} ${limitsParts.join(" ")}`);
 		}
 	}
 
-	if (dailySpendConfig.enabled && todayCost > 0) {
-		line += ` ${sep} D:${colors.LIGHT_GRAY} $${formatCost(todayCost)}`;
+	const sevenDay = data.usageLimits.seven_day;
+	if (
+		shouldShowWeekly(config.weeklyUsage, fiveHour?.utilization ?? null) &&
+		config.weeklyUsage.percentage.enabled &&
+		sevenDay
+	) {
+		const weeklyParts: string[] = [];
+
+		if (config.weeklyUsage.showCost && data.periodCost > 0) {
+			weeklyParts.push(
+				`${colors.gray("$")}${colors.lightGray(formatCost(data.periodCost))}`,
+			);
+		}
+
+		if (config.weeklyUsage.percentage.progressBar.enabled) {
+			const bar = formatProgressBar({
+				percentage: sevenDay.utilization,
+				length: config.weeklyUsage.percentage.progressBar.length,
+				style: config.weeklyUsage.percentage.progressBar.style,
+				colorMode: config.weeklyUsage.percentage.progressBar.color,
+				background: config.weeklyUsage.percentage.progressBar.background,
+			});
+			weeklyParts.push(bar);
+		}
+
+		if (config.weeklyUsage.percentage.showValue) {
+			weeklyParts.push(
+				`${colors.lightGray(sevenDay.utilization.toString())}${colors.gray("%")}`,
+			);
+		}
+
+		if (config.weeklyUsage.showTimeLeft && sevenDay.resets_at) {
+			const resetTime = formatResetTime(sevenDay.resets_at);
+			weeklyParts.push(colors.gray(`(${resetTime})`));
+		}
+
+		if (weeklyParts.length > 0) {
+			parts.push(`${colors.gray("W:")} ${weeklyParts.join(" ")}`);
+		}
 	}
 
-	line += colors.RESET;
+	if (config.dailySpend.enabled && data.todayCost > 0) {
+		parts.push(
+			`${colors.gray("D:")} ${colors.gray("$")}${colors.lightGray(formatCost(data.todayCost))}`,
+		);
+	}
 
-	return line;
+	const output = parts.join(` ${sep} `);
+
+	return config.oneLine
+		? output
+		: output.replace(sessionPart, `\n${sessionPart}`);
 }
 
 async function main() {
@@ -177,12 +189,6 @@ async function main() {
 		await saveSession(input);
 
 		const git = await getGitStatus();
-		const branch = formatBranch(git, config.git);
-		const dirPath = formatPath(
-			input.workspace.current_dir,
-			config.pathDisplayMode,
-		);
-
 		const contextData = await getContextData({
 			transcriptPath: input.transcript_path,
 			maxContextTokens: config.context.maxContextTokens,
@@ -194,49 +200,41 @@ async function main() {
 		const periodCost = await getCurrentPeriodCost();
 		const todayCost = await getTodayCost();
 
-		const sessionCost = formatCost(input.cost.total_cost_usd);
-		const sessionDuration = formatDuration(input.cost.total_duration_ms);
-
-		const firstLine = buildFirstLine(
-			branch,
-			dirPath,
-			input.model.display_name,
-			config.showSonnetModel,
-			config.separator,
-		);
-		const secondLine = buildSecondLine(
-			sessionCost,
-			sessionDuration,
-			contextData.tokens,
-			config.context.maxContextTokens,
-			contextData.percentage,
-			usageLimits.five_hour?.utilization ?? null,
-			usageLimits.five_hour?.resets_at ?? null,
-			usageLimits.seven_day?.utilization ?? null,
-			usageLimits.seven_day?.resets_at ?? null,
+		const data: StatuslineData = {
+			branch: formatBranch(git, config.git),
+			dirPath: formatPath(input.workspace.current_dir, config.pathDisplayMode),
+			modelName: input.model.display_name,
+			sessionCost: formatCost(input.cost.total_cost_usd),
+			sessionDuration: formatDuration(input.cost.total_duration_ms),
+			contextTokens: contextData.tokens,
+			contextPercentage: contextData.percentage,
+			usageLimits: {
+				five_hour: usageLimits.five_hour
+					? {
+							utilization: usageLimits.five_hour.utilization,
+							resets_at: usageLimits.five_hour.resets_at,
+						}
+					: null,
+				seven_day: usageLimits.seven_day
+					? {
+							utilization: usageLimits.seven_day.utilization,
+							resets_at: usageLimits.seven_day.resets_at,
+						}
+					: null,
+			},
 			periodCost,
 			todayCost,
-			config.session,
-			config.limits,
-			config.weeklyUsage,
-			config.dailySpend,
-			config.separator,
-		);
+		};
 
+		const output = renderStatusline(data, config);
+		console.log(output);
 		if (config.oneLine) {
-			const sep = ` ${colors.GRAY}${config.separator}${colors.LIGHT_GRAY} `;
-			console.log(`${firstLine}${sep}${secondLine}`);
 			console.log("");
-		} else {
-			console.log(firstLine);
-			console.log(secondLine);
 		}
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
-		console.log(
-			`${colors.RED}Error:${colors.LIGHT_GRAY} ${errorMessage}${colors.RESET}`,
-		);
-		console.log(`${colors.GRAY}Check statusline configuration${colors.RESET}`);
+		console.log(`${colors.red("Error:")} ${errorMessage}`);
+		console.log(colors.gray("Check statusline configuration"));
 	}
 }
 

@@ -31,6 +31,13 @@ export interface ProgressBarConfig {
 	background: ProgressBarBackground;
 }
 
+export interface PercentageConfig {
+	enabled: boolean;
+	// Show percentage value (e.g., "23%")
+	showValue: boolean;
+	progressBar: ProgressBarConfig;
+}
+
 export interface StatuslineConfig {
 	// Display everything on one line (separated by separator) or two lines
 	oneLine: boolean;
@@ -76,6 +83,11 @@ export interface StatuslineConfig {
 			enabled: boolean;
 		};
 
+		// Duration display configuration
+		duration: {
+			enabled: boolean;
+		};
+
 		// Tokens display configuration
 		tokens: {
 			enabled: boolean;
@@ -86,12 +98,7 @@ export interface StatuslineConfig {
 		};
 
 		// Context percentage display configuration
-		percentage: {
-			enabled: boolean;
-			// Progress bar configuration
-			// Styles: "filled" (█████), "rectangle" (▰▰▰▱▱), "braille" (⣿⣿⣧⣀⣀)
-			progressBar: ProgressBarConfig;
-		};
+		percentage: PercentageConfig;
 	};
 
 	// Context display configuration
@@ -118,13 +125,7 @@ export interface StatuslineConfig {
 		showCost: boolean;
 
 		// Usage percentage display configuration
-		percentage: {
-			enabled: boolean;
-			// Progress bar configuration
-			// Styles: "filled" (█████), "rectangle" (▰▰▰▱▱), "braille" (⣿⣿⣧⣀⣀)
-			// Colors: "progressive" (changes based on usage), "green", "yellow", "red"
-			progressBar: ProgressBarConfig;
-		};
+		percentage: PercentageConfig;
 	};
 
 	// Weekly usage limits display configuration
@@ -137,10 +138,7 @@ export interface StatuslineConfig {
 		showCost: boolean;
 
 		// Usage percentage display configuration
-		percentage: {
-			enabled: boolean;
-			progressBar: ProgressBarConfig;
-		};
+		percentage: PercentageConfig;
 	};
 
 	// Daily spend display configuration
@@ -168,6 +166,9 @@ export const defaultConfig: StatuslineConfig = {
 		cost: {
 			enabled: true,
 		},
+		duration: {
+			enabled: true,
+		},
 		tokens: {
 			enabled: true,
 			showMax: false,
@@ -175,6 +176,7 @@ export const defaultConfig: StatuslineConfig = {
 		},
 		percentage: {
 			enabled: true,
+			showValue: true,
 			progressBar: {
 				enabled: true,
 				length: 10,
@@ -196,6 +198,7 @@ export const defaultConfig: StatuslineConfig = {
 		showCost: false,
 		percentage: {
 			enabled: true,
+			showValue: true,
 			progressBar: {
 				enabled: true,
 				length: 10,
@@ -211,6 +214,7 @@ export const defaultConfig: StatuslineConfig = {
 		showCost: false,
 		percentage: {
 			enabled: true,
+			showValue: true,
 			progressBar: {
 				enabled: true,
 				length: 10,

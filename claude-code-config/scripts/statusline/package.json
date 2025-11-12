@@ -19,5 +19,9 @@
 	},
 	"peerDependencies": {
 		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"picocolors": "^1.1.1",
+		"table": "^6.9.0"
 	}
 }

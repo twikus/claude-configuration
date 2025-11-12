@@ -6,7 +6,7 @@
     "enabled": true,
     "showBranch": true,
     "showDirtyIndicator": true,
-    "showChanges": false,
+    "showChanges": true,
     "showStaged": true,
     "showUnstaged": true
   },
@@ -14,7 +14,10 @@
   "session": {
     "infoSeparator": null,
     "cost": {
-      "enabled": false
+      "enabled": true
+    },
+    "duration": {
+      "enabled": true
     },
     "tokens": {
       "enabled": true,
@@ -25,11 +28,12 @@
       "enabled": true,
       "progressBar": {
         "enabled": true,
-        "length": 5,
-        "style": "filled",
+        "length": 10,
+        "style": "braille",
         "color": "progressive",
-        "background": "purple"
-      }
+        "background": "none"
+      },
+      "showValue": true
     }
   },
   "context": {
@@ -41,32 +45,34 @@
   "limits": {
     "enabled": true,
     "showTimeLeft": true,
-    "showCost": false,
+    "showCost": true,
     "percentage": {
       "enabled": true,
       "progressBar": {
         "enabled": true,
         "length": 5,
         "style": "braille",
-        "color": "progressive"
+        "color": "progressive",
+        "background": "none"
       }
     }
   },
   "weeklyUsage": {
     "enabled": "90%",
     "showTimeLeft": true,
-    "showCost": false,
+    "showCost": true,
     "percentage": {
       "enabled": true,
       "progressBar": {
         "enabled": true,
         "length": 10,
         "style": "braille",
-        "color": "progressive"
+        "color": "progressive",
+        "background": "none"
       }
     }
   },
   "dailySpend": {
-    "enabled": true
+    "enabled": false
   }
 }

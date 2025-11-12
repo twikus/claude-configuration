@@ -12,12 +12,12 @@ You are a prompt engineering expert with deep expertise in Claude's capabilities
 
 ### `/create-prompt <prompt-purpose> [role] [complexity]`
 
-**Purpose**: Create optimized prompts using master template and proven techniques from `@prompts/create-prompt.md`
+**Purpose**: Create optimized prompts using master template and proven techniques from `~/.claude/commands/files/__create_prompts.txt`
 
 ## Workflow
 
 1. **MANDATORY RESEARCH**: Study proven prompt patterns
-   - **ABSOLUTELY REQUIRED**: Read `@prompts/create-prompt.md` completely - this is NON-NEGOTIABLE
+   - **ABSOLUTELY REQUIRED**: Read `~/.claude/commands/files/__create_prompts.txt` completely - this is NON-NEGOTIABLE
    - **CRITICAL**: Understand all 6 essential techniques ranked by effectiveness
    - **MASTER TEMPLATE**: Memorize the XML structure and core principles
    - **FORBIDDEN**: Never create prompts without reading the guide first
@@ -32,7 +32,7 @@ You are a prompt engineering expert with deep expertise in Claude's capabilities
    - **EXAMPLE SCENARIOS**: What are 3-5 diverse use cases?
 
 3. **APPLY MASTER TEMPLATE**: Use proven XML structure
-   - **MANDATORY STRUCTURE**: Follow the exact template from create-prompt.md:
+   - **MANDATORY STRUCTURE**: Follow the exact template from `~/.claude/commands/files/__create_prompts.txt`:
      ```xml
      <role>
      [Expert role with specific context and experience]
@@ -167,7 +167,7 @@ You are a prompt engineering expert with deep expertise in Claude's capabilities
 
 ## Execution Rules
 
-- **RESEARCH FIRST**: Always read `@prompts/create-prompt.md` before creating any prompt
+- **RESEARCH FIRST**: Always read `~/.claude/commands/files/__create_prompts.txt` before creating any prompt
 - **XML STRUCTURE MANDATORY**: Every prompt must use the master template structure
 - **MINIMUM 3 EXAMPLES**: Never create prompts with fewer than 3 diverse examples
 - **SPECIFIC ROLES ONLY**: No generic "helpful assistant" roles
@@ -180,7 +180,7 @@ You are a prompt engineering expert with deep expertise in Claude's capabilities
 
 ## Error Handling
 
-- **Missing research**: Stop immediately and read `@prompts/create-prompt.md` first
+- **Missing research**: Stop immediately and read `~/.claude/commands/files/__create_prompts.txt` first
 - **Vague purpose**: Ask clarifying questions about exact task requirements
 - **Generic role**: Demand specific expertise, experience, and specialization details
 - **Insufficient examples**: Require minimum 3 diverse scenarios with clear inputs/outputs
@@ -190,4 +190,4 @@ You are a prompt engineering expert with deep expertise in Claude's capabilities
 
 ## Priority
 
-**EFFECTIVENESS > EVERYTHING**. Every prompt element must be optimized for maximum performance using proven techniques. The master template and core principles from `@prompts/create-prompt.md` are non-negotiable foundations for all prompt creation.
+**EFFECTIVENESS > EVERYTHING**. Every prompt element must be optimized for maximum performance using proven techniques. The master template and core principles from `~/.claude/commands/files/__create_prompts.txt` are non-negotiable foundations for all prompt creation.

@@ -186,7 +186,14 @@ async function main() {
 		const input: HookInput = await Bun.stdin.json();
 		const config = await loadConfig();
 
-		await saveSession(input);
+		// Get usage limits FIRST to ensure the current period entry exists
+		// and to get the current resets_at for session tracking
+		const usageLimits = await getUsageLimits();
+		const currentResetsAt = usageLimits.five_hour?.resets_at ?? undefined;
+
+		// Now save session with the current period context
+		// This ensures costs are attributed to the correct period
+		await saveSession(input, currentResetsAt);
 
 		const git = await getGitStatus();
 		const contextData = await getContextData({
@@ -196,7 +203,6 @@ async function main() {
 			useUsableContextOnly: config.context.useUsableContextOnly,
 			overheadTokens: config.context.overheadTokens,
 		});
-		const usageLimits = await getUsageLimits();
 		const periodCost = await getCurrentPeriodCost();
 		const todayCost = await getTodayCost();
 

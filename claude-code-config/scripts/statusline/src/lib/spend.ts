@@ -4,6 +4,22 @@ import { join } from "node:path";
 import type { HookInput } from "./types";
 import { updatePeriodCost } from "./usage-limits";
 
+function normalizeResetsAt(resetsAt: string): string {
+	try {
+		const date = new Date(resetsAt);
+		const minutes = date.getMinutes();
+		const roundedMinutes = Math.round(minutes / 5) * 5;
+
+		date.setMinutes(roundedMinutes);
+		date.setSeconds(0);
+		date.setMilliseconds(0);
+
+		return date.toISOString();
+	} catch {
+		return resetsAt;
+	}
+}
+
 export interface SpendSession {
 	id: string;
 	cost: number;
@@ -12,6 +28,7 @@ export interface SpendSession {
 	lines_added: number;
 	lines_removed: number;
 	cwd: string;
+	last_resets_at?: string;
 }
 
 export interface SpendData {
@@ -31,12 +48,8 @@ export async function loadSpendData(): Promise<SpendData> {
 		return { sessions: [] };
 	}
 
-	try {
-		const content = await readFile(spendFile, "utf-8");
-		return JSON.parse(content);
-	} catch {
-		return { sessions: [] };
-	}
+	const content = await readFile(spendFile, "utf-8");
+	return JSON.parse(content);
 }
 
 export async function saveSpendData(data: SpendData): Promise<void> {
@@ -48,10 +61,24 @@ export async function saveSpendData(data: SpendData): Promise<void> {
 		mkdirSync(dataDir, { recursive: true });
 	}
 
-	await writeFile(spendFile, JSON.stringify(data, null, 2));
+	// Protection: never save fewer sessions than already exist
+	if (existsSync(spendFile)) {
+		const existingContent = await readFile(spendFile, "utf-8");
+		const existingData: SpendData = JSON.parse(existingContent);
+		if (data.sessions.length < existingData.sessions.length) {
+			throw new Error(
+				`Refusing to save: would lose ${existingData.sessions.length - data.sessions.length} sessions`,
+			);
+		}
+	}
+
+	await writeFile(spendFile, JSON.stringify(data, null, "\t"));
 }
 
-export async function saveSession(input: HookInput): Promise<void> {
+export async function saveSession(
+	input: HookInput,
+	currentResetsAt?: string,
+): Promise<void> {
 	if (
 		!input.session_id ||
 		input.cost.total_cost_usd === 0 ||
@@ -65,8 +92,30 @@ export async function saveSession(input: HookInput): Promise<void> {
 
 	const existingSession = data.sessions.find((s) => s.id === input.session_id);
 	const oldCost = existingSession?.cost ?? 0;
+	const oldResetsAt = existingSession?.last_resets_at;
 	const newCost = input.cost.total_cost_usd;
 	const costDelta = newCost - oldCost;
+
+	// Normalize resets_at values for comparison (rounded to 5-minute intervals)
+	const normalizedCurrentResetsAt = currentResetsAt
+		? normalizeResetsAt(currentResetsAt)
+		: undefined;
+	const normalizedOldResetsAt = oldResetsAt
+		? normalizeResetsAt(oldResetsAt)
+		: undefined;
+
+	// Check if we crossed a period boundary
+	const periodChanged =
+		normalizedCurrentResetsAt &&
+		normalizedOldResetsAt &&
+		normalizedCurrentResetsAt !== normalizedOldResetsAt;
+
+	// When period changes, don't add any cost delta to the new period because:
+	// 1. The cost accumulated before the period change belongs to the old period
+	// 2. We can't know exactly what portion was before/after the boundary
+	// 3. After this update, the session will have the new resets_at, so future
+	//    deltas will correctly be attributed to the new period
+	const costToAdd = periodChanged ? 0 : costDelta;
 
 	const session: SpendSession = {
 		id: input.session_id,
@@ -76,6 +125,7 @@ export async function saveSession(input: HookInput): Promise<void> {
 		lines_added: input.cost.total_lines_added,
 		lines_removed: input.cost.total_lines_removed,
 		cwd: input.cwd,
+		last_resets_at: normalizedCurrentResetsAt ?? normalizedOldResetsAt,
 	};
 
 	const existingIndex = data.sessions.findIndex(
@@ -90,8 +140,8 @@ export async function saveSession(input: HookInput): Promise<void> {
 
 	await saveSpendData(data);
 
-	if (costDelta > 0) {
-		await updatePeriodCost(costDelta);
+	if (costToAdd > 0) {
+		await updatePeriodCost(costToAdd);
 	}
 }
 

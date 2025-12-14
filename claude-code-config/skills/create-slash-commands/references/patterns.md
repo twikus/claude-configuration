@@ -33,13 +33,15 @@ Create a git commit for current changes following repository conventions.
 </process>
 
 <success_criteria>
+
 - All relevant changes staged
 - Commit message follows repository conventions
 - Commit created successfully
-</success_criteria>
+  </success_criteria>
 ```
 
 **Key features**:
+
 - Tool restrictions prevent running arbitrary bash commands
 - Dynamic context loaded via the exclamation mark prefix before backticks
 - Git state injected before prompt execution
@@ -67,8 +69,9 @@ Current changes: ! `git status`
 </process>
 
 <success_criteria>
+
 - Changes committed successfully
-</success_criteria>
+  </success_criteria>
 ```
 
 ## Code Analysis Patterns
@@ -78,6 +81,7 @@ Current changes: ! `git status`
 **Source**: Official Claude Code documentation
 
 **File**: `.claude/commands/optimize.md`
+
 ```markdown
 ---
 description: Analyze the performance of this code and suggest three specific optimizations
@@ -97,11 +101,12 @@ This helps improve application performance through targeted improvements.
 </process>
 
 <success_criteria>
+
 - Performance issues clearly identified
 - Three concrete optimizations suggested
 - Implementation guidance provided
 - Performance impact estimated
-</success_criteria>
+  </success_criteria>
 ```
 
 **Usage**: `/optimize`
@@ -111,6 +116,7 @@ Claude analyzes code in the current conversation context.
 ### Pattern: Security Review
 
 **File**: `.claude/commands/security-review.md`
+
 ```markdown
 ---
 description: Review this code for security vulnerabilities
@@ -128,11 +134,12 @@ Review code for security vulnerabilities and suggest fixes.
 </process>
 
 <success_criteria>
+
 - All major vulnerability types checked
 - Specific issues identified with locations
 - Severity levels assigned
 - Actionable fixes provided
-</success_criteria>
+  </success_criteria>
 ```
 
 **Usage**: `/security-review`
@@ -146,24 +153,25 @@ argument-hint: [file-path]
 ---
 
 <objective>
-Analyze performance of @ $ARGUMENTS and suggest three specific optimizations.
+Analyze performance of @ #$ARGUMENTS and suggest three specific optimizations.
 
 This helps improve application performance through targeted file improvements.
 </objective>
 
 <process>
-1. Review code in @ $ARGUMENTS for performance issues
+1. Review code in @ #$ARGUMENTS for performance issues
 2. Identify bottlenecks and inefficiencies
 3. Suggest three specific optimizations with rationale
 4. Estimate performance impact of each
 </process>
 
 <success_criteria>
+
 - File analyzed thoroughly
 - Performance issues identified
 - Three concrete optimizations suggested
 - Implementation guidance provided
-</success_criteria>
+  </success_criteria>
 ```
 
 **Usage**: `/optimize src/utils/helpers.js`
@@ -197,11 +205,12 @@ This ensures bugs are resolved systematically with proper testing and documentat
 </process>
 
 <success_criteria>
+
 - Issue fully understood and addressed
 - Solution addresses root cause
 - Tests added and passing
 - PR description clearly explains fix
-</success_criteria>
+  </success_criteria>
 ```
 
 **Usage**: `/fix-issue 123`
@@ -229,11 +238,12 @@ This ensures PRs are reviewed systematically with proper prioritization and assi
 </process>
 
 <success_criteria>
+
 - PR reviewed thoroughly
 - Priority considered in review depth
 - Constructive feedback provided
 - Assigned to correct person
-</success_criteria>
+  </success_criteria>
 ```
 
 **Usage**: `/review-pr 456 high alice`
@@ -266,11 +276,12 @@ This ensures code quality and identifies potential improvements.
 </process>
 
 <success_criteria>
+
 - File reviewed thoroughly
 - Code quality assessed
 - Specific improvements identified
 - Actionable suggestions provided
-</success_criteria>
+  </success_criteria>
 ```
 
 Uses `@` prefix to reference specific files.
@@ -284,13 +295,13 @@ argument-hint: [file-path]
 ---
 
 <objective>
-Review the implementation in @ $ARGUMENTS.
+Review the implementation in @ #$ARGUMENTS.
 
 This allows flexible file review based on user specification.
 </objective>
 
 <process>
-1. Read @ $ARGUMENTS
+1. Read @ #$ARGUMENTS
 2. Analyze code structure and patterns
 3. Check for best practices
 4. Identify potential improvements
@@ -298,11 +309,12 @@ This allows flexible file review based on user specification.
 </process>
 
 <success_criteria>
+
 - File reviewed thoroughly
 - Code quality assessed
 - Specific improvements identified
 - Actionable suggestions provided
-</success_criteria>
+  </success_criteria>
 ```
 
 **Usage**: `/review src/app.js`
@@ -332,11 +344,12 @@ This helps understand changes and identify important variations between files.
 </process>
 
 <success_criteria>
+
 - Both files analyzed
 - Key differences identified
 - Impact of changes assessed
 - Clear comparison provided
-</success_criteria>
+  </success_criteria>
 ```
 
 **Usage**: `/compare src/old.js src/new.js`
@@ -366,11 +379,12 @@ This helps discover optimal solutions by stripping away assumptions and rebuildi
 </process>
 
 <success_criteria>
+
 - Problem analyzed from ground up
 - Assumptions identified and questioned
 - Solution rebuilt from fundamentals
 - Novel insights discovered
-</success_criteria>
+  </success_criteria>
 ```
 
 Tool restriction ensures Claude only uses SequentialThinking.
@@ -385,7 +399,7 @@ argument-hint: [task description]
 ---
 
 <objective>
-Create a detailed implementation strategy for: $ARGUMENTS
+Create a detailed implementation strategy for: #$ARGUMENTS
 
 This ensures complex tasks are approached systematically with proper planning.
 </objective>
@@ -399,12 +413,13 @@ This ensures complex tasks are approached systematically with proper planning.
 </process>
 
 <success_criteria>
+
 - Task broken into clear phases
 - Dependencies mapped
 - Complexity estimated
 - Optimal approach identified
 - Risks and mitigations outlined
-</success_criteria>
+  </success_criteria>
 ```
 
 ## Bash Execution Patterns
@@ -437,11 +452,12 @@ This helps understand current project state across git, dependencies, and tests.
 </process>
 
 <success_criteria>
+
 - All metrics checked
 - Current state clearly described
 - Issues identified
 - Recommendations provided
-</success_criteria>
+  </success_criteria>
 ```
 
 Multiple bash commands load environment state.
@@ -473,11 +489,12 @@ Test results: ! `npm test`
 </process>
 
 <success_criteria>
+
 - All tests verified passing
 - Deployment executed only on test success
 - Deployment confirmed successful
 - Or deployment aborted with clear failure reasons
-</success_criteria>
+  </success_criteria>
 ```
 
 ## Multi-Step Workflow Patterns
@@ -491,7 +508,7 @@ argument-hint: [feature description]
 ---
 
 <objective>
-Complete full feature development workflow for: $ARGUMENTS
+Complete full feature development workflow for: #$ARGUMENTS
 
 This ensures features are developed systematically with proper planning, implementation, testing, and documentation.
 </objective>
@@ -515,7 +532,7 @@ This ensures features are developed systematically with proper planning, impleme
 4. **Completion**
    - Create commit
    - Write PR description
-</process>
+     </process>
 
 <testing>
 - Run tests: ! `npm test`
@@ -531,13 +548,14 @@ Before completing:
 </verification>
 
 <success_criteria>
+
 - Feature fully implemented
 - Tests added and passing
 - Code passes linting
 - Documentation updated
 - Commit created
 - PR description written
-</success_criteria>
+  </success_criteria>
 ```
 
 ## Command Chaining Patterns
@@ -551,13 +569,13 @@ argument-hint: [file-path]
 ---
 
 <objective>
-Analyze and fix performance issues in @ $ARGUMENTS.
+Analyze and fix performance issues in @ #$ARGUMENTS.
 
 This provides end-to-end performance improvement from analysis through verification.
 </objective>
 
 <process>
-1. Analyze @ $ARGUMENTS for performance issues
+1. Analyze @ #$ARGUMENTS for performance issues
 2. Identify top 3 most impactful optimizations
 3. Implement the optimizations
 4. Verify improvements with benchmarks
@@ -571,11 +589,12 @@ Before completing:
 </verification>
 
 <success_criteria>
+
 - Performance issues identified and fixed
 - Measurable performance improvement
 - Benchmarks confirm gains
 - No regressions introduced
-</success_criteria>
+  </success_criteria>
 ```
 
 Sequential steps in single command.
@@ -607,10 +626,11 @@ Current git state: ! `git status`
 </process>
 
 <success_criteria>
+
 - Git operations completed successfully
 - No arbitrary commands executed
 - Repository state as expected
-</success_criteria>
+  </success_criteria>
 ```
 
 Prevents running non-git bash commands.
@@ -625,7 +645,7 @@ argument-hint: [search pattern]
 ---
 
 <objective>
-Search codebase for pattern: $ARGUMENTS
+Search codebase for pattern: #$ARGUMENTS
 
 This provides safe codebase analysis without modification or execution permissions.
 </objective>
@@ -638,11 +658,12 @@ This provides safe codebase analysis without modification or execution permissio
 </process>
 
 <success_criteria>
+
 - Pattern search completed
 - All matches identified
 - Relevant context provided
 - No files modified
-</success_criteria>
+  </success_criteria>
 ```
 
 No write or execution permissions.
@@ -675,11 +696,12 @@ Lint: ! `npm run lint`
 </process>
 
 <success_criteria>
+
 - All tests passing
 - No lint errors
 - Clear report of results
 - Or specific failures identified with details
-</success_criteria>
+  </success_criteria>
 ```
 
 Only allows specific npm scripts.
@@ -710,19 +732,22 @@ Recent activity: ! `git log --oneline -5`
 
 ```markdown
 Review @ package.json for dependencies
-Check @ src/config/* for settings
+Check @ src/config/\* for settings
 ```
 
 ### 4. Structure Complex Commands
 
 ```markdown
 ## Step 1: Analysis
+
 [analysis prompt]
 
 ## Step 2: Implementation
+
 [implementation prompt]
 
 ## Step 3: Verification
+
 [verification prompt]
 ```
 
@@ -730,13 +755,16 @@ Check @ src/config/* for settings
 
 ```markdown
 # Simple
+
 Fix issue #$ARGUMENTS
 
 # Positional
+
 Review PR #$1 with priority $2
 
 # File reference
-Analyze @ $ARGUMENTS
+
+Analyze @ #$ARGUMENTS
 ```
 
 ## Anti-Patterns to Avoid
@@ -759,6 +787,7 @@ description: Create commit
 ```
 
 Better:
+
 ```yaml
 ---
 description: Create commit
@@ -769,12 +798,14 @@ allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
 ### ❌ Vague Instructions
 
 ```markdown
-Do the thing for $ARGUMENTS
+Do the thing for #$ARGUMENTS
 ```
 
 Better:
+
 ```markdown
 Fix issue #$ARGUMENTS by:
+
 1. Understanding the issue
 2. Locating relevant code
 3. Implementing solution
@@ -788,6 +819,7 @@ Create a git commit
 ```
 
 Better:
+
 ```markdown
 Current changes: ! `git status`
 Diff: ! `git diff`

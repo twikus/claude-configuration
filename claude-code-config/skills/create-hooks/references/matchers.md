@@ -5,6 +5,7 @@ Complete guide to matching tools with hook matchers.
 ## What are matchers?
 
 Matchers are regex patterns that filter which tools trigger a hook. They allow you to:
+
 - Target specific tools (e.g., only `Bash`)
 - Match multiple tools (e.g., `Write|Edit`)
 - Match tool categories (e.g., all MCP tools)
@@ -29,53 +30,64 @@ The pattern is tested against the tool name using `new RegExp(pattern).test(tool
 ## Common Patterns
 
 ### Exact match
+
 ```json
 {
   "matcher": "Bash"
 }
 ```
+
 Matches: `Bash`
 Doesn't match: `bash`, `BashOutput`
 
 ### Multiple tools (OR)
+
 ```json
 {
   "matcher": "Write|Edit"
 }
 ```
+
 Matches: `Write`, `Edit`
 Doesn't match: `Read`, `Bash`
 
 ### Starts with
+
 ```json
 {
   "matcher": "^Bash"
 }
 ```
+
 Matches: `Bash`, `BashOutput`
 Doesn't match: `Read`
 
 ### Ends with
+
 ```json
 {
   "matcher": "Output$"
 }
 ```
+
 Matches: `BashOutput`
 Doesn't match: `Bash`, `Read`
 
 ### Contains
+
 ```json
 {
   "matcher": ".*write.*"
 }
 ```
+
 Matches: `Write`, `NotebookWrite`, `TodoWrite`
 Doesn't match: `Read`, `Edit`
 
 Case-sensitive! `write` won't match `Write`.
 
 ### Any tool (no matcher)
+
 ```json
 {
   "hooks": {
@@ -93,6 +105,7 @@ Case-sensitive! `write` won't match `Write`.
 ## Tool Categories
 
 ### All file operations
+
 ```json
 {
   "matcher": "Read|Write|Edit|Glob|Grep"
@@ -100,36 +113,44 @@ Case-sensitive! `write` won't match `Write`.
 ```
 
 ### All bash tools
+
 ```json
 {
   "matcher": "Bash.*"
 }
 ```
+
 Matches: `Bash`, `BashOutput`, `BashKill`
 
 ### All MCP tools
+
 ```json
 {
   "matcher": "mcp__.*"
 }
 ```
+
 Matches: `mcp__memory__store`, `mcp__filesystem__read`, etc.
 
 ### Specific MCP server
+
 ```json
 {
   "matcher": "mcp__memory__.*"
 }
 ```
+
 Matches: `mcp__memory__store`, `mcp__memory__retrieve`
 Doesn't match: `mcp__filesystem__read`
 
 ### Specific MCP tool
+
 ```json
 {
   "matcher": "mcp__.*__write.*"
 }
 ```
+
 Matches: `mcp__filesystem__write`, `mcp__memory__write`
 Doesn't match: `mcp__filesystem__read`
 
@@ -140,11 +161,13 @@ Doesn't match: `mcp__filesystem__read`
 MCP tools follow the pattern: `mcp__{server}__{tool}`
 
 Examples:
+
 - `mcp__memory__store`
 - `mcp__filesystem__read`
 - `mcp__github__create_issue`
 
 **Match all tools from a server**:
+
 ```json
 {
   "matcher": "mcp__github__.*"
@@ -152,6 +175,7 @@ Examples:
 ```
 
 **Match specific tool across all servers**:
+
 ```json
 {
   "matcher": "mcp__.*__read.*"
@@ -163,6 +187,7 @@ Examples:
 ## Real-World Examples
 
 ### Log all bash commands
+
 ```json
 {
   "hooks": {
@@ -182,6 +207,7 @@ Examples:
 ```
 
 ### Format code after any file write
+
 ```json
 {
   "hooks": {
@@ -201,6 +227,7 @@ Examples:
 ```
 
 ### Validate all MCP memory writes
+
 ```json
 {
   "hooks": {
@@ -210,7 +237,7 @@ Examples:
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Validate this memory operation: $ARGUMENTS\n\nCheck if data is appropriate to store.\n\nReturn: {\"decision\": \"approve\" or \"block\", \"reason\": \"why\"}"
+            "prompt": "Validate this memory operation: #$ARGUMENTS\n\nCheck if data is appropriate to store.\n\nReturn: {\"decision\": \"approve\" or \"block\", \"reason\": \"why\"}"
           }
         ]
       }
@@ -220,6 +247,7 @@ Examples:
 ```
 
 ### Block destructive git commands
+
 ```json
 {
   "hooks": {
@@ -239,6 +267,7 @@ Examples:
 ```
 
 `check-git-safety.sh`:
+
 ```bash
 #!/bin/bash
 input=$(cat)
@@ -302,11 +331,13 @@ Each matcher is evaluated independently. A tool can match multiple matchers.
 ## Debugging Matchers
 
 ### Enable debug mode
+
 ```bash
 claude --debug
 ```
 
 Debug output shows:
+
 ```
 [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
 [DEBUG] Found 3 hook matchers in settings
@@ -325,6 +356,7 @@ console.log(regex.test(toolName)); // true
 ```
 
 Or in Node.js:
+
 ```bash
 node -e "console.log(/mcp__memory__.*/.test('mcp__memory__store'))"
 ```
@@ -332,13 +364,15 @@ node -e "console.log(/mcp__memory__.*/.test('mcp__memory__store'))"
 ### Common mistakes
 
 ❌ **Case sensitivity**
+
 ```json
 {
-  "matcher": "bash"  // Won't match "Bash"
+  "matcher": "bash" // Won't match "Bash"
 }
 ```
 
 ✅ **Correct**
+
 ```json
 {
   "matcher": "Bash"
@@ -348,29 +382,33 @@ node -e "console.log(/mcp__memory__.*/.test('mcp__memory__store'))"
 ---
 
 ❌ **Missing escape**
+
 ```json
 {
-  "matcher": "mcp__memory__*"  // * is literal, not wildcard
+  "matcher": "mcp__memory__*" // * is literal, not wildcard
 }
 ```
 
 ✅ **Correct**
+
 ```json
 {
-  "matcher": "mcp__memory__.*"  // .* is regex for "any characters"
+  "matcher": "mcp__memory__.*" // .* is regex for "any characters"
 }
 ```
 
 ---
 
 ❌ **Unintended partial match**
+
 ```json
 {
-  "matcher": "Write"  // Matches "Write", "TodoWrite", "NotebookWrite"
+  "matcher": "Write" // Matches "Write", "TodoWrite", "NotebookWrite"
 }
 ```
 
 ✅ **Exact match only**
+
 ```json
 {
   "matcher": "^Write$"
@@ -382,14 +420,17 @@ node -e "console.log(/mcp__memory__.*/.test('mcp__memory__store'))"
 ## Advanced Patterns
 
 ### Negative lookahead (exclude tools)
+
 ```json
 {
   "matcher": "^(?!Read).*"
 }
 ```
+
 Matches: Everything except `Read`
 
 ### Match any file operation except Grep
+
 ```json
 {
   "matcher": "^(Read|Write|Edit|Glob)$"
@@ -397,11 +438,13 @@ Matches: Everything except `Read`
 ```
 
 ### Case-insensitive match
+
 ```json
 {
   "matcher": "(?i)bash"
 }
 ```
+
 Matches: `Bash`, `bash`, `BASH`
 
 (Note: Claude Code tools are PascalCase by convention, so this is rarely needed)
@@ -411,15 +454,17 @@ Matches: `Bash`, `bash`, `BASH`
 ## Performance Considerations
 
 **Broad matchers** (e.g., `.*`) run on every tool use:
+
 - Simple command hooks: negligible impact
 - Prompt hooks: can slow down significantly
 
 **Recommendation**: Be as specific as possible with matchers to minimize unnecessary hook executions.
 
 **Example**: Instead of matching all tools and checking inside the hook:
+
 ```json
 {
-  "matcher": ".*",  // Runs on EVERY tool
+  "matcher": ".*", // Runs on EVERY tool
   "hooks": [
     {
       "type": "command",
@@ -430,9 +475,10 @@ Matches: `Bash`, `bash`, `BASH`
 ```
 
 Do this:
+
 ```json
 {
-  "matcher": "Bash",  // Only runs on Bash
+  "matcher": "Bash", // Only runs on Bash
   "hooks": [
     {
       "type": "command",
@@ -447,6 +493,7 @@ Do this:
 ## Tool Name Reference
 
 Common Claude Code tool names:
+
 - `Bash`
 - `BashOutput`
 - `KillShell`

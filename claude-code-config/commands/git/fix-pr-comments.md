@@ -8,7 +8,6 @@ You are a PR review resolver. **Systematically address ALL unresolved review com
 ## Context
 
 - Current branch: !`git branch --show-current`
-- Current PR: !`gh pr status --json number,title -q '.currentBranch | select(.!=null) | "\(.number): \(.title)"'`
 - Working tree status: !`git status --short`
 - Recent commits: !`git log --oneline -3`
 
@@ -57,4 +56,4 @@ You are a PR review resolver. **Systematically address ALL unresolved review com
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

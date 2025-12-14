@@ -2,6 +2,7 @@ import type { StatuslineConfig } from "../../statusline.config";
 import type { StatuslineData } from "../index";
 import { renderStatusline as render } from "../index";
 import { getContextData } from "./context";
+import { getPeriodCost } from "./database";
 import {
 	formatBranch,
 	formatCost,
@@ -9,9 +10,25 @@ import {
 	formatPath,
 } from "./formatters";
 import { getGitStatus } from "./git";
-import { getTodayCost } from "./spend";
+import { getTodayCostV2 } from "./spend-v2";
 import type { HookInput } from "./types";
-import { getCurrentPeriodCost, getUsageLimits } from "./usage-limits";
+import { getUsageLimits } from "./usage-limits";
+
+function normalizeResetsAt(resetsAt: string): string {
+	try {
+		const date = new Date(resetsAt);
+		const minutes = date.getMinutes();
+		const roundedMinutes = Math.round(minutes / 5) * 5;
+
+		date.setMinutes(roundedMinutes);
+		date.setSeconds(0);
+		date.setMilliseconds(0);
+
+		return date.toISOString();
+	} catch {
+		return resetsAt;
+	}
+}
 
 export async function renderStatusline(
 	input: HookInput,
@@ -26,8 +43,12 @@ export async function renderStatusline(
 		overheadTokens: config.context.overheadTokens,
 	});
 	const usageLimits = await getUsageLimits();
-	const periodCost = await getCurrentPeriodCost();
-	const todayCost = await getTodayCost();
+
+	const normalizedPeriodId = usageLimits.five_hour?.resets_at
+		? normalizeResetsAt(usageLimits.five_hour.resets_at)
+		: null;
+	const periodCost = normalizedPeriodId ? getPeriodCost(normalizedPeriodId) : 0;
+	const todayCost = getTodayCostV2();
 
 	const data: StatuslineData = {
 		branch: formatBranch(git, config.git),

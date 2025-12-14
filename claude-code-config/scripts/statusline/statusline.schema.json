@@ -1,0 +1,272 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Statusline Configuration",
+	"description": "Configuration for Claude Code statusline",
+	"type": "object",
+	"properties": {
+		"$schema": {
+			"type": "string",
+			"description": "JSON Schema reference"
+		},
+		"oneLine": {
+			"type": "boolean",
+			"description": "Display everything on one line or two lines",
+			"default": true
+		},
+		"showSonnetModel": {
+			"type": "boolean",
+			"description": "Show model name even when using Sonnet (default model)",
+			"default": false
+		},
+		"pathDisplayMode": {
+			"type": "string",
+			"enum": ["full", "truncated", "basename"],
+			"description": "Path display mode: full (~/path), truncated (…/last/two), basename (folder)",
+			"default": "truncated"
+		},
+		"separator": {
+			"type": "string",
+			"enum": ["|", "•", "·", "⋅", "●", "◆", "▪", "▸", "›", "→"],
+			"description": "Separator character between sections",
+			"default": "•"
+		},
+		"git": {
+			"type": "object",
+			"description": "Git display configuration",
+			"properties": {
+				"enabled": {
+					"type": "boolean",
+					"default": true
+				},
+				"showBranch": {
+					"type": "boolean",
+					"description": "Show current branch name",
+					"default": true
+				},
+				"showDirtyIndicator": {
+					"type": "boolean",
+					"description": "Show * indicator when branch has changes",
+					"default": true
+				},
+				"showChanges": {
+					"type": "boolean",
+					"description": "Show added/deleted lines count",
+					"default": false
+				},
+				"showStaged": {
+					"type": "boolean",
+					"description": "Show staged files count",
+					"default": true
+				},
+				"showUnstaged": {
+					"type": "boolean",
+					"description": "Show unstaged files count",
+					"default": true
+				}
+			}
+		},
+		"session": {
+			"type": "object",
+			"description": "Session display configuration",
+			"properties": {
+				"infoSeparator": {
+					"type": ["string", "null"],
+					"enum": ["|", "•", "·", "⋅", "●", "◆", "▪", "▸", "›", "→", null],
+					"description": "Separator between session info items (null for space)",
+					"default": null
+				},
+				"cost": {
+					"$ref": "#/definitions/costConfig"
+				},
+				"duration": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean",
+							"default": true
+						}
+					}
+				},
+				"tokens": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean",
+							"default": true
+						},
+						"showMax": {
+							"type": "boolean",
+							"description": "Show max tokens (192k/200k vs 192k)",
+							"default": false
+						},
+						"showDecimals": {
+							"type": "boolean",
+							"description": "Show decimals (192.1k vs 192k)",
+							"default": false
+						}
+					}
+				},
+				"percentage": {
+					"$ref": "#/definitions/percentageConfig"
+				}
+			}
+		},
+		"context": {
+			"type": "object",
+			"description": "Context display configuration",
+			"properties": {
+				"usePayloadContextWindow": {
+					"type": "boolean",
+					"description": "Use context_window from payload (fast) vs transcript parsing (accurate)",
+					"default": true
+				},
+				"maxContextTokens": {
+					"type": "number",
+					"description": "Maximum context window size",
+					"default": 200000
+				},
+				"autocompactBufferTokens": {
+					"type": "number",
+					"description": "Autocompact buffer size",
+					"default": 45000
+				},
+				"useUsableContextOnly": {
+					"type": "boolean",
+					"default": true
+				},
+				"overheadTokens": {
+					"type": "number",
+					"description": "Approximate tokens overhead for system",
+					"default": 0
+				}
+			}
+		},
+		"limits": {
+			"type": "object",
+			"description": "5-hour rate limits display",
+			"properties": {
+				"enabled": {
+					"type": "boolean",
+					"default": true
+				},
+				"showTimeLeft": {
+					"type": "boolean",
+					"description": "Show time until reset",
+					"default": true
+				},
+				"cost": {
+					"$ref": "#/definitions/costConfig"
+				},
+				"percentage": {
+					"$ref": "#/definitions/percentageConfig"
+				}
+			}
+		},
+		"weeklyUsage": {
+			"type": "object",
+			"description": "7-day usage limits display",
+			"properties": {
+				"enabled": {
+					"type": ["boolean", "string"],
+					"enum": [true, false, "90%"],
+					"description": "true: always, false: never, '90%': when 5h usage >= 90%",
+					"default": "90%"
+				},
+				"showTimeLeft": {
+					"type": "boolean",
+					"default": true
+				},
+				"cost": {
+					"$ref": "#/definitions/costConfig"
+				},
+				"percentage": {
+					"$ref": "#/definitions/percentageConfig"
+				}
+			}
+		},
+		"dailySpend": {
+			"type": "object",
+			"description": "Daily spend display",
+			"properties": {
+				"cost": {
+					"$ref": "#/definitions/costConfig"
+				}
+			}
+		}
+	},
+	"definitions": {
+		"costFormat": {
+			"type": "string",
+			"enum": ["integer", "decimal1", "decimal2"],
+			"description": "integer: $12, decimal1: $12.2, decimal2: $12.29"
+		},
+		"costConfig": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"type": "boolean",
+					"default": true
+				},
+				"format": {
+					"$ref": "#/definitions/costFormat",
+					"default": "decimal1"
+				}
+			}
+		},
+		"progressBarStyle": {
+			"type": "string",
+			"enum": ["filled", "rectangle", "braille"],
+			"default": "braille"
+		},
+		"progressBarColor": {
+			"type": "string",
+			"enum": ["progressive", "green", "yellow", "red", "peach", "black", "white"],
+			"default": "progressive"
+		},
+		"progressBarBackground": {
+			"type": "string",
+			"enum": ["none", "dark", "gray", "light", "blue", "purple", "cyan", "peach"],
+			"default": "none"
+		},
+		"progressBarConfig": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"type": "boolean",
+					"default": true
+				},
+				"length": {
+					"type": "number",
+					"enum": [5, 10, 15],
+					"default": 10
+				},
+				"style": {
+					"$ref": "#/definitions/progressBarStyle"
+				},
+				"color": {
+					"$ref": "#/definitions/progressBarColor"
+				},
+				"background": {
+					"$ref": "#/definitions/progressBarBackground"
+				}
+			}
+		},
+		"percentageConfig": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"type": "boolean",
+					"default": true
+				},
+				"showValue": {
+					"type": "boolean",
+					"description": "Show percentage value (23%)",
+					"default": true
+				},
+				"progressBar": {
+					"$ref": "#/definitions/progressBarConfig"
+				}
+			}
+		}
+	}
+}

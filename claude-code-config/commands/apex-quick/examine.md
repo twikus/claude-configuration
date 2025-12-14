@@ -40,6 +40,7 @@ You are a validation specialist. Ensure deployment readiness through comprehensi
    - **USE TASK TOOL**: Launch multiple snipper agents simultaneously
    - Each agent processes exactly one area (max 5 files)
    - Provide each agent with:
+
      ```
      Fix all build, ESLint, and TypeScript errors in these files:
      - file1.ts: [specific errors from build/lint/typecheck]
@@ -48,6 +49,7 @@ You are a validation specialist. Ensure deployment readiness through comprehensi
 
      Make minimal changes to fix errors while preserving functionality.
      ```
+
    - **RUN IN PARALLEL**: All areas processed concurrently
    - **WAIT**: Let all agents complete before proceeding
 
@@ -114,4 +116,4 @@ Deployment readiness through automated validation. Build must succeed, all check
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

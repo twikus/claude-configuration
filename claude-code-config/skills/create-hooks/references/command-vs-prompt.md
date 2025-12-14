@@ -39,6 +39,7 @@ Need to execute a hook?
 ### When to use
 
 ✅ **Use command hooks for**:
+
 - File operations (read, write, check existence)
 - Running tools (prettier, eslint, git)
 - Simple pattern matching (grep, regex)
@@ -47,6 +48,7 @@ Need to execute a hook?
 - Fast validation (file size, permissions)
 
 ❌ **Don't use command hooks for**:
+
 - Natural language analysis
 - Complex decision logic
 - Context-aware validation
@@ -55,6 +57,7 @@ Need to execute a hook?
 ### Examples
 
 **1. Log bash commands**
+
 ```json
 {
   "type": "command",
@@ -63,6 +66,7 @@ Need to execute a hook?
 ```
 
 **2. Block if file doesn't exist**
+
 ```bash
 #!/bin/bash
 # check-file-exists.sh
@@ -79,6 +83,7 @@ echo '{"decision": "approve", "reason": "File exists"}'
 ```
 
 **3. Run prettier after edits**
+
 ```json
 {
   "type": "command",
@@ -88,6 +93,7 @@ echo '{"decision": "approve", "reason": "File exists"}'
 ```
 
 **4. Desktop notification**
+
 ```json
 {
   "type": "command",
@@ -123,7 +129,7 @@ fi
 ### Characteristics
 
 - **Execution**: LLM evaluates prompt
-- **Input**: Prompt string with `$ARGUMENTS` placeholder
+- **Input**: Prompt string with `#$ARGUMENTS` placeholder
 - **Output**: LLM generates JSON response
 - **Speed**: Slower (~1-3s per evaluation)
 - **Cost**: Uses API credits
@@ -132,6 +138,7 @@ fi
 ### When to use
 
 ✅ **Use prompt hooks for**:
+
 - Natural language validation
 - Semantic analysis (intent, safety, appropriateness)
 - Complex decision trees
@@ -140,6 +147,7 @@ fi
 - Understanding user intent
 
 ❌ **Don't use prompt hooks for**:
+
 - Simple pattern matching (use regex/grep)
 - File operations (use command hooks)
 - High-frequency events (too slow/expensive)
@@ -148,45 +156,51 @@ fi
 ### Examples
 
 **1. Validate commit messages**
+
 ```json
 {
   "type": "prompt",
-  "prompt": "Evaluate this git commit message: $ARGUMENTS\n\nCheck if it:\n1. Starts with conventional commit type (feat|fix|docs|refactor|test|chore)\n2. Is descriptive and clear\n3. Under 72 characters\n\nReturn: {\"decision\": \"approve\" or \"block\", \"reason\": \"specific feedback\"}"
+  "prompt": "Evaluate this git commit message: #$ARGUMENTS\n\nCheck if it:\n1. Starts with conventional commit type (feat|fix|docs|refactor|test|chore)\n2. Is descriptive and clear\n3. Under 72 characters\n\nReturn: {\"decision\": \"approve\" or \"block\", \"reason\": \"specific feedback\"}"
 }
 ```
 
 **2. Check if Stop is appropriate**
+
 ```json
 {
   "type": "prompt",
-  "prompt": "Review the conversation transcript: $ARGUMENTS\n\nDetermine if Claude should stop:\n1. All user tasks completed?\n2. Any errors that need fixing?\n3. Tests passing?\n4. Documentation updated?\n\nIf incomplete: {\"decision\": \"block\", \"reason\": \"what's missing\"}\nIf complete: {\"decision\": \"approve\", \"reason\": \"all done\"}"
+  "prompt": "Review the conversation transcript: #$ARGUMENTS\n\nDetermine if Claude should stop:\n1. All user tasks completed?\n2. Any errors that need fixing?\n3. Tests passing?\n4. Documentation updated?\n\nIf incomplete: {\"decision\": \"block\", \"reason\": \"what's missing\"}\nIf complete: {\"decision\": \"approve\", \"reason\": \"all done\"}"
 }
 ```
 
 **3. Validate code changes for security**
+
 ```json
 {
   "type": "prompt",
-  "prompt": "Analyze this code change for security issues: $ARGUMENTS\n\nCheck for:\n- SQL injection vulnerabilities\n- XSS attack vectors\n- Authentication bypasses\n- Sensitive data exposure\n\nIf issues found: {\"decision\": \"block\", \"reason\": \"specific vulnerabilities\"}\nIf safe: {\"decision\": \"approve\", \"reason\": \"no issues found\"}"
+  "prompt": "Analyze this code change for security issues: #$ARGUMENTS\n\nCheck for:\n- SQL injection vulnerabilities\n- XSS attack vectors\n- Authentication bypasses\n- Sensitive data exposure\n\nIf issues found: {\"decision\": \"block\", \"reason\": \"specific vulnerabilities\"}\nIf safe: {\"decision\": \"approve\", \"reason\": \"no issues found\"}"
 }
 ```
 
 **4. Semantic prompt validation**
+
 ```json
 {
   "type": "prompt",
-  "prompt": "Evaluate user prompt: $ARGUMENTS\n\nIs this:\n1. Related to coding/development?\n2. Appropriate and professional?\n3. Clear and actionable?\n\nIf inappropriate: {\"decision\": \"block\", \"reason\": \"why\"}\nIf good: {\"decision\": \"approve\", \"reason\": \"ok\"}"
+  "prompt": "Evaluate user prompt: #$ARGUMENTS\n\nIs this:\n1. Related to coding/development?\n2. Appropriate and professional?\n3. Clear and actionable?\n\nIf inappropriate: {\"decision\": \"block\", \"reason\": \"why\"}\nIf good: {\"decision\": \"approve\", \"reason\": \"ok\"}"
 }
 ```
 
 ### Writing effective prompts
 
 **Be specific about output format**:
+
 ```
 Return JSON: {"decision": "approve" or "block", "reason": "explanation"}
 ```
 
 **Provide clear criteria**:
+
 ```
 Block if:
 1. Command contains 'rm -rf /'
@@ -196,27 +210,28 @@ Block if:
 Otherwise approve.
 ```
 
-**Use $ARGUMENTS placeholder**:
+**Use #$ARGUMENTS placeholder**:
+
 ```
-Analyze this input: $ARGUMENTS
+Analyze this input: #$ARGUMENTS
 
 Check for...
 ```
 
-The `$ARGUMENTS` placeholder is replaced with the actual hook input JSON.
+The `#$ARGUMENTS` placeholder is replaced with the actual hook input JSON.
 
 ---
 
 ## Performance Comparison
 
-| Aspect | Command Hook | Prompt Hook |
-|--------|--------------|-------------|
-| **Speed** | <100ms | 1-3s |
-| **Cost** | Free | ~$0.001-0.01 per call |
-| **Complexity** | Shell scripting | Natural language |
-| **Context awareness** | Limited | High |
-| **Reasoning** | No | Yes |
-| **Best for** | Operations, logging | Validation, analysis |
+| Aspect                | Command Hook        | Prompt Hook           |
+| --------------------- | ------------------- | --------------------- |
+| **Speed**             | <100ms              | 1-3s                  |
+| **Cost**              | Free                | ~$0.001-0.01 per call |
+| **Complexity**        | Shell scripting     | Natural language      |
+| **Context awareness** | Limited             | High                  |
+| **Reasoning**         | No                  | Yes                   |
+| **Best for**          | Operations, logging | Validation, analysis  |
 
 ---
 
@@ -238,7 +253,7 @@ You can use multiple hooks for the same event:
           },
           {
             "type": "prompt",
-            "prompt": "Analyze this bash command for safety: $ARGUMENTS",
+            "prompt": "Analyze this bash command for safety: #$ARGUMENTS",
             "comment": "Validate with LLM (slower, smarter)"
           }
         ]
@@ -255,15 +270,18 @@ Hooks execute in order. If any hook blocks, execution stops.
 ## Recommendations
 
 **High-frequency events** (PreToolUse, PostToolUse):
+
 - Prefer command hooks
 - Use prompt hooks sparingly
 - Cache LLM decisions when possible
 
 **Low-frequency events** (Stop, UserPromptSubmit):
+
 - Prompt hooks are fine
 - Cost/latency less critical
 
 **Balance**:
+
 - Command hooks for simple checks
 - Prompt hooks for complex validation
 - Combine when appropriate

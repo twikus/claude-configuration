@@ -13,16 +13,19 @@ You are a task execution specialist with comprehensive tracking. Complete issues
 **Goal**: Set up task tracking and retrieve requirements
 
 ### Task Setup
+
 - **Create task directory**: `mkdir -p tasks/` if it doesn't exist
 - **Generate task file**: Copy template from `~/.claude/commands/files/__tasks_template.txt` to `tasks/[XX]-[task-name].md`
 - **Initialize tracking**: Fill in metadata section with task details
 
 ### Task Source Processing
+
 - **File path**: Read file for task instructions
 - **Issue number/URL**: Fetch with `gh issue view`
 - **Add label**: `gh issue edit --add-label "processing"` for issues
 
 ### Task File Creation
+
 - **Number sequence**: Use next available number (01, 02, 03...)
 - **Naming convention**: `tasks/[XX]-[kebab-case-task-name].md`
 - **Template copy**: Copy from `~/.claude/commands/files/__tasks_template.txt`
@@ -144,6 +147,7 @@ You are a task execution specialist with comprehensive tracking. Complete issues
 ## Task File Management Rules
 
 ### Throughout Execution:
+
 - **Real-time updates**: Edit task file after each major step
 - **Checkbox tracking**: Check off completed items immediately
 - **Question answering**: Fill in all Q1-Q13 answers as you progress
@@ -151,11 +155,13 @@ You are a task execution specialist with comprehensive tracking. Complete issues
 - **Results documentation**: Record all test results, PR URLs, etc.
 
 ### File Location:
+
 - **Directory**: `tasks/` in project root
 - **Naming**: `01-task-name.md`, `02-another-task.md`, etc.
 - **Template source**: `~/.claude/commands/files/__tasks_template.txt`
 
 ### Quality Requirements:
+
 - **Complete all checkboxes**: Every [ ] must be checked or marked N/A
 - **Answer all questions**: Q1-Q13 must have meaningful answers
 - **Fill all blanks**: Replace all `**********\_**********` with actual values
@@ -176,4 +182,4 @@ Correctness > Completeness > Speed. Complete each phase and update task file bef
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

@@ -10,8 +10,16 @@ export type Separator =
 	| "›"
 	| "→";
 
+export type CostFormat = "integer" | "decimal1" | "decimal2";
 export type ProgressBarStyle = "filled" | "rectangle" | "braille";
-export type ProgressBarColor = "progressive" | "green" | "yellow" | "red";
+export type ProgressBarColor =
+	| "progressive"
+	| "green"
+	| "yellow"
+	| "red"
+	| "peach"
+	| "black"
+	| "white";
 export type ProgressBarBackground =
 	| "none"
 	| "dark"
@@ -19,7 +27,13 @@ export type ProgressBarBackground =
 	| "light"
 	| "blue"
 	| "purple"
-	| "cyan";
+	| "cyan"
+	| "peach";
+
+export interface CostConfig {
+	enabled: boolean;
+	format: CostFormat;
+}
 
 export interface ProgressBarConfig {
 	enabled: boolean;
@@ -79,9 +93,7 @@ export interface StatuslineConfig {
 		infoSeparator: Separator | null;
 
 		// Cost display configuration
-		cost: {
-			enabled: boolean;
-		};
+		cost: CostConfig;
 
 		// Duration display configuration
 		duration: {
@@ -103,6 +115,10 @@ export interface StatuslineConfig {
 
 	// Context display configuration
 	context: {
+		// Use context_window data from payload (accurate, fast) vs transcript parsing (legacy)
+		// When true: uses input.context_window.total_input_tokens directly
+		// When false: parses transcript file to estimate tokens (slower, less accurate)
+		usePayloadContextWindow: boolean;
 		// Maximum context window size (Claude's hard limit)
 		maxContextTokens: number;
 		// Autocompact buffer size (reserved for safety)
@@ -121,9 +137,8 @@ export interface StatuslineConfig {
 		enabled: boolean;
 		// Show time left until reset
 		showTimeLeft: boolean;
-		// Show cost for current 5-hour period
-		showCost: boolean;
-
+		// Cost display configuration
+		cost: CostConfig;
 		// Usage percentage display configuration
 		percentage: PercentageConfig;
 	};
@@ -134,17 +149,16 @@ export interface StatuslineConfig {
 		enabled: boolean | "90%";
 		// Show time left until reset
 		showTimeLeft: boolean;
-		// Show cost for current 7-day period
-		showCost: boolean;
-
+		// Cost display configuration
+		cost: CostConfig;
 		// Usage percentage display configuration
 		percentage: PercentageConfig;
 	};
 
 	// Daily spend display configuration
 	dailySpend: {
-		// Enable/disable daily spend display
-		enabled: boolean;
+		// Cost display configuration
+		cost: CostConfig;
 	};
 }
 
@@ -165,6 +179,7 @@ export const defaultConfig: StatuslineConfig = {
 		infoSeparator: null,
 		cost: {
 			enabled: true,
+			format: "decimal1",
 		},
 		duration: {
 			enabled: true,
@@ -187,6 +202,7 @@ export const defaultConfig: StatuslineConfig = {
 		},
 	},
 	context: {
+		usePayloadContextWindow: true,
 		maxContextTokens: 200000,
 		autocompactBufferTokens: 45000,
 		useUsableContextOnly: true,
@@ -195,7 +211,10 @@ export const defaultConfig: StatuslineConfig = {
 	limits: {
 		enabled: true,
 		showTimeLeft: true,
-		showCost: false,
+		cost: {
+			enabled: false,
+			format: "decimal1",
+		},
 		percentage: {
 			enabled: true,
 			showValue: true,
@@ -211,7 +230,10 @@ export const defaultConfig: StatuslineConfig = {
 	weeklyUsage: {
 		enabled: "90%",
 		showTimeLeft: true,
-		showCost: false,
+		cost: {
+			enabled: false,
+			format: "decimal1",
+		},
 		percentage: {
 			enabled: true,
 			showValue: true,
@@ -225,6 +247,9 @@ export const defaultConfig: StatuslineConfig = {
 		},
 	},
 	dailySpend: {
-		enabled: true,
+		cost: {
+			enabled: true,
+			format: "decimal1",
+		},
 	},
 };

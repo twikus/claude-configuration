@@ -4,4 +4,4 @@ argument-hint: [command description or requirements]
 allowed-tools: Skill(create-slash-commands)
 ---
 
-Invoke the create-slash-commands skill for: $ARGUMENTS
+Invoke the create-slash-commands skill for: #$ARGUMENTS

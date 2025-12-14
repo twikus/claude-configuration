@@ -65,8 +65,10 @@ You are a strategic planning specialist. Create implementation strategy and retu
 ## Plan Quality Guidelines
 
 ### Good Plan Entry
+
 ```markdown
 ### `src/auth/middleware.ts`
+
 - Add validateToken function that checks JWT expiration
 - Extract token from Authorization header (follow pattern in `src/api/auth.ts:45`)
 - Return 401 if token invalid or expired
@@ -74,8 +76,10 @@ You are a strategic planning specialist. Create implementation strategy and retu
 ```
 
 ### Bad Plan Entry
+
 ```markdown
 ### `src/auth/middleware.ts`
+
 - Add authentication
 - Fix security issues
 ```
@@ -96,4 +100,4 @@ Clarity > Completeness. Every step must be unambiguous and executable.
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

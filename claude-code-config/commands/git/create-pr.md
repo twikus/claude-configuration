@@ -56,4 +56,4 @@ Clarity > Completeness. Keep PRs scannable and actionable.
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

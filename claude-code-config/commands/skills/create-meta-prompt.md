@@ -4,4 +4,4 @@ argument-hint: [task description]
 allowed-tools: Skill(create-meta-prompts)
 ---
 
-Invoke the create-meta-prompts skill for: $ARGUMENTS
+Invoke the create-meta-prompts skill for: #$ARGUMENTS

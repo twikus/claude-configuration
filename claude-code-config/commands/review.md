@@ -103,4 +103,4 @@ Security > Correctness > Quality > Speed. Never compromise on security.
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

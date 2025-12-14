@@ -9,6 +9,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: Yes
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -25,6 +26,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Output schema** (to control execution):
+
 ```json
 {
   "decision": "approve" | "block",
@@ -38,6 +40,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Use cases**:
+
 - Validate commands before execution
 - Block dangerous operations
 - Modify tool inputs
@@ -45,6 +48,7 @@ Complete reference for all Claude Code hook events.
 - Ask user for confirmation
 
 **Example**: Block force pushes to main
+
 ```json
 {
   "hooks": {
@@ -54,7 +58,7 @@ Complete reference for all Claude Code hook events.
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Check if this git command is safe: $ARGUMENTS\n\nBlock if: force push to main/master\n\nReturn: {\"decision\": \"approve\" or \"block\", \"reason\": \"explanation\"}"
+            "prompt": "Check if this git command is safe: #$ARGUMENTS\n\nBlock if: force push to main/master\n\nReturn: {\"decision\": \"approve\" or \"block\", \"reason\": \"explanation\"}"
           }
         ]
       }
@@ -72,6 +76,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: No (tool already executed)
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -89,6 +94,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Output schema**:
+
 ```json
 {
   "systemMessage": "Optional message to display",
@@ -97,6 +103,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Use cases**:
+
 - Auto-format code after Write/Edit
 - Run tests after code changes
 - Update documentation
@@ -104,6 +111,7 @@ Complete reference for all Claude Code hook events.
 - Send notifications
 
 **Example**: Auto-format after edits
+
 ```json
 {
   "hooks": {
@@ -132,6 +140,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: Yes
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -144,6 +153,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Output schema**:
+
 ```json
 {
   "decision": "approve" | "block",
@@ -153,6 +163,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Use cases**:
+
 - Validate prompt format
 - Block inappropriate requests
 - Preprocess user input
@@ -160,6 +171,7 @@ Complete reference for all Claude Code hook events.
 - Enforce prompt templates
 
 **Example**: Require issue numbers in prompts
+
 ```json
 {
   "hooks": {
@@ -168,7 +180,7 @@ Complete reference for all Claude Code hook events.
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Check if prompt mentions an issue number (e.g., #123 or PROJ-456): $ARGUMENTS\n\nIf no issue number: {\"decision\": \"block\", \"reason\": \"Please include issue number\"}\nOtherwise: {\"decision\": \"approve\", \"reason\": \"ok\"}"
+            "prompt": "Check if prompt mentions an issue number (e.g., #123 or PROJ-456): #$ARGUMENTS\n\nIf no issue number: {\"decision\": \"block\", \"reason\": \"Please include issue number\"}\nOtherwise: {\"decision\": \"approve\", \"reason\": \"ok\"}"
           }
         ]
       }
@@ -186,6 +198,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: Yes
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -198,6 +211,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Output schema**:
+
 ```json
 {
   "decision": "block" | undefined,
@@ -208,6 +222,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Use cases**:
+
 - Verify all tasks completed
 - Check for errors that need fixing
 - Ensure tests pass before stopping
@@ -215,6 +230,7 @@ Complete reference for all Claude Code hook events.
 - Custom completion criteria
 
 **Example**: Verify tests pass before stopping
+
 ```json
 {
   "hooks": {
@@ -243,6 +259,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: Yes
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -257,12 +274,14 @@ Complete reference for all Claude Code hook events.
 **Output schema**: Same as Stop
 
 **Use cases**:
+
 - Verify subagent completed its task
 - Check for errors in subagent output
 - Validate subagent deliverables
 - Ensure quality before accepting results
 
 **Example**: Check if code-reviewer provided feedback
+
 ```json
 {
   "hooks": {
@@ -271,7 +290,7 @@ Complete reference for all Claude Code hook events.
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Review the subagent transcript: $ARGUMENTS\n\nDid the code-reviewer provide:\n1. Specific issues found\n2. Severity ratings\n3. Remediation steps\n\nIf missing: {\"decision\": \"block\", \"reason\": \"Incomplete review\"}\nOtherwise: {\"decision\": \"approve\", \"reason\": \"Complete\"}"
+            "prompt": "Review the subagent transcript: #$ARGUMENTS\n\nDid the code-reviewer provide:\n1. Specific issues found\n2. Severity ratings\n3. Remediation steps\n\nIf missing: {\"decision\": \"block\", \"reason\": \"Incomplete review\"}\nOtherwise: {\"decision\": \"approve\", \"reason\": \"Complete\"}"
           }
         ]
       }
@@ -289,6 +308,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: No
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -301,6 +321,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Output schema**:
+
 ```json
 {
   "hookSpecificOutput": {
@@ -311,6 +332,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Use cases**:
+
 - Load project context
 - Inject sprint information
 - Set environment variables
@@ -318,6 +340,7 @@ Complete reference for all Claude Code hook events.
 - Display welcome messages
 
 **Example**: Load current sprint context
+
 ```json
 {
   "hooks": {
@@ -344,6 +367,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: No (cannot prevent session end)
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -358,6 +382,7 @@ Complete reference for all Claude Code hook events.
 **Output schema**: None (hook output ignored)
 
 **Use cases**:
+
 - Save session state
 - Cleanup temporary files
 - Update logs
@@ -365,6 +390,7 @@ Complete reference for all Claude Code hook events.
 - Archive transcripts
 
 **Example**: Archive session transcript
+
 ```json
 {
   "hooks": {
@@ -391,6 +417,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: Yes
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -404,6 +431,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Output schema**:
+
 ```json
 {
   "decision": "approve" | "block",
@@ -412,6 +440,7 @@ Complete reference for all Claude Code hook events.
 ```
 
 **Use cases**:
+
 - Validate state before compaction
 - Save important context
 - Custom compaction logic
@@ -426,6 +455,7 @@ Complete reference for all Claude Code hook events.
 **Can block**: No
 
 **Input schema**:
+
 ```json
 {
   "session_id": "abc123",
@@ -439,12 +469,14 @@ Complete reference for all Claude Code hook events.
 **Output schema**: None
 
 **Use cases**:
+
 - Desktop notifications
 - Sound alerts
 - Status bar updates
 - External notifications (Slack, etc.)
 
 **Example**: macOS notification
+
 ```json
 {
   "hooks": {

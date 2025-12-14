@@ -5,6 +5,7 @@ Official documentation on restricting tool access in slash commands.
 ## Why Restrict Tools
 
 Tool restrictions provide:
+
 - **Security**: Prevent accidental destructive operations
 - **Focus**: Limit scope for specialized commands
 - **Safety**: Ensure commands only perform intended operations
@@ -53,11 +54,13 @@ allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
 ```
 
 **Allows**:
+
 - `git add <anything>`
 - `git status <anything>`
 - `git commit <anything>`
 
 **Prevents**:
+
 - `rm -rf`
 - `curl <url>`
 - Any non-git bash commands
@@ -72,12 +75,14 @@ allowed-tools: Bash(npm test:*), Bash(npm run lint:*)
 ```
 
 **Allows**:
+
 - `npm test`
 - `npm test -- --watch`
 - `npm run lint`
 - `npm run lint:fix`
 
 **Prevents**:
+
 - `npm install malicious-package`
 - `npm run deploy`
 - Other npm commands
@@ -122,8 +127,7 @@ Create a commit for these changes.
 description: Analyze codebase for pattern
 allowed-tools: [Read, Grep, Glob]
 ---
-
-Search codebase for: $ARGUMENTS
+Search codebase for: #$ARGUMENTS
 ```
 
 **Security benefit**: Cannot write files or execute code
@@ -137,7 +141,6 @@ Search codebase for: $ARGUMENTS
 description: Analyze problem from first principles
 allowed-tools: SequentialThinking
 ---
-
 Analyze the current problem from first principles.
 ```
 
@@ -152,8 +155,7 @@ Analyze the current problem from first principles.
 description: Update documentation
 allowed-tools: [Read, Edit(*.md)]
 ---
-
-Update documentation in @ $ARGUMENTS
+Update documentation in @ #$ARGUMENTS
 ```
 
 **Note**: File pattern restrictions may not be supported in all versions.
@@ -183,6 +185,7 @@ Based on the above changes, create a single git commit.
 ```
 
 **Allowed bash commands**:
+
 - `git add .`
 - `git add file.js`
 - `git status`
@@ -191,6 +194,7 @@ Based on the above changes, create a single git commit.
 - `git commit --amend`
 
 **Blocked commands**:
+
 - `rm file.js`
 - `curl https://malicious.com`
 - `npm install`
@@ -209,6 +213,7 @@ Review this code for security vulnerabilities:
 **No allowed-tools field** = All tools available
 
 Claude can:
+
 - Read files
 - Write files
 - Execute bash commands
@@ -221,18 +226,21 @@ Claude can:
 ### ✅ Restrict when:
 
 1. **Security-sensitive operations**
+
    ```yaml
    # Git operations only
    allowed-tools: Bash(git add:*), Bash(git status:*)
    ```
 
 2. **Focused tasks**
+
    ```yaml
    # Deep thinking only
    allowed-tools: SequentialThinking
    ```
 
 3. **Read-only analysis**
+
    ```yaml
    # No modifications
    allowed-tools: [Read, Grep, Glob]
@@ -284,6 +292,7 @@ allowed-tools: [Read, Grep, Bash(git status:*)]
 ### 3. Test Restrictions
 
 Create command and verify:
+
 - Allowed operations work
 - Blocked operations are prevented
 - Error messages are clear
@@ -300,6 +309,7 @@ allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
 ## Tool Types
 
 ### File Operations
+
 - `Read` - Read files
 - `Write` - Write new files
 - `Edit` - Modify existing files
@@ -307,10 +317,12 @@ allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
 - `Glob` - Find files by pattern
 
 ### Execution
+
 - `Bash(pattern:*)` - Execute bash commands matching pattern
 - `SequentialThinking` - Reasoning tool
 
 ### Other
+
 - `Task` - Invoke subagents
 - `WebSearch` - Search the web
 - `WebFetch` - Fetch web pages
@@ -364,6 +376,7 @@ allowed-tools: Bash(npm run deploy:staging), Bash(git push origin:staging)
 4. Check error message
 
 Example test:
+
 ```markdown
 ---
 description: Test restrictions

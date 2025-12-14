@@ -5,6 +5,7 @@ Real-world hook configurations ready to use.
 ## Desktop Notifications
 
 ### macOS notification when input needed
+
 ```json
 {
   "hooks": {
@@ -23,6 +24,7 @@ Real-world hook configurations ready to use.
 ```
 
 ### Linux notification (notify-send)
+
 ```json
 {
   "hooks": {
@@ -41,6 +43,7 @@ Real-world hook configurations ready to use.
 ```
 
 ### Play sound on notification
+
 ```json
 {
   "hooks": {
@@ -63,6 +66,7 @@ Real-world hook configurations ready to use.
 ## Logging
 
 ### Log all bash commands
+
 ```json
 {
   "hooks": {
@@ -82,6 +86,7 @@ Real-world hook configurations ready to use.
 ```
 
 ### Log file operations
+
 ```json
 {
   "hooks": {
@@ -101,6 +106,7 @@ Real-world hook configurations ready to use.
 ```
 
 ### Audit trail for MCP operations
+
 ```json
 {
   "hooks": {
@@ -124,6 +130,7 @@ Real-world hook configurations ready to use.
 ## Code Quality
 
 ### Auto-format after edits
+
 ```json
 {
   "hooks": {
@@ -144,6 +151,7 @@ Real-world hook configurations ready to use.
 ```
 
 ### Run linter after code changes
+
 ```json
 {
   "hooks": {
@@ -163,6 +171,7 @@ Real-world hook configurations ready to use.
 ```
 
 ### Run tests before stopping
+
 ```json
 {
   "hooks": {
@@ -181,6 +190,7 @@ Real-world hook configurations ready to use.
 ```
 
 `check-tests.sh`:
+
 ```bash
 #!/bin/bash
 cd "$cwd" || exit 1
@@ -200,6 +210,7 @@ fi
 ## Safety and Validation
 
 ### Block destructive commands
+
 ```json
 {
   "hooks": {
@@ -219,6 +230,7 @@ fi
 ```
 
 `check-command-safety.sh`:
+
 ```bash
 #!/bin/bash
 input=$(cat)
@@ -243,6 +255,7 @@ echo '{"decision": "approve", "reason": "Command is safe"}'
 ```
 
 ### Validate commit messages
+
 ```json
 {
   "hooks": {
@@ -252,7 +265,7 @@ echo '{"decision": "approve", "reason": "Command is safe"}'
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Check if this is a git commit command: $ARGUMENTS\n\nIf it's a git commit, validate the message follows conventional commits format (feat|fix|docs|refactor|test|chore): description\n\nIf invalid format: {\"decision\": \"block\", \"reason\": \"Commit message must follow conventional commits\"}\nIf valid or not a commit: {\"decision\": \"approve\", \"reason\": \"ok\"}"
+            "prompt": "Check if this is a git commit command: #$ARGUMENTS\n\nIf it's a git commit, validate the message follows conventional commits format (feat|fix|docs|refactor|test|chore): description\n\nIf invalid format: {\"decision\": \"block\", \"reason\": \"Commit message must follow conventional commits\"}\nIf valid or not a commit: {\"decision\": \"approve\", \"reason\": \"ok\"}"
           }
         ]
       }
@@ -262,6 +275,7 @@ echo '{"decision": "approve", "reason": "Command is safe"}'
 ```
 
 ### Block writes to critical files
+
 ```json
 {
   "hooks": {
@@ -281,6 +295,7 @@ echo '{"decision": "approve", "reason": "Command is safe"}'
 ```
 
 `check-protected-files.sh`:
+
 ```bash
 #!/bin/bash
 input=$(cat)
@@ -308,6 +323,7 @@ echo '{"decision": "approve", "reason": "File is not protected"}'
 ## Context Injection
 
 ### Load sprint context at session start
+
 ```json
 {
   "hooks": {
@@ -326,6 +342,7 @@ echo '{"decision": "approve", "reason": "File is not protected"}'
 ```
 
 `load-sprint-context.sh`:
+
 ```bash
 #!/bin/bash
 
@@ -344,6 +361,7 @@ jq -n \
 ```
 
 ### Load git branch context
+
 ```json
 {
   "hooks": {
@@ -362,6 +380,7 @@ jq -n \
 ```
 
 ### Load environment info
+
 ```json
 {
   "hooks": {
@@ -384,6 +403,7 @@ jq -n \
 ## Workflow Automation
 
 ### Auto-commit after major changes
+
 ```json
 {
   "hooks": {
@@ -403,6 +423,7 @@ jq -n \
 ```
 
 `auto-commit.sh`:
+
 ```bash
 #!/bin/bash
 cd "$cwd" || exit 1
@@ -416,6 +437,7 @@ fi
 ```
 
 ### Update documentation after code changes
+
 ```json
 {
   "hooks": {
@@ -436,6 +458,7 @@ fi
 ```
 
 ### Run pre-commit hooks
+
 ```json
 {
   "hooks": {
@@ -455,6 +478,7 @@ fi
 ```
 
 `check-pre-commit.sh`:
+
 ```bash
 #!/bin/bash
 input=$(cat)
@@ -478,6 +502,7 @@ echo '{"decision": "approve", "reason": "ok"}'
 ## Session Management
 
 ### Archive transcript on session end
+
 ```json
 {
   "hooks": {
@@ -496,6 +521,7 @@ echo '{"decision": "approve", "reason": "ok"}'
 ```
 
 `archive-session.sh`:
+
 ```bash
 #!/bin/bash
 input=$(cat)
@@ -514,6 +540,7 @@ echo "Session archived to $archive_dir"
 ```
 
 ### Save session stats
+
 ```json
 {
   "hooks": {
@@ -536,6 +563,7 @@ echo "Session archived to $archive_dir"
 ## Advanced Patterns
 
 ### Intelligent stop logic
+
 ```json
 {
   "hooks": {
@@ -544,7 +572,7 @@ echo "Session archived to $archive_dir"
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Review the conversation: $ARGUMENTS\n\nCheck if:\n1. All user-requested tasks are complete\n2. Tests are passing (if code changes made)\n3. No errors that need fixing\n4. Documentation updated (if applicable)\n\nIf incomplete: {\"decision\": \"block\", \"reason\": \"specific issue\", \"systemMessage\": \"what needs to be done\"}\n\nIf complete: {\"decision\": \"approve\", \"reason\": \"all tasks done\"}\n\nIMPORTANT: If stop_hook_active is true, return {\"decision\": undefined} to avoid infinite loop",
+            "prompt": "Review the conversation: #$ARGUMENTS\n\nCheck if:\n1. All user-requested tasks are complete\n2. Tests are passing (if code changes made)\n3. No errors that need fixing\n4. Documentation updated (if applicable)\n\nIf incomplete: {\"decision\": \"block\", \"reason\": \"specific issue\", \"systemMessage\": \"what needs to be done\"}\n\nIf complete: {\"decision\": \"approve\", \"reason\": \"all tasks done\"}\n\nIMPORTANT: If stop_hook_active is true, return {\"decision\": undefined} to avoid infinite loop",
             "timeout": 30000
           }
         ]
@@ -555,6 +583,7 @@ echo "Session archived to $archive_dir"
 ```
 
 ### Chain multiple hooks
+
 ```json
 {
   "hooks": {
@@ -572,7 +601,7 @@ echo "Session archived to $archive_dir"
           },
           {
             "type": "prompt",
-            "prompt": "Final validation: $ARGUMENTS"
+            "prompt": "Final validation: #$ARGUMENTS"
           }
         ]
       }
@@ -584,6 +613,7 @@ echo "Session archived to $archive_dir"
 Hooks execute in order. First block stops the chain.
 
 ### Conditional execution based on file type
+
 ```json
 {
   "hooks": {
@@ -603,6 +633,7 @@ Hooks execute in order. First block stops the chain.
 ```
 
 `format-by-type.sh`:
+
 ```bash
 #!/bin/bash
 input=$(cat)

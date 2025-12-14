@@ -52,25 +52,32 @@ You are an analysis specialist. Your mission is to gather ALL relevant context b
 5. **SAVE ANALYSIS**: Write to `analyze.md`
    - Save to `.claude/tasks/nn-task-name/analyze.md`
    - **Structure**:
+
      ```markdown
      # Task: [Description]
 
      ## Codebase Context
+
      [Findings from codebase exploration]
 
      ## Documentation Insights
+
      [Key information from docs]
 
      ## Research Findings
+
      [Web research results]
 
      ## Key Files
+
      - `path/to/file.ts:line` - Purpose
 
      ## Patterns to Follow
+
      [Existing conventions]
 
      ## Dependencies
+
      [Prerequisites and related systems]
      ```
 
@@ -94,4 +101,4 @@ Context depth > Speed. Missing context causes failed implementations.
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

@@ -10,7 +10,7 @@
 		"current_dir": "/Users/melvynx/.claude",
 		"project_dir": "/Users/melvynx/.claude"
 	},
-	"version": "2.0.31",
+	"version": "2.0.68",
 	"output_style": {
 		"name": "default"
 	},
@@ -20,6 +20,11 @@
 		"total_api_duration_ms": 252694,
 		"total_lines_added": 185,
 		"total_lines_removed": 75
+	},
+	"context_window": {
+		"total_input_tokens": 136349,
+		"total_output_tokens": 21612,
+		"context_window_size": 200000
 	},
 	"exceeds_200k_tokens": false
 }

@@ -2,7 +2,7 @@
 
 Official documentation examples for using arguments in slash commands.
 
-## $ARGUMENTS - All Arguments
+## #$ARGUMENTS - All Arguments
 
 **Source**: Official Claude Code documentation
 
@@ -11,6 +11,7 @@ Captures all arguments as a single concatenated string.
 ### Basic Example
 
 **Command file**: `.claude/commands/fix-issue.md`
+
 ```markdown
 ---
 description: Fix issue following coding standards
@@ -20,11 +21,13 @@ Fix issue #$ARGUMENTS following our coding standards
 ```
 
 **Usage**:
+
 ```
 /fix-issue 123 high-priority
 ```
 
 **Claude receives**:
+
 ```
 Fix issue #123 high-priority following our coding standards
 ```
@@ -32,6 +35,7 @@ Fix issue #123 high-priority following our coding standards
 ### Multi-Step Workflow Example
 
 **Command file**: `.claude/commands/fix-issue.md`
+
 ```markdown
 ---
 description: Fix issue following coding standards
@@ -47,11 +51,12 @@ Fix issue #$ARGUMENTS. Follow these steps:
 ```
 
 **Usage**:
+
 ```
 /fix-issue 456
 ```
 
-**Claude receives the full prompt** with "456" replacing $ARGUMENTS.
+**Claude receives the full prompt** with "456" replacing #$ARGUMENTS.
 
 ## Positional Arguments - $1, $2, $3
 
@@ -62,6 +67,7 @@ Access specific arguments individually.
 ### Example
 
 **Command file**: `.claude/commands/review-pr.md`
+
 ```markdown
 ---
 description: Review PR with priority and assignee
@@ -71,11 +77,13 @@ Review PR #$1 with priority $2 and assign to $3
 ```
 
 **Usage**:
+
 ```
 /review-pr 456 high alice
 ```
 
 **Claude receives**:
+
 ```
 Review PR #456 with priority high and assign to alice
 ```
@@ -89,6 +97,7 @@ Review PR #456 with priority high and assign to alice
 ### Pattern 1: File Reference with Argument
 
 **Command**:
+
 ```markdown
 ---
 description: Optimize code performance
@@ -96,10 +105,11 @@ description: Optimize code performance
 
 Analyze the performance of this code and suggest three specific optimizations:
 
-@ $ARGUMENTS
+@ #$ARGUMENTS
 ```
 
 **Usage**:
+
 ```
 /optimize src/utils/helpers.js
 ```
@@ -109,6 +119,7 @@ References the file specified in the argument.
 ### Pattern 2: Issue Tracking
 
 **Command**:
+
 ```markdown
 ---
 description: Find and fix issue
@@ -117,6 +128,7 @@ description: Find and fix issue
 Find and fix issue #$ARGUMENTS.
 
 Follow these steps:
+
 1. Understand the issue described in the ticket
 2. Locate the relevant code in our codebase
 3. Implement a solution that addresses the root cause
@@ -125,6 +137,7 @@ Follow these steps:
 ```
 
 **Usage**:
+
 ```
 /fix-issue 789
 ```
@@ -132,6 +145,7 @@ Follow these steps:
 ### Pattern 3: Code Review with Context
 
 **Command**:
+
 ```markdown
 ---
 description: Review PR with context
@@ -140,11 +154,13 @@ description: Review PR with context
 Review PR #$1 with priority $2 and assign to $3
 
 Context from git:
+
 - Changes: ! `gh pr diff $1`
 - Status: ! `gh pr view $1 --json state`
 ```
 
 **Usage**:
+
 ```
 /review-pr 123 critical bob
 ```
@@ -153,18 +169,20 @@ Combines positional arguments with dynamic bash execution.
 
 ## Best Practices
 
-### Use $ARGUMENTS for Simple Commands
+### Use #$ARGUMENTS for Simple Commands
 
 When you just need to pass a value through:
+
 ```markdown
 Fix issue #$ARGUMENTS
-Optimize @ $ARGUMENTS
-Summarize $ARGUMENTS
+Optimize @ #$ARGUMENTS
+Summarize #$ARGUMENTS
 ```
 
 ### Use Positional Arguments for Structure
 
 When different arguments have different meanings:
+
 ```markdown
 Review PR #$1 with priority $2 and assign to $3
 Deploy $1 to $2 environment with tag $3
@@ -173,6 +191,7 @@ Deploy $1 to $2 environment with tag $3
 ### Provide Clear Descriptions
 
 Help users understand what arguments are expected:
+
 ```yaml
 # Good
 description: Fix issue following coding standards (usage: /fix-issue <issue-number>)
@@ -187,12 +206,13 @@ argument-hint: <issue-number> [priority]
 Commands work with or without arguments:
 
 **Command**:
+
 ```markdown
 ---
 description: Analyze code for issues
 ---
 
-Analyze this code for issues: $ARGUMENTS
+Analyze this code for issues: #$ARGUMENTS
 
 If no specific file provided, analyze the current context.
 ```
@@ -212,6 +232,7 @@ description: Review changes for issue
 Issue #$ARGUMENTS
 
 Recent changes:
+
 - Status: ! `git status`
 - Diff: ! `git diff`
 

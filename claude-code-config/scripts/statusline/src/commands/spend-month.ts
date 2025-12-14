@@ -1,29 +1,32 @@
 #!/usr/bin/env bun
 
 import { table } from "table";
+import { getAllSessions, type SessionRow } from "../lib/database";
 import { formatCost, formatDuration } from "../lib/formatters";
-import {
-	calculateTotalCost,
-	calculateTotalDuration,
-	filterSessionsByDate,
-	getMonthStart,
-	loadSpendData,
-} from "../lib/spend";
+
+function getMonthStart(): Date {
+	const today = new Date();
+	return new Date(today.getFullYear(), today.getMonth(), 1);
+}
 
 async function main() {
-	const data = await loadSpendData();
+	const allSessions = getAllSessions();
 	const monthStart = getMonthStart();
-	const monthSessions = filterSessionsByDate(data.sessions, monthStart);
+	const monthStartStr = monthStart.toISOString().split("T")[0];
+
+	const monthSessions = allSessions.filter((s) => s.date >= monthStartStr);
 
 	if (monthSessions.length === 0) {
 		console.log("📊 No sessions this month");
 		return;
 	}
 
-	const totalCost = calculateTotalCost(monthSessions);
-	const totalDuration = calculateTotalDuration(monthSessions);
+	const totalCost = monthSessions.reduce((sum, s) => sum + s.total_cost, 0);
+	const totalDuration = monthSessions.reduce(
+		(sum, s) => sum + s.duration_ms,
+		0,
+	);
 
-	// Group by date
 	const sessionsByDate = monthSessions.reduce(
 		(acc, session) => {
 			if (!acc[session.date]) {
@@ -32,7 +35,7 @@ async function main() {
 			acc[session.date].push(session);
 			return acc;
 		},
-		{} as Record<string, typeof monthSessions>,
+		{} as Record<string, SessionRow[]>,
 	);
 
 	const monthName = monthStart.toLocaleString("default", { month: "long" });
@@ -41,7 +44,7 @@ async function main() {
 	console.log(`Sessions: ${monthSessions.length}`);
 	console.log(`Total Cost: $${formatCost(totalCost)}`);
 	console.log(`Total Duration: ${formatDuration(totalDuration)}`);
-	console.log(`\n📅 By Date:\n`);
+	console.log("\n📅 By Date:\n");
 
 	const sortedDates = Object.keys(sessionsByDate).sort();
 
@@ -49,8 +52,8 @@ async function main() {
 		["Date", "Cost", "Duration", "Sessions"],
 		...sortedDates.map((date) => {
 			const sessions = sessionsByDate[date];
-			const dayCost = calculateTotalCost(sessions);
-			const dayDuration = calculateTotalDuration(sessions);
+			const dayCost = sessions.reduce((sum, s) => sum + s.total_cost, 0);
+			const dayDuration = sessions.reduce((sum, s) => sum + s.duration_ms, 0);
 			return [
 				date,
 				`$${formatCost(dayCost)}`,

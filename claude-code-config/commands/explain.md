@@ -48,9 +48,11 @@ You are a code archaeologist. Your mission is to deeply understand a specific fe
 ## Explanation: [Feature/Topic]
 
 ### Objective
+
 [2-3 sentences explaining what this feature does and why it exists]
 
 ### Files to Read (in order)
+
 1. `path/to/entry-point.ts` - Where the feature starts
 2. `path/to/core-logic.ts` - Main implementation
 3. `path/to/dependencies.ts` - Supporting functionality
@@ -58,21 +60,23 @@ You are a code archaeologist. Your mission is to deeply understand a specific fe
 
 ### Architecture Diagram
 ```
+
 ┌─────────────────┐
-│   Entry Point   │ Feature starts here
+│ Entry Point │ Feature starts here
 └────────┬────────┘
-         │
-         ▼
+│
+▼
 ┌─────────────────┐
-│   Core Logic    │ Main implementation
+│ Core Logic │ Main implementation
 └────────┬────────┘
-         │
-         ├──────────┐
-         ▼          ▼
-┌──────────┐  ┌──────────┐
-│ Helper A │  │ Helper B │ Supporting functions
-└──────────┘  └──────────┘
-```
+│
+├──────────┐
+▼ ▼
+┌──────────┐ ┌──────────┐
+│ Helper A │ │ Helper B │ Supporting functions
+└──────────┘ └──────────┘
+
+````
 
 ### Key Decisions
 
@@ -83,9 +87,10 @@ You are a code archaeologist. Your mission is to deeply understand a specific fe
 **Code example**:
 ```language
 // Concrete example from codebase showing this decision
-```
+````
 
 #### Decision 2: [Another decision]
+
 **Why**: [Reasoning]
 **Alternative considered**: [What wasn't chosen and why]
 
@@ -111,23 +116,27 @@ Final Output (file:line)
 **Pattern Used**: [e.g., Factory, Repository, Observer]
 
 **Key Functions**:
+
 - `functionName()` in `file.ts:123` - What it does
 - `otherFunction()` in `file.ts:456` - Its role
 
 **Configuration**:
+
 - `CONFIG_VAR` affects [behavior]
 - Default values set in `config.ts:789`
 
 ### Complexity Points
 
 **Where it gets tricky**:
+
 1. [Complex area 1] - Why it's complex and how it's handled
 2. [Complex area 2] - Edge cases and solutions
 
 ### Summary
 
 [3-4 sentences tying everything together - the "aha!" moment explanation]
-```
+
+````
 
 ## Analysis Techniques
 
@@ -141,15 +150,17 @@ grep -r "router\." --include="*.ts"
 
 # Find React components
 glob "**/*ComponentName*.tsx"
-```
+````
 
 ### Understanding Dependencies
+
 - Read imports at top of each file
 - Trace backward from exports
 - Check for dependency injection
 - Look for factory/builder patterns
 
 ### Reading Order Priority
+
 1. Entry point (route/handler/component)
 2. Core business logic
 3. Data models/types
@@ -170,6 +181,7 @@ glob "**/*ComponentName*.tsx"
 ## Ultra Thinking Checklist
 
 Before writing output, verify you can answer:
+
 - [ ] Where does this feature start executing?
 - [ ] What's the complete file dependency chain?
 - [ ] What design patterns are used and why?
@@ -183,4 +195,4 @@ Understanding > Speed. Take time to truly comprehend before explaining.
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

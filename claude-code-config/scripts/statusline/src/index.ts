@@ -1,10 +1,11 @@
 #!/usr/bin/env bun
 
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { StatuslineConfig } from "../statusline.config";
 import { defaultConfig } from "../statusline.config";
 import { getContextData } from "./lib/context";
+import { getPeriodCost } from "./lib/database";
 import {
 	colors,
 	formatBranch,
@@ -16,11 +17,33 @@ import {
 	formatSession,
 } from "./lib/formatters";
 import { getGitStatus } from "./lib/git";
-import { getTodayCost, saveSession } from "./lib/spend";
+import { getTodayCostV2, saveSessionV2 } from "./lib/spend-v2";
 import type { HookInput } from "./lib/types";
-import { getCurrentPeriodCost, getUsageLimits } from "./lib/usage-limits";
+import { getUsageLimits } from "./lib/usage-limits";
 
 const CONFIG_FILE_PATH = join(import.meta.dir, "..", "statusline.config.json");
+const LAST_PAYLOAD_PATH = join(
+	import.meta.dir,
+	"..",
+	"data",
+	"last_payload.txt",
+);
+
+function normalizeResetsAt(resetsAt: string): string {
+	try {
+		const date = new Date(resetsAt);
+		const minutes = date.getMinutes();
+		const roundedMinutes = Math.round(minutes / 5) * 5;
+
+		date.setMinutes(roundedMinutes);
+		date.setSeconds(0);
+		date.setMilliseconds(0);
+
+		return date.toISOString();
+	} catch {
+		return resetsAt;
+	}
+}
 
 async function loadConfig(): Promise<StatuslineConfig> {
 	try {
@@ -73,10 +96,10 @@ export function renderStatusline(
 
 	const isSonnet = data.modelName.toLowerCase().includes("sonnet");
 	if (isSonnet && !config.showSonnetModel) {
-		parts.push(`${data.branch} ${sep} ${colors.lightGray(data.dirPath)}`);
+		parts.push(`${data.branch} ${sep} ${colors.gray(data.dirPath)}`);
 	} else {
 		parts.push(
-			`${data.branch} ${sep} ${colors.lightGray(data.dirPath)} ${sep} ${colors.lightGray(data.modelName)}`,
+			`${data.branch} ${sep} ${colors.gray(data.dirPath)} ${sep} ${colors.peach(data.modelName)}`,
 		);
 	}
 
@@ -94,9 +117,9 @@ export function renderStatusline(
 	if (config.limits.enabled && config.limits.percentage.enabled && fiveHour) {
 		const limitsParts: string[] = [];
 
-		if (config.limits.showCost && data.periodCost > 0) {
+		if (config.limits.cost.enabled && data.periodCost > 0) {
 			limitsParts.push(
-				`${colors.gray("$")}${colors.lightGray(formatCost(data.periodCost))}`,
+				`${colors.gray("$")}${colors.dimWhite(formatCost(data.periodCost, config.limits.cost.format))}`,
 			);
 		}
 
@@ -135,9 +158,9 @@ export function renderStatusline(
 	) {
 		const weeklyParts: string[] = [];
 
-		if (config.weeklyUsage.showCost && data.periodCost > 0) {
+		if (config.weeklyUsage.cost.enabled && data.periodCost > 0) {
 			weeklyParts.push(
-				`${colors.gray("$")}${colors.lightGray(formatCost(data.periodCost))}`,
+				`${colors.gray("$")}${colors.dimWhite(formatCost(data.periodCost, config.weeklyUsage.cost.format))}`,
 			);
 		}
 
@@ -168,9 +191,9 @@ export function renderStatusline(
 		}
 	}
 
-	if (config.dailySpend.enabled && data.todayCost > 0) {
+	if (config.dailySpend.cost.enabled && data.todayCost > 0) {
 		parts.push(
-			`${colors.gray("D:")} ${colors.gray("$")}${colors.lightGray(formatCost(data.todayCost))}`,
+			`${colors.gray("D:")} ${colors.gray("$")}${colors.dimWhite(formatCost(data.todayCost, config.dailySpend.cost.format))}`,
 		);
 	}
 
@@ -184,6 +207,10 @@ export function renderStatusline(
 async function main() {
 	try {
 		const input: HookInput = await Bun.stdin.json();
+
+		// Save last payload for debugging
+		await writeFile(LAST_PAYLOAD_PATH, JSON.stringify(input, null, 2));
+
 		const config = await loadConfig();
 
 		// Get usage limits FIRST to ensure the current period entry exists
@@ -192,28 +219,58 @@ async function main() {
 		const currentResetsAt = usageLimits.five_hour?.resets_at ?? undefined;
 
 		// Now save session with the current period context
-		// This ensures costs are attributed to the correct period
-		await saveSession(input, currentResetsAt);
+		// This ensures costs are attributed to the correct period (DELTA only!)
+		await saveSessionV2(input, currentResetsAt);
 
 		const git = await getGitStatus();
-		const contextData = await getContextData({
-			transcriptPath: input.transcript_path,
-			maxContextTokens: config.context.maxContextTokens,
-			autocompactBufferTokens: config.context.autocompactBufferTokens,
-			useUsableContextOnly: config.context.useUsableContextOnly,
-			overheadTokens: config.context.overheadTokens,
-		});
-		const periodCost = await getCurrentPeriodCost();
-		const todayCost = await getTodayCost();
+
+		let contextTokens: number;
+		let contextPercentage: number;
+
+		const usePayloadContext =
+			config.context.usePayloadContextWindow && input.context_window;
+
+		if (usePayloadContext && input.context_window) {
+			const maxTokens =
+				input.context_window.context_window_size ||
+				config.context.maxContextTokens;
+			contextTokens = input.context_window.total_input_tokens;
+			contextPercentage = Math.min(
+				100,
+				Math.round((contextTokens / maxTokens) * 100),
+			);
+		} else {
+			const contextData = await getContextData({
+				transcriptPath: input.transcript_path,
+				maxContextTokens: config.context.maxContextTokens,
+				autocompactBufferTokens: config.context.autocompactBufferTokens,
+				useUsableContextOnly: config.context.useUsableContextOnly,
+				overheadTokens: config.context.overheadTokens,
+			});
+			contextTokens = contextData.tokens;
+			contextPercentage = contextData.percentage;
+		}
+
+		// Get period cost from SQLite (tracks DELTAS, not full session costs)
+		const normalizedPeriodId = currentResetsAt
+			? normalizeResetsAt(currentResetsAt)
+			: null;
+		const periodCost = normalizedPeriodId
+			? getPeriodCost(normalizedPeriodId)
+			: 0;
+		const todayCost = getTodayCostV2();
 
 		const data: StatuslineData = {
 			branch: formatBranch(git, config.git),
 			dirPath: formatPath(input.workspace.current_dir, config.pathDisplayMode),
 			modelName: input.model.display_name,
-			sessionCost: formatCost(input.cost.total_cost_usd),
+			sessionCost: formatCost(
+				input.cost.total_cost_usd,
+				config.session.cost.format,
+			),
 			sessionDuration: formatDuration(input.cost.total_duration_ms),
-			contextTokens: contextData.tokens,
-			contextPercentage: contextData.percentage,
+			contextTokens,
+			contextPercentage,
 			usageLimits: {
 				five_hour: usageLimits.five_hour
 					? {

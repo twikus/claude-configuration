@@ -44,4 +44,4 @@ Fix accuracy > Speed > Minimal commits. Ensure CI is truly green.
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

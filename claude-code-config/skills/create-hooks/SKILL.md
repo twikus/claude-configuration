@@ -15,6 +15,7 @@ Hooks are shell commands or LLM-evaluated prompts that execute in response to Cl
 
 <quick_start>
 <workflow>
+
 1. Create hooks config file:
    - Project: `.claude/hooks.json`
    - User: `~/.claude/hooks.json`
@@ -22,12 +23,13 @@ Hooks are shell commands or LLM-evaluated prompts that execute in response to Cl
 3. Choose hook type (command or prompt)
 4. Configure matcher (which tools trigger it)
 5. Test with `claude --debug`
-</workflow>
+   </workflow>
 
 <example>
 **Log all bash commands**:
 
 `.claude/hooks.json`:
+
 ```json
 {
   "hooks": {
@@ -47,11 +49,12 @@ Hooks are shell commands or LLM-evaluated prompts that execute in response to Cl
 ```
 
 This hook:
+
 - Fires before (`PreToolUse`) every `Bash` tool use
 - Executes a `command` (not an LLM prompt)
 - Logs command + description to a file
-</example>
-</quick_start>
+  </example>
+  </quick_start>
 
 <hook_types>
 | Event | When it fires | Can block? |
@@ -74,6 +77,7 @@ Blocking hooks can return `"decision": "block"` to prevent the action. See [refe
 **Type**: Executes a shell command
 
 **Use when**:
+
 - Simple validation (check file exists)
 - Logging (append to file)
 - External tools (formatters, linters)
@@ -89,26 +93,29 @@ Blocking hooks can return `"decision": "block"` to prevent the action. See [refe
   "timeout": 30000
 }
 ```
+
 </hook_type>
 
 <hook_type name="prompt">
 **Type**: LLM evaluates a prompt
 
 **Use when**:
+
 - Complex decision logic
 - Natural language validation
 - Context-aware checks
 - Reasoning required
 
-**Input**: Prompt with `$ARGUMENTS` placeholder
+**Input**: Prompt with `#$ARGUMENTS` placeholder
 **Output**: JSON with `decision` and `reason`
 
 ```json
 {
   "type": "prompt",
-  "prompt": "Evaluate if this command is safe: $ARGUMENTS\n\nReturn JSON: {\"decision\": \"approve\" or \"block\", \"reason\": \"explanation\"}"
+  "prompt": "Evaluate if this command is safe: #$ARGUMENTS\n\nReturn JSON: {\"decision\": \"approve\" or \"block\", \"reason\": \"explanation\"}"
 }
 ```
+
 </hook_type>
 </hook_anatomy>
 
@@ -117,14 +124,15 @@ Matchers filter which tools trigger the hook:
 
 ```json
 {
-  "matcher": "Bash",           // Exact match
-  "matcher": "Write|Edit",     // Multiple tools (regex OR)
-  "matcher": "mcp__.*",        // All MCP tools
+  "matcher": "Bash", // Exact match
+  "matcher": "Write|Edit", // Multiple tools (regex OR)
+  "matcher": "mcp__.*", // All MCP tools
   "matcher": "mcp__memory__.*" // Specific MCP server
 }
 ```
 
 **No matcher**: Hook fires for all tools
+
 ```json
 {
   "hooks": {
@@ -136,12 +144,14 @@ Matchers filter which tools trigger the hook:
   }
 }
 ```
+
 </matchers>
 
 <input_output>
 Hooks receive JSON via stdin with session info, current directory, and event-specific data. Blocking hooks can return JSON to approve/block actions or modify inputs.
 
 **Example output** (blocking hooks):
+
 ```json
 {
   "decision": "approve" | "block",
@@ -155,22 +165,25 @@ See [references/input-output-schemas.md](references/input-output-schemas.md) for
 <environment_variables>
 Available in hook commands:
 
-| Variable | Value |
-|----------|-------|
-| `$CLAUDE_PROJECT_DIR` | Project root directory |
+| Variable                | Value                                |
+| ----------------------- | ------------------------------------ |
+| `$CLAUDE_PROJECT_DIR`   | Project root directory               |
 | `${CLAUDE_PLUGIN_ROOT}` | Plugin directory (plugin hooks only) |
-| `$ARGUMENTS` | Hook input JSON (prompt hooks only) |
+| `#$ARGUMENTS`           | Hook input JSON (prompt hooks only)  |
 
 **Example**:
+
 ```json
 {
   "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/validate.sh"
 }
 ```
+
 </environment_variables>
 
 <common_patterns>
 **Desktop notification when input needed**:
+
 ```json
 {
   "hooks": {
@@ -189,6 +202,7 @@ Available in hook commands:
 ```
 
 **Block destructive git commands**:
+
 ```json
 {
   "hooks": {
@@ -198,7 +212,7 @@ Available in hook commands:
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Check if this command is destructive: $ARGUMENTS\n\nBlock if it contains: 'git push --force', 'rm -rf', 'git reset --hard'\n\nReturn: {\"decision\": \"approve\" or \"block\", \"reason\": \"explanation\"}"
+            "prompt": "Check if this command is destructive: #$ARGUMENTS\n\nBlock if it contains: 'git push --force', 'rm -rf', 'git reset --hard'\n\nReturn: {\"decision\": \"approve\" or \"block\", \"reason\": \"explanation\"}"
           }
         ]
       }
@@ -208,6 +222,7 @@ Available in hook commands:
 ```
 
 **Auto-format code after edits**:
+
 ```json
 {
   "hooks": {
@@ -228,6 +243,7 @@ Available in hook commands:
 ```
 
 **Add context at session start**:
+
 ```json
 {
   "hooks": {
@@ -244,6 +260,7 @@ Available in hook commands:
   }
 }
 ```
+
 </common_patterns>
 
 <debugging>
@@ -257,30 +274,35 @@ This shows which hooks matched, command execution, and output. See [references/t
 
 <reference_guides>
 **Hook types and events**: [references/hook-types.md](references/hook-types.md)
+
 - Complete list of hook events
 - When each event fires
 - Input/output schemas for each
 - Blocking vs non-blocking hooks
 
 **Command vs Prompt hooks**: [references/command-vs-prompt.md](references/command-vs-prompt.md)
+
 - Decision tree: which type to use
 - Command hook patterns and examples
 - Prompt hook patterns and examples
 - Performance considerations
 
 **Matchers and patterns**: [references/matchers.md](references/matchers.md)
+
 - Regex patterns for tool matching
 - MCP tool matching patterns
 - Multiple tool matching
 - Debugging matcher issues
 
 **Input/Output schemas**: [references/input-output-schemas.md](references/input-output-schemas.md)
+
 - Complete schema for each hook type
 - Field descriptions and types
 - Hook-specific output fields
 - Example JSON for each event
 
 **Working examples**: [references/examples.md](references/examples.md)
+
 - Desktop notifications
 - Command validation
 - Auto-formatting workflows
@@ -289,13 +311,14 @@ This shows which hooks matched, command execution, and output. See [references/t
 - Session context injection
 
 **Troubleshooting**: [references/troubleshooting.md](references/troubleshooting.md)
+
 - Hooks not triggering
 - Command execution failures
 - Prompt hook issues
 - Permission problems
 - Timeout handling
 - Debug workflow
-</reference_guides>
+  </reference_guides>
 
 <security_checklist>
 **Critical safety requirements**:
@@ -308,6 +331,7 @@ This shows which hooks matched, command execution, and output. See [references/t
 - **Selective blocking**: Be conservative with blocking hooks to avoid workflow disruption
 
 **Testing protocol**:
+
 ```bash
 # Always test with debug flag first
 claude --debug
@@ -315,6 +339,7 @@ claude --debug
 # Validate JSON config
 jq . .claude/hooks.json
 ```
+
 </security_checklist>
 
 <success_criteria>
@@ -329,4 +354,4 @@ A working hook configuration has:
 - No infinite loops in Stop hooks (checks `stop_hook_active` flag)
 - Reasonable timeout set (especially for external commands)
 - Executable permissions on script files if using file paths
-</success_criteria>
+  </success_criteria>

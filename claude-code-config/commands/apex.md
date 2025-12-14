@@ -2,75 +2,108 @@
 description: Systematic implementation using APEX methodology (Analyze-Plan-Execute-eXamine)
 ---
 
-You are a systematic implementation specialist. Follow the APEX workflow rigorously for every task.
+<objective>
+Implement #$ARGUMENTS using the systematic APEX workflow to ensure thorough analysis, detailed planning, clean execution, and proper verification.
 
-**You need to always ULTRA THINK.**
+This methodology helps developers deliver high-quality features by breaking complex tasks into four distinct phases: Analyze (gather context), Plan (create strategy), Execute (implement), and eXamine (verify).
+</objective>
 
-**CRITICAL: When starting each phase, output a clear heading like "# 1. ANALYZE", "# 2. PLAN", "# 3. EXECUTE", "# 4. EXAMINE" so the user can see which phase you're in.**
+<context>
+Current git status: !`git status`
+Current branch: !`git branch --show-current`
+</context>
 
-## 1. ANALYZE
+<process>
 
-**Goal**: Find all relevant files for implementation
+## Phase 1: ANALYZE
 
-- Launch **parallel subagents** to search codebase (`explore-codebase` agent is good for that)
-- Launch **parallel subagents** to gather online information (`websearch` agent is good for that)
-- Launch **parallel subagents** to search inside documentation (`explore-docs` agent is good for that)
-- Find files to use as **examples** or **edit targets**
-- Return relevant file paths and useful context
-- **CRITICAL**: Think deeply before starting agents - know exactly what to search for
-- Use multiple agents to search across different areas
+**Goal**: Find all relevant files and context for implementation
 
-## 2. PLAN
+1. **Think deeply** before launching agents - know exactly what to search for
+2. Launch **parallel subagents** to gather context:
+   - `explore-codebase` agent to search codebase for relevant patterns
+   - `websearch` agent to gather online information if needed
+   - `explore-docs` agent to search documentation for API usage
+3. Find files to use as **examples** or **edit targets**
+4. Identify relevant file paths and useful context
+
+**Output clear heading**: `# 1. ANALYZE`
+
+## Phase 2: PLAN
 
 **Goal**: Create detailed implementation strategy
 
-- Write comprehensive implementation plan including:
-  - Core functionality changes
-  - Test coverage requirements
-  - Lookbook components if needed
-  - Documentation updates
-- **STOP and ASK** user if anything remains unclear
+1. Write comprehensive implementation plan including:
+   - Core functionality changes
+   - Test coverage requirements
+   - Lookbook components if needed
+   - Documentation updates
+2. **STOP and ASK** user if anything remains unclear using `AskUserQuestion` tool
+3. Get user approval before proceeding to execution
 
-## 3. EXECUTE
+**Output clear heading**: `# 2. PLAN`
+
+## Phase 3: EXECUTE
 
 **Goal**: Implement following existing patterns
 
-- Follow existing codebase style:
-  - Prefer clear variable/method names over comments
-  - Match existing patterns and conventions
-- **CRITICAL RULES**:
-  - Stay **STRICTLY IN SCOPE** - change only what's needed
-  - NO comments unless absolutely necessary
-  - Run autoformatting scripts when done
-  - Fix reasonable linter warnings
+1. Follow existing codebase style:
+   - Prefer clear variable/method names over comments
+   - Match existing patterns and conventions
+2. **CRITICAL RULES**:
+   - Stay **STRICTLY IN SCOPE** - change only what's needed
+   - NO comments unless absolutely necessary
+   - Run autoformatting scripts when done
+   - Fix reasonable linter warnings
+3. Use parallel execution where possible for speed
 
-## 4. EXAMINE
+**Output clear heading**: `# 3. EXECUTE`
 
-**Goal**: Verify your changes work correctly
+## Phase 4: EXAMINE
 
-- **First check package.json** for available scripts:
-  - Look for: `lint`, `typecheck`, `test`, `format`, `build`
-  - Run relevant commands like `npm run lint`, `npm run typecheck`
-- Run **ONLY tests related to your feature** using subagents
-- **STAY IN SCOPE**: Don't run entire test suite, just tests that match your changes
-- For major UX changes:
-  - Create test checklist for affected features only
-  - Use browser agent to verify specific functionality
-- **CRITICAL**: Code must pass linting and type checks
-- If tests fail: **return to PLAN phase** and rethink approach
+**Goal**: Verify changes work correctly
 
-## Execution Rules
+1. **Check package.json** for available scripts (lint, typecheck, test, format, build)
+2. Run relevant validation commands:
+   - `npm run lint` - Fix any linting issues
+   - `npm run typecheck` - Ensure type safety
+   - `npm run format` - Format code consistently
+3. Run **ONLY tests related to your feature** (stay in scope)
+4. For major UX changes:
+   - Create test checklist for affected features only
+   - Use browser agent to verify specific functionality if needed
+5. **If tests fail**: Return to PLAN phase and rethink approach
 
-- Use parallel execution for speed
+**Output clear heading**: `# 4. EXAMINE`
+
+</process>
+
+<verification>
+Before completing each phase:
+- **Analyze**: Confirmed all relevant files and patterns found
+- **Plan**: User has approved the implementation strategy
+- **Execute**: Code follows existing patterns, stays in scope, no unnecessary comments
+- **Examine**: All validation scripts pass, tests related to changes pass
+</verification>
+
+<success_criteria>
+
+- All four phases completed in order with clear headings
+- Deep thinking applied at each phase transition
+- Implementation stays strictly within task boundaries
+- Code passes linting, type checking, and relevant tests
+- Follows repository standards for code style and patterns
+- No scope creep - only changed what was needed
+- Correctness prioritized over speed
+  </success_criteria>
+
+<execution_rules>
+**Critical principles**:
+
+- **Always ULTRA THINK** before acting
+- Use parallel execution for speed where possible
 - Think deeply at each phase transition
 - Never exceed task boundaries
-- Follow repo standards for tests/docs/components
 - Test ONLY what you changed
-
-## Priority
-
-Correctness > Completeness > Speed. Each phase must be thorough before proceeding.
-
----
-
-User: $ARGUMENTS
+- Priority: Correctness > Completeness > Speed
+  </execution_rules>

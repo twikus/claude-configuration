@@ -18,12 +18,10 @@ You are a git workflow specialist. Create commits efficiently.
 ## Workflow
 
 1. **STAGE**: Prepare changes
-
    - `git add -A` or selective staging
    - `git status` to verify
 
 2. **COMMIT**: Create commit
-
    - Generate message following convention
    - `git commit -m "type: description"`
 
@@ -40,7 +38,8 @@ You are a git workflow specialist. Create commits efficiently.
 ## Priority
 
 Speed > Completeness. Create working commits quickly.
-```
+
+````
 </example>
 
 <example name="ci_monitoring">
@@ -80,7 +79,8 @@ You are a CI/CD specialist. Monitor and fix build failures autonomously.
 ## Priority
 
 Reliability > Speed. Fix root causes.
-```
+````
+
 </example>
 
 <example name="epct_task">
@@ -96,20 +96,17 @@ You are a task execution specialist. Complete GitHub issues systematically.
 ## Workflow
 
 1. **EXPLORE**: Gather information
-
    - If GitHub issue: `gh issue view $1`
    - Search codebase with parallel agents
    - Find relevant files and patterns
    - **CRITICAL**: Understand full context before planning
 
 2. **PLAN**: Create strategy
-
    - Document approach in task plan
    - Post plan as comment if GitHub issue: `gh issue comment $1 --body "..."`
    - **WAIT** for user approval if complex changes
 
 3. **CODE**: Implement changes
-
    - Follow existing patterns
    - **STAY IN SCOPE**: Only what the task requires
    - Commit incrementally
@@ -128,7 +125,8 @@ You are a task execution specialist. Complete GitHub issues systematically.
 ## Priority
 
 Correctness > Speed. Complete the task properly.
-```
+
+`````
 </example>
 
 </pattern_1_numbered_workflow>
@@ -157,7 +155,7 @@ vercel inspect <deployment-url>
 
 # List all deployments
 vercel ls
-```
+`````
 
 ## Deployment
 
@@ -212,7 +210,8 @@ vercel --prod
 # 3. Inspect deployment
 vercel inspect <url>
 ```
-````
+
+`````
 </example>
 
 <example name="neon_cli">
@@ -287,7 +286,8 @@ neonctl connection-string <new-branch-id>
 # 4. Add to .env.local
 echo "DATABASE_URL=<connection-string>" >> .env.local
 ```
-````
+`````
+
 </example>
 
 </pattern_2_reference_docs>
@@ -339,7 +339,8 @@ You are a code analysis specialist. Answer questions with deep codebase investig
 - **READ actual code**: Don't rely on naming alone
 - **TRACE deeply**: Follow implementations 3+ levels down
 - **CITE sources**: Always include file:line references
-```
+
+````
 </example>
 
 <example name="security_audit">
@@ -384,7 +385,8 @@ You are a security audit specialist. Find and document vulnerabilities systemati
 - **PROVIDE context**: Show vulnerable code path
 - **ACTIONABLE fixes**: Specific code suggestions
 - **SEVERITY LEVELS**: Use CVSS or similar standard
-```
+````
+
 </example>
 
 <example name="performance_optimization">
@@ -399,9 +401,9 @@ You are a performance optimization specialist. Find and fix performance issues.
 
 ## Profiling Phase
 
-**Goal**: Identify performance bottlenecks in $ARGUMENTS
+**Goal**: Identify performance bottlenecks in #$ARGUMENTS
 
-- Review @ $ARGUMENTS for O(n²) or worse algorithms
+- Review @ #$ARGUMENTS for O(n²) or worse algorithms
 - Check for unnecessary re-renders (React)
 - Find redundant database queries
 - Identify large bundle imports
@@ -430,7 +432,8 @@ You are a performance optimization specialist. Find and fix performance issues.
 - **HOT PATHS first**: Focus on frequently executed code
 - **SPECIFIC suggestions**: Include implementation code
 - **TRADE-OFFS**: Note any complexity costs
-```
+
+````
 </example>
 
 </pattern_3_section_based_analysis>
@@ -455,9 +458,10 @@ You are a Swift/iOS build specialist. Fix compilation errors systematically.
 ```swift
 // Error: Cannot find type 'SomeType' in scope
 // Fix: import FrameworkName
-```
+````
 
 ### Type Mismatches
+
 ```swift
 // Error: Cannot convert value of type 'X' to expected type 'Y'
 // Fix: Use proper type conversion or update declaration
@@ -465,14 +469,12 @@ You are a Swift/iOS build specialist. Fix compilation errors systematically.
 
 ## Workflow
 
-1. **BUILD**: Run Xcode build for $ARGUMENTS target
-
+1. **BUILD**: Run Xcode build for #$ARGUMENTS target
    - `xcodebuild build -scheme $1 2>&1`
    - Parse errors from output
    - **STOP** if no errors
 
 2. **ANALYZE**: Understand each error
-
    - Read error messages carefully
    - **CRITICAL**: Check file locations and line numbers
    - Identify error categories
@@ -493,7 +495,8 @@ You are a Swift/iOS build specialist. Fix compilation errors systematically.
 - **READ context**: Understand code before changing
 - **COMMIT incrementally**: Each fix is separate commit
 - **STOP after 5 tries**: Ask for help if stuck
-```
+
+````
 </example>
 
 </hybrid_patterns>
@@ -505,28 +508,34 @@ You are a Swift/iOS build specialist. Fix compilation errors systematically.
 ---
 description: Analyze this code for performance issues
 ---
-```
+````
+
 </basic_command>
 
 <command_with_args>
+
 ```yaml
 ---
 argument-hint: <issue-number>
 description: Fix GitHub issue following coding standards
 ---
 ```
+
 </command_with_args>
 
 <command_with_tools>
+
 ```yaml
 ---
 allowed-tools: Bash(git :*), Bash(gh :*), Read, Edit
 description: Create and push PR with auto-generated description
 ---
 ```
+
 </command_with_tools>
 
 <command_with_model>
+
 ```yaml
 ---
 description: Quick commit automation
@@ -534,9 +543,11 @@ model: haiku
 allowed-tools: Bash(git :*)
 ---
 ```
+
 </command_with_model>
 
 <complex_command>
+
 ```yaml
 ---
 argument-hint: <action> <target> [options]
@@ -545,6 +556,7 @@ allowed-tools: [Read, Edit, Write, Bash(npm :*)]
 model: sonnet
 ---
 ```
+
 </complex_command>
 
 </frontmatter_examples>
@@ -572,18 +584,20 @@ This helps identify risks before they reach production.
 </process>
 
 <success_criteria>
+
 - All major vulnerability types checked
 - Findings include file:line references
 - Actionable remediation provided
-</success_criteria>
+  </success_criteria>
 ```
 
 **Benefits**:
+
 - Clear section boundaries
 - Claude-native format (trained on XML)
 - Easy to parse and validate
 - Supports nested structure
-</xml_format>
+  </xml_format>
 
 <markdown_format>
 **Use for**: Simple commands, user preference, documentation focus
@@ -613,21 +627,24 @@ This helps identify risks before they reach production.
 ```
 
 **Benefits**:
+
 - Familiar markdown syntax
 - Better for documentation
 - Easier for humans to read/edit
 - Works well for simple commands
-</markdown_format>
+  </markdown_format>
 
 <when_to_use_each>
 
 **Use XML when**:
+
 - Command is complex with multiple phases
 - Need clear section boundaries
 - Want Claude-optimized format
 - Building reusable patterns
 
 **Use Markdown when**:
+
 - Command is simple (2-3 steps)
 - User prefers markdown
 - Documentation-focused

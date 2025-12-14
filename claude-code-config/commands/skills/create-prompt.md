@@ -4,4 +4,4 @@ argument-hint: [prompt description or requirements]
 allowed-tools: Skill(create-prompt)
 ---
 
-Invoke the create-prompt skill for: $ARGUMENTS
+Invoke the create-prompt skill for: #$ARGUMENTS

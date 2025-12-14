@@ -1,95 +1,128 @@
 ---
-description: Systematic bug debugging with deep analysis and resolution
-argument-hint: <log|error|problem-description>
-allowed-tools: Bash, Read, Edit, MultiEdit, Write, Grep, Glob, Task, WebSearch, WebFetch
+description: Deep error analysis and systematic bug resolution with comprehensive reasoning
+argument-hint: <error-message-or-description>
 ---
 
-You are a systematic debugging specialist. Follow this ultra-deep analysis workflow to identify, understand, and resolve bugs.
+<objective>
+Perform deep analysis of the error "#$ARGUMENTS" to identify root cause, evaluate multiple solutions, implement the most effective fix, and verify the resolution.
 
-**You need to always ULTRA THINK.**
+This systematic debugging approach ensures errors are resolved comprehensively with maximum reasoning effort and minimal risk of introducing regressions.
+</objective>
 
-## Workflow
+<context>
+Current project state: !`git status`
+Recent changes: !`git log --oneline -5`
+Package info: @package.json
+Error context: #$ARGUMENTS
+</context>
 
-1. **ANALYZE**: Deep log/error analysis
-   - Parse the provided log/error message carefully
-   - Extract key error patterns, stack traces, and symptoms
-   - Identify error types: runtime, compile-time, logic, performance
-   - **CRITICAL**: Document exact error context and reproduction steps
+<process>
+**Phase 1: Deep Error Analysis (Reasoning-Heavy)**
+1. Parse and categorize the error (syntax, runtime, type, logic, dependency, etc.)
+2. Extract key information: error type, stack trace, affected files, line numbers
+3. Identify the immediate failure point vs root cause
+4. Search codebase for related code patterns that might contribute
+5. Check recent changes that could have introduced the issue
 
-2. **EXPLORE**: Targeted codebase investigation
-   - Launch **parallel subagents** to search for error-related code (`explore-codebase`, `explore-docs`, `websearch`)
-   - Search for similar error patterns in codebase using Grep
-   - Find all files related to the failing component/module
-   - Examine recent changes that might have introduced the bug
-   - **ULTRA THINK**: Connect error symptoms to potential root causes
+**Phase 2: Root Cause Investigation**
 
-3. **ULTRA-THINK**: Deep root cause analysis
-   - **THINK DEEPLY** about the error chain: symptoms → immediate cause → root cause
-   - Consider all possible causes:
-     - Code logic errors
-     - Configuration issues
-     - Environment problems
-     - Race conditions
-     - Memory issues
-     - Network problems
-   - **CRITICAL**: Map the complete failure path from root cause to visible symptom
-   - Validate hypotheses against the evidence
+1. Trace execution flow backwards from error point
+2. Examine all files mentioned in stack trace or error message
+3. Search for similar patterns across codebase
+4. Check dependencies, configurations, and environment factors
+5. Identify ALL potential causes (not just the first one found)
 
-4. **RESEARCH**: Solution investigation
-   - Launch **parallel subagents** for web research (`websearch`)
-   - Search for similar issues and solutions online
-   - Check documentation for affected libraries/frameworks
-   - Look for known bugs, workarounds, and best practices
-   - **THINK**: Evaluate solution approaches for this specific context
+**Phase 3: Solution Evaluation (Multiple Options)**
 
-5. **IMPLEMENT**: Systematic resolution
-   - Choose the most appropriate solution based on analysis
-   - Follow existing codebase patterns and conventions
-   - Implement minimal, targeted fixes
-   - **STAY IN SCOPE**: Fix only what's needed for this specific bug
-   - Add defensive programming where appropriate
+1. Generate 3-5 potential solutions with different approaches
+2. For each solution, evaluate:
+   - Pros: What it fixes, how thoroughly
+   - Cons: Risks, complexity, side effects
+   - Effort: Implementation difficulty
+   - Impact: Scope of changes required
+3. Rank solutions by effectiveness, safety, and maintainability
+4. Select the optimal solution with clear reasoning
 
-6. **VERIFY**: Comprehensive testing
-   - Test the specific scenario that was failing
-   - Run related tests to ensure no regressions
-   - Check edge cases around the fix
-   - **CRITICAL**: Verify the original error is completely resolved
+**Phase 4: Implementation**
 
-## Deep Analysis Techniques
+1. Implement the selected solution carefully
+2. Follow existing code patterns and conventions
+3. Add defensive checks if needed to prevent recurrence
+4. Ensure changes are minimal and focused
+5. Document any non-obvious fixes with brief comments
 
-### Log Analysis
+**Phase 5: Verification & Validation (MANDATORY)**
 
-- Extract timestamps, error codes, stack traces
-- Identify error propagation patterns
-- Look for correlation with system events
+1. Check if original error is resolved
+2. **CRITICAL**: Run `pnpm ts` - TypeScript MUST pass with 0 errors
+3. **CRITICAL**: Run `pnpm lint` - Linting MUST pass with 0 errors
+4. Fix any TypeScript/lint errors introduced by the fix
+5. Run relevant test suites if available
+6. Test related functionality to catch regressions
+7. Re-run validation commands until all pass
+8. Provide testing instructions to user if manual verification needed
 
-### Code Investigation
+**⚠️ THE FIX IS INCOMPLETE UNTIL `pnpm ts` AND `pnpm lint` BOTH PASS ⚠️**
+</process>
 
-- Trace execution path to error location
-- Check variable states and data flow
-- Examine error handling patterns
-- Review recent commits affecting the area
+<reasoning_guidelines>
 
-### Root Cause Mapping
+- Use SequentialThinking for complex error analysis
+- Consider edge cases and hidden dependencies
+- Question assumptions about what "should" work
+- Look beyond the immediate error to systemic issues
+- Think about why the error wasn't caught earlier
+- Consider how to prevent similar errors in future
+  </reasoning_guidelines>
 
-- **WHY technique**: Ask "why" 5 times minimum
-- Consider environmental factors
-- Check for timing/concurrency issues
-- Validate assumptions about data/state
+<success_criteria>
 
-## Execution Rules
+- Root cause clearly identified and explained
+- Multiple solution approaches evaluated
+- Optimal solution implemented with reasoning provided
+- **MANDATORY**: `pnpm ts` passes with 0 TypeScript errors
+- **MANDATORY**: `pnpm lint` passes with 0 linting errors
+- All validation commands executed and passing
+- Fix verified through testing or clear test instructions given
+- No regressions introduced
+- User understands what was fixed and why
 
-- **ULTRA THINK** at each phase transition
-- Use parallel agents for comprehensive investigation
-- Document findings and reasoning at each step
-- **NEVER guess** - validate all hypotheses with evidence
-- **MINIMAL CHANGES**: Fix root cause, not symptoms
-- Test thoroughly before declaring resolution complete
+**❌ The debugging session FAILS if TypeScript or linting validation fails ❌**
+</success_criteria>
 
-## Priority
+<validation>
+**CRITICAL: The fix is NOT complete until ALL validation passes.**
 
-Understanding > Speed > Completeness. Every bug must be fully understood before attempting fixes.
+After implementing ANY fix, ALWAYS run in this order:
 
----
+1. **TypeScript validation**: `pnpm ts` - Must pass with 0 errors
+2. **Linting validation**: `pnpm lint` - Must pass with 0 errors
+3. **Tests**: `pnpm test` or relevant test command if available
 
-User: $ARGUMENTS
+If TypeScript or lint errors appear:
+
+- These are NOT optional - they MUST be fixedtlets && pnpm lint both pass.\*\*
+  </validation>
+
+<verification>
+After implementing the fix:
+1. Verify the specific error no longer occurs
+2. **MANDATORY**: Run `pnpm ts` - fix all TypeScript errors
+3. **MANDATORY**: Run `pnpm lint` - fix all linting errors
+4. Run existing tests if available
+5. Check for new errors introduced by the fix
+6. Confirm related functionality still works
+7. If manual testing required, provide step-by-step instructions
+</verification>
+
+<output>
+For each debugging session, provide:
+1. **Error Analysis**: What the error means and immediate cause
+2. **Root Cause**: Underlying issue that led to the error
+3. **Solutions Considered**: Brief summary of 3-5 approaches evaluated
+4. **Selected Solution**: Which approach chosen and why
+5. **Implementation**: Files modified with brief explanation
+6. **TypeScript Validation**: Result of `pnpm ts` (MUST be ✅ passing)
+7. **Linting Validation**: Result of `pnpm lint` (MUST be ✅ passing)
+8. **Testing**: Results or instructions for verification
+</output>

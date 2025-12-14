@@ -11,6 +11,7 @@ Skills are organized prompts that get loaded on-demand. All prompting best pract
 
 <quick_start>
 <workflow>
+
 1. **Identify the reusable pattern**: What context or procedural knowledge would be useful for similar future tasks?
 2. **Create directory and SKILL.md**:
    - Directory name: Follow verb-noun convention: `create-*`, `manage-*`, `setup-*`, `generate-*` (see [references/skill-structure.md](references/skill-structure.md) for details)
@@ -20,10 +21,11 @@ Skills are organized prompts that get loaded on-demand. All prompting best pract
 3. **If skill requires API credentials**: See [references/api-security.md](references/api-security.md) for credential setup
 4. **Write concise instructions**: Assume Claude is smart. Only add context Claude doesn't have. Use pure XML structure.
 5. **Test with real usage**: Iterate based on observations.
-</workflow>
+   </workflow>
 
 <example_skill>
-```yaml
+
+````yaml
 ---
 name: process-pdfs
 description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
@@ -40,14 +42,16 @@ Extract text with pdfplumber:
 import pdfplumber
 with pdfplumber.open("file.pdf") as pdf:
     text = pdf.pages[0].extract_text()
-```
+````
+
 </quick_start>
 
 <advanced_features>
 **Form filling**: See [forms.md](forms.md)
 **API reference**: See [reference.md](reference.md)
 </advanced_features>
-```
+
+````
 </example_skill>
 </quick_start>
 
@@ -245,10 +249,44 @@ Research findings flow into step_1 analysis and inform code examples in later st
 </step_6>
 
 <step_7>
-**Test with real usage**: Observe Claude using the skill. Iterate based on actual behavior, not assumptions.
+**Write skill files**: Save the skill to the filesystem.
+
+**Directory structure**:
+````
+
+~/.claude/skills/{skill-name}/
+├── SKILL.md # Main skill file (required)
+└── references/ # Reference files (optional, for progressive disclosure)
+├── patterns.md
+├── api-reference.md
+└── examples.md
+
+````
+
+**Writing the SKILL.md**:
+1. Create the skill directory: `~/.claude/skills/{skill-name}/`
+2. Write `SKILL.md` with:
+   - Valid YAML frontmatter (name, description)
+   - Pure XML body structure
+   - All required tags
+3. Create reference files if skill is complex (>500 lines potential)
+
+**Verification after writing**:
+- Confirm directory created at correct location
+- Validate YAML frontmatter parses correctly
+- Check all XML tags properly closed
+- Verify reference file links are valid relative paths
+
+**After saving**:
+- Confirm location to user: `Created skill at ~/.claude/skills/{skill-name}/SKILL.md`
+- Show how to invoke: `Use the Skill tool with skill: "{skill-name}"`
 </step_7>
 
 <step_8>
+**Test with real usage**: Observe Claude using the skill. Iterate based on actual behavior, not assumptions.
+</step_8>
+
+<step_9>
 **Create slash command wrapper**: Create a lightweight slash command that invokes the skill.
 
 Location: `~/.claude/commands/{skill-name}.md`
@@ -262,14 +300,14 @@ allowed-tools: Skill({skill-name})
 ---
 
 <objective>
-Delegate {task} to the {skill-name} skill for: $ARGUMENTS
+Delegate {task} to the {skill-name} skill for: #$ARGUMENTS
 
 This routes to specialized skill containing patterns, best practices, and workflows.
 </objective>
 
 <process>
 1. Use Skill tool to invoke {skill-name} skill
-2. Pass user's request: $ARGUMENTS
+2. Pass user's request: #$ARGUMENTS
 3. Let skill handle workflow
 </process>
 
@@ -277,7 +315,7 @@ This routes to specialized skill containing patterns, best practices, and workfl
 - Skill successfully invoked
 - Arguments passed correctly to skill
 </success_criteria>
-```
+````
 
 The slash command's only job is routing—all expertise lives in the skill.
 </step_8>
@@ -285,12 +323,14 @@ The slash command's only job is routing—all expertise lives in the skill.
 
 <yaml_requirements>
 <required_fields>
+
 ```yaml
 ---
 name: skill-name-here
 description: What it does and when to use it (third person, specific triggers)
 ---
 ```
+
 </required_fields>
 
 <validation_rules>
@@ -300,12 +340,13 @@ See [references/skill-structure.md](references/skill-structure.md) for complete 
 
 <when_to_use>
 <create_skills_for>
+
 - Reusable patterns across multiple tasks
 - Domain knowledge that doesn't change frequently
 - Complex workflows that benefit from structured guidance
 - Reference materials (schemas, APIs, libraries)
 - Validation scripts and quality checks
-</create_skills_for>
+  </create_skills_for>
 
 <use_prompts_for>
 One-off tasks that won't be reused
@@ -320,12 +361,14 @@ Explicit user-triggered workflows that run with fresh context
 For deeper topics, see reference files:
 
 **Core principles**: [references/core-principles.md](references/core-principles.md)
+
 - XML structure (consistency, parseability, Claude performance)
 - Conciseness (context window is shared)
 - Degrees of freedom (matching specificity to task fragility)
 - Model testing (Haiku vs Sonnet vs Opus)
 
 **Skill structure**: [references/skill-structure.md](references/skill-structure.md)
+
 - XML structure requirements
 - Naming conventions
 - Writing effective descriptions
@@ -333,38 +376,44 @@ For deeper topics, see reference files:
 - File organization
 
 **Workflows and validation**: [references/workflows-and-validation.md](references/workflows-and-validation.md)
+
 - Complex workflows with checklists
 - Feedback loops (validate → fix → repeat)
 - Plan-validate-execute pattern
 
 **Common patterns**: [references/common-patterns.md](references/common-patterns.md)
+
 - Template patterns
 - Examples patterns
 - Consistent terminology
 - Anti-patterns to avoid
 
 **Executable code**: [references/executable-code.md](references/executable-code.md)
+
 - When to use utility scripts
 - Error handling in scripts
 - Package dependencies
 - MCP tool references
 
 **API security**: [references/api-security.md](references/api-security.md)
+
 - Preventing credentials from appearing in chat
 - Using the secure API wrapper
 - Adding new services and operations
 - Credential storage patterns
 
 **Iteration and testing**: [references/iteration-and-testing.md](references/iteration-and-testing.md)
+
 - Evaluation-driven development
 - Claude A/B development pattern
 - Observing how Claude navigates Skills
 - XML structure validation during testing
 
 **Prompting fundamentals**:
+
 - [references/be-clear-and-direct.md](references/be-clear-and-direct.md)
 - [references/use-xml-tags.md](references/use-xml-tags.md)
-</reference_guides>
+  </reference_guides>
 
 <success_criteria>
 A well-structured skill has:
@@ -377,4 +426,4 @@ A well-structured skill has:
 - Clear, concise instructions that assume Claude is smart
 - Real-world testing and iteration based on observed behavior
 - Lightweight slash command wrapper for discoverability
-</success_criteria>
+  </success_criteria>

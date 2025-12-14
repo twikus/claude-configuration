@@ -1,59 +1,60 @@
 ---
-allowed-tools: Bash(git :*)
 description: Quick commit and push with minimal, clean messages
 model: haiku
+allowed-tools: Bash(git :*), Bash(npm :*), Bash(pnpm :*)
 ---
 
-You are a git commit automation tool. Create minimal, clean commits for a tidy git history.
+<objective>
+Quickly analyze git changes and create a conventional commit message following the commitizen format (e.g., "update(statusline): refresh spend data"). This command prioritizes speed and efficiency for straightforward commits.
+</objective>
 
-## Context
+<context>
+Git state: !`git status`
+Staged changes: !`git diff --cached --stat`
+Unstaged changes: !`git diff --stat`
+Recent commits: !`git log --oneline -5`
+Current branch: !`git branch --show-current`
+</context>
 
-- Current git status: !`git status`
-- Current git diff: !`git diff HEAD`
-- Current branch: !`git branch --show-current`
-- Recent commits: !`git log --oneline -10`
+<process>
+1. **Analyze changes**: Review git status to determine what needs to be committed
+   - If nothing staged but unstaged changes exist: stage all changes with `git add .`
+   - If nothing to commit: inform user and exit
 
-## Workflow
+2. **Determine commit type and scope**:
+   - Types: `feat`, `fix`, `update`, `docs`, `chore`, `refactor`, `test`, `perf`, `revert`
+   - Scope: Identify the main area affected (e.g., `statusline`, `auth`, `api`, `ui`, `commands`)
+   - Use `update` for refreshing/updating existing features
+   - Use `feat` for new features
+   - Use `fix` for bug fixes
 
-1. **Stage**: `git add -A` to stage all changes
-2. **Analyze**: `git diff --cached --stat` to see what changed
-3. **Commit**: Generate ONE-LINE message (max 50 chars):
-   - `fix: [what was fixed]`
-   - `feat: [what was added]`
-   - `update: [what was modified]`
-   - `refactor: [what was reorganized]`
-4. **Push**: `git push` immediately
+3. **Generate commit message**:
+   - Format: `type(scope): brief description`
+   - Keep it under 72 characters
+   - Use imperative mood ("add" not "added")
+   - Start description with lowercase
+   - Be specific but concise
+   - Example: `update(statusline): refresh spend data`
 
-## Message Rules
+4. **Create commit**: Execute `git commit -m "message"` immediately with the generated message
 
-- **ONE LINE ONLY** - no body, no details
-- **Under 50 characters** - be concise
-- **No periods** - waste of space
-- **Present tense** - "add" not "added"
-- **Lowercase after colon** - `fix: typo` not `fix: Typo`
+5. **Push changes**: After successful commit, push to remote with `git push`
+</process>
 
-## Examples
+<success_criteria>
+- Changes properly staged if needed
+- Commit message follows format: `type(scope): description`
+- Commit created successfully
+- Changes pushed to remote
+- No errors during git operations
+</success_criteria>
 
-```
-feat: add user authentication
-fix: resolve memory leak
-update: improve error handling
-refactor: simplify api routes
-docs: update readme
-```
-
-## Execution
-
-- NO interactive commands
-- NO verbose messages
-- NO "Generated with" signatures
-- If no changes, exit silently
-- If push fails, report error only
-
-## Priority
-
-Speed > Detail. Keep commits atomic and history clean.
-
----
-
-User: $ARGUMENTS
+<rules>
+- **SPEED OVER PERFECTION**: Generate one good commit message and commit immediately
+- **NO INTERACTION**: Never use AskUserQuestion - just analyze and commit
+- **AUTO-STAGE**: If changes exist but nothing staged, stage everything
+- **AUTO-PUSH**: Always push after committing
+- **MINIMAL OUTPUT**: Brief confirmation of what was committed
+- **IMPERATIVE MOOD**: Use "add", "update", "fix", not past tense
+- **LOWERCASE**: Description starts lowercase after colon
+</rules>

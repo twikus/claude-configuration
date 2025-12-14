@@ -3,229 +3,255 @@ description: Implement a production-ready landing page from specification using 
 ---
 
 <objective>
-Implement a complete, production-ready landing page from a markdown specification file.
+Implement a complete, production-ready landing page from a markdown specification file using high-quality Shadcn UI components.
 
-Use high-quality shadcn/ui ecosystem components to create a beautiful, accessible, performant landing page. This transforms a landing page spec (content, sections, design) into fully functional React components.
+This comes AFTER the PRD, ARCHI, and LANDING_PAGE copywriting. Transform the specification into a fully functional, modern landing page using the Shadcn UI ecosystem.
 </objective>
+
+<role>
+You are a senior frontend developer and design systems specialist with 10+ years experience building production-ready landing pages using modern UI components and design patterns.
+</role>
 
 <context>
 Project structure: !`ls -la`
 Existing components: !`ls src/components/ 2>/dev/null || ls components/ 2>/dev/null || echo "No components folder"`
-Tailwind config: !`cat tailwind.config.ts 2>/dev/null | head -30 || cat tailwind.config.js 2>/dev/null | head -30 || echo "No tailwind config"`
+CSS variables: !`cat app/globals.css 2>/dev/null | head -50 || cat src/app/globals.css 2>/dev/null | head -50 || echo "No globals.css"`
 </context>
 
 <process>
-## Phase 1: Specification Analysis
+## Phase 1: Read Specification
 
-1. **Ask for spec file path**:
-   > "Please provide the path to your landing page specification file."
+1. **Ask for spec file location**:
+   > "Please provide the path to your landing page specification file (LANDING_PAGE.md)."
 
-2. **Read spec completely**, extract:
-   - Sections required (Hero, Features, Pricing, FAQ, etc.)
-   - Content (headlines, descriptions, CTAs)
-   - Design preferences (colors, style)
+2. **Read and extract from spec**:
+   - Sections needed (Hero, Features, Pricing, FAQ, etc.)
+   - Content (headlines, descriptions, CTAs, images)
+   - Design preferences (colors, style, brand)
    - Target audience
 
-3. **Ask for project location** if not provided
+3. **STOP if spec is missing** - Ask user for complete specification
 
-4. **Analyze existing project**:
-   - Read `tsconfig.json` for path aliases
-   - Read `tailwind.config.ts` for theme
-   - Check `components.json` for shadcn setup
-   - Note existing patterns and conventions
+## Phase 2: Analyze Project
 
-## Phase 2: Component Research
+4. **Ask for project location** if not provided
 
-5. **Research component sources** using Context7 MCP:
-   - Official Shadcn UI: https://ui.shadcn.com
-   - Shadcn UI Blocks: https://shadcn-ui-blocks.akashmoradiya.com
-   - Coss.com: https://coss.com/origin
-   - Aceternity UI (selective): https://ui.aceternity.com
+5. **Explore project structure** (use Glob):
+   - `**/*.tsx` - existing components
+   - `**/globals.css` - styling and CSS variables
+   - `**/tsconfig.json` - path aliases
+   - `components.json` - shadcn setup
 
-6. **Document component choices** in `landing-page-components.md`:
-```markdown
-# Landing Page Components
+6. **Read key config files**:
+   - `tsconfig.json` - path aliases (@/*)
+   - `app/globals.css` - CSS variables and theme
 
-## Hero Section
-- **Source**: Shadcn UI Blocks - hero-03
-- **URL**: https://shadcn-ui-blocks.akashmoradiya.com/r/hero-03.json
-- **Install**: `npx shadcn add <url>`
-- **Why**: [Rationale]
+7. **Document findings**:
+   - Framework version (Next.js 14/15)
+   - Component organization pattern
+   - Existing UI components
+   - Path aliases and imports
 
-## Navigation
-- **Source**: Coss.com - comp-577
-- **URL**: https://coss.com/origin/r/comp-577.json
-- **Install**: `pnpm dlx shadcn@latest add <url>`
-- **Why**: [Rationale]
+## Phase 3: Research Components
 
-[Continue for each section...]
-```
+8. **Use MCP Context7** to research Shadcn UI:
+   - `mcp__context7__resolve-library-id` with "shadcn-ui"
+   - `mcp__context7__get-library-docs` for component patterns
 
-## Phase 3: Setup
+9. **Component source hierarchy** (priority order):
+   - **Official Shadcn UI** (ui.shadcn.com) - Base components
+   - **Shadcn UI Blocks** (shadcn-ui-blocks.akashmoradiya.com) - Pre-built sections
+   - **Coss.com** (coss.com/origin) - Modern components
+   - **Aceternity UI** (ui.aceternity.com) - Advanced effects (selective use)
 
-7. **Configure theme** in `app/globals.css`:
-   - Update CSS variables based on brand colors
-   - Ensure sufficient contrast (4.5:1 for text)
+10. **Create `landing-page-components.md`** documenting:
+    - Component source for each section
+    - Installation command
+    - Customization notes
 
-8. **Install base components**:
-```bash
-npx shadcn@latest add button card input label badge separator
-npx shadcn@latest add navigation-menu dropdown-menu sheet
-npx shadcn@latest add accordion dialog toast
-```
+## Phase 4: Configure Theme
 
-## Phase 4: Build Sections
+11. **Configure CSS variables** in `app/globals.css` based on spec brand colors:
+    ```css
+    :root {
+      --primary: /* brand primary */;
+      --secondary: /* brand secondary */;
+    }
+    ```
 
-9. **Build Navigation** - `src/features/landing/navbar.tsx`:
-   - Logo and branding
-   - Navigation links
-   - CTA button
-   - Mobile menu with Sheet
+12. **Ensure contrast** - 4.5:1 for text (WCAG AA)
 
-10. **Build Hero** - `src/features/landing/hero.tsx`:
-    - Headline and subheadline from spec
-    - Primary and secondary CTAs
-    - Hero image if specified
-    - Mobile-first responsive design
+## Phase 5: Install Components
 
-11. **Build Features** - `src/features/landing/features.tsx`:
-    - Feature cards from spec
-    - Icons from lucide-react
-    - Grid layout (responsive)
+13. **Install base components**:
+    ```bash
+    npx shadcn@latest add button card input label badge separator
+    npx shadcn@latest add navigation-menu dropdown-menu sheet
+    npx shadcn@latest add accordion dialog
+    ```
 
-12. **Build Pricing** (if in spec) - `src/features/landing/pricing.tsx`:
-    - Pricing tiers from spec
-    - Feature lists with checkmarks
-    - Highlight recommended tier
+14. **Install section-specific components** from blocks:
+    ```bash
+    npx shadcn add https://shadcn-ui-blocks.akashmoradiya.com/r/hero-03.json
+    npx shadcn add https://shadcn-ui-blocks.akashmoradiya.com/r/features-01.json
+    ```
 
-13. **Build FAQ** (if in spec) - `src/features/landing/faq.tsx`:
-    - Accordion component
-    - All questions from spec
+## Phase 6: Build Sections
 
-14. **Build CTA** - `src/features/landing/cta.tsx`:
-    - Compelling headline
-    - Primary and secondary buttons
-    - Strategic placement
+15. **Create component files** in `src/features/landing/` (or match existing structure):
 
-15. **Build Footer** - `src/features/landing/footer.tsx`:
-    - Navigation links
-    - Legal links
-    - Social media
-    - Copyright
+**Navigation** (`navbar.tsx`):
+- Logo, nav links, mobile menu
+- Sticky header with backdrop blur
+- CTA button
 
-## Phase 5: Assembly
+**Hero** (`hero.tsx`):
+- Headline from spec (H1)
+- Subheadline (H2)
+- Primary/secondary CTAs
+- Hero image with next/image
 
-16. **Assemble page** in `app/page.tsx`:
-```typescript
-import { Navbar } from "@/features/landing/navbar"
-import { Hero } from "@/features/landing/hero"
-import { Features } from "@/features/landing/features"
-import { Pricing } from "@/features/landing/pricing"
-import { FAQ } from "@/features/landing/faq"
-import { CTA } from "@/features/landing/cta"
-import { Footer } from "@/features/landing/footer"
+**Features** (`features.tsx`):
+- Section headline
+- Feature cards with icons (lucide-react)
+- Grid layout (3 columns desktop)
 
-export default function HomePage() {
-  return (
-    <>
-      <Navbar />
-      <main>
-        <Hero />
-        <Features />
-        <Pricing />
-        <FAQ />
-        <CTA />
-      </main>
-      <Footer />
-    </>
-  )
-}
-```
+**Social Proof** (`testimonials.tsx`) - if in spec:
+- Testimonial cards
+- Logo cloud
+- Statistics
 
-17. **Add smooth scrolling** in `app/globals.css`:
-```css
-html {
-  scroll-behavior: smooth;
-}
-```
+**Pricing** (`pricing.tsx`) - if in spec:
+- Pricing tiers with Card component
+- Feature lists with checkmarks
+- Popular tier highlight
+- CTA buttons
 
-## Phase 6: Quality Assurance
+**FAQ** (`faq.tsx`) - if in spec:
+- Accordion component
+- All questions from spec
+
+**CTA** (`cta.tsx`):
+- Compelling headline
+- Action buttons
+- Background styling
+
+**Footer** (`footer.tsx`):
+- Navigation columns
+- Social links (lucide-react icons)
+- Legal links
+- Copyright
+
+## Phase 7: Assemble Page
+
+16. **Update `app/page.tsx`**:
+    ```typescript
+    import { Navbar } from "@/features/landing/navbar"
+    import { Hero } from "@/features/landing/hero"
+    import { Features } from "@/features/landing/features"
+    // ... other imports
+
+    export default function HomePage() {
+      return (
+        <>
+          <Navbar />
+          <main>
+            <Hero />
+            <Features />
+            {/* Other sections */}
+          </main>
+          <Footer />
+        </>
+      )
+    }
+    ```
+
+17. **Add smooth scrolling** in `globals.css`:
+    ```css
+    html { scroll-behavior: smooth; }
+    ```
+
+## Phase 8: Quality Assurance
 
 18. **Mobile responsiveness**:
-    - Test at 375px width (iPhone SE)
-    - Verify readable text (min 16px)
-    - Check touch targets (min 44x44px)
+    - Test at 375px (iPhone SE)
+    - Verify touch targets (44x44px min)
+    - Check text readability (16px min)
     - Test mobile navigation
 
 19. **Accessibility audit**:
-    - Keyboard navigation (Tab through page)
-    - Heading hierarchy (h1 → h2 → h3)
-    - Alt text on images
-    - ARIA labels on icon buttons
-    - Color contrast (4.5:1 minimum)
+    - Tab through entire page
+    - Verify heading hierarchy (h1 → h2 → h3)
+    - Check alt text on images
+    - Verify color contrast
+    - Add ARIA labels on icon buttons
 
 20. **Performance optimization**:
-    - Next.js Image for all images
-    - `priority` on above-fold images
-    - `loading="lazy"` on below-fold
-    - next/font for fonts
-    - Remove unused imports
+    - Use next/image with width/height
+    - Add `priority` to hero image
+    - Use `loading="lazy"` below fold
 
 21. **Final verification**:
-```bash
-pnpm lint
-pnpm ts
-pnpm build
-```
+    ```bash
+    pnpm format
+    pnpm lint
+    pnpm ts
+    pnpm build
+    ```
 </process>
 
 <constraints>
-**QUALITY STANDARDS** (non-negotiable):
+**DESIGN STANDARDS**:
+- Modern, contemporary design (not dated Bootstrap-style)
+- Mobile-first responsive approach
 - WCAG 2.1 AA accessibility compliance
-- Mobile-first responsive design
-- Lighthouse score 90+
-- Clean, maintainable code
+- Lighthouse score 90+ target
+
+**CODE QUALITY**:
+- Follow existing project conventions
+- Use path aliases (@/components, @/features)
+- TypeScript strict mode
+- No placeholder content - use real spec content
 
 **COMPONENT RULES**:
-- Adapt to existing project structure
-- Respect existing path aliases and conventions
-- Never overwrite existing components without understanding
-- Use shadcn/ui ecosystem components
+- Prioritize official Shadcn UI components
+- Use next/image for all images
+- Use next/font for typography
+- Respect existing component patterns
 
-**DO NOT**:
-- Skip reading the spec file
-- Ignore existing project conventions
-- Leave placeholder content
-- Skip accessibility requirements
-- Use hardcoded colors (use theme variables)
+**NEVER**:
+- Overwrite existing components without understanding
+- Use placeholder text instead of spec content
+- Skip mobile responsiveness
+- Ignore accessibility requirements
+- Add unused dependencies
 </constraints>
 
 <output>
-**Files created**:
-- `landing-page-components.md` - Component sources documentation
-- `src/features/landing/navbar.tsx`
-- `src/features/landing/hero.tsx`
-- `src/features/landing/features.tsx`
-- `src/features/landing/pricing.tsx` (if in spec)
-- `src/features/landing/faq.tsx` (if in spec)
-- `src/features/landing/cta.tsx`
-- `src/features/landing/footer.tsx`
-- Updated `app/page.tsx`
+**Files created in `src/features/landing/`** (or matching structure):
+- `navbar.tsx` - Navigation header
+- `hero.tsx` - Hero section
+- `features.tsx` - Features grid
+- `pricing.tsx` - Pricing tiers (if in spec)
+- `faq.tsx` - FAQ accordion (if in spec)
+- `cta.tsx` - Call-to-action sections
+- `footer.tsx` - Footer navigation
 
-**Quality verified**:
-- Mobile responsive
-- WCAG 2.1 AA accessible
-- Performant (Lighthouse 90+)
-- All spec requirements implemented
+**Documentation**:
+- `landing-page-components.md` - Component sources and customizations
+
+**Updated files**:
+- `app/page.tsx` - Assembled landing page
+- `app/globals.css` - Theme variables and brand colors
 </output>
 
 <success_criteria>
-- All spec sections implemented
-- Mobile responsive on all breakpoints
-- Keyboard navigation works
-- Color contrast passes WCAG AA
-- Images optimized with Next.js Image
-- No TypeScript or ESLint errors
-- Build succeeds without warnings
-- Component sources documented
+- All spec sections implemented with real content (not placeholders)
+- Mobile responsive on all breakpoints (375px, 768px, 1024px, 1440px)
+- WCAG 2.1 AA accessible (keyboard nav, contrast, alt text)
+- Lighthouse performance score 90+
+- All links and CTAs functional
+- No console errors
+- Build passes without warnings
+- Matches spec design preferences and brand colors
 </success_criteria>

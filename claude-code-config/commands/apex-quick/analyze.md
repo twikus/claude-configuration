@@ -70,4 +70,4 @@ Context depth > Speed. Missing context causes failed implementations.
 
 ---
 
-User: $ARGUMENTS
+User: #$ARGUMENTS

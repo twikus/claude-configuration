@@ -8,11 +8,11 @@ All hooks receive these fields:
 
 ```typescript
 {
-  session_id: string           // Unique session identifier
-  transcript_path: string      // Path to session transcript (.jsonl file)
-  cwd: string                  // Current working directory
-  permission_mode: string      // "default" | "plan" | "acceptEdits" | "bypassPermissions"
-  hook_event_name: string      // Name of the hook event
+  session_id: string; // Unique session identifier
+  transcript_path: string; // Path to session transcript (.jsonl file)
+  cwd: string; // Current working directory
+  permission_mode: string; // "default" | "plan" | "acceptEdits" | "bypassPermissions"
+  hook_event_name: string; // Name of the hook event
 }
 ```
 
@@ -21,6 +21,7 @@ All hooks receive these fields:
 ## PreToolUse
 
 **Input**:
+
 ```json
 {
   "session_id": "abc123",
@@ -37,6 +38,7 @@ All hooks receive these fields:
 ```
 
 **Output** (optional, for control):
+
 ```json
 {
   "decision": "approve" | "block",
@@ -53,6 +55,7 @@ All hooks receive these fields:
 ```
 
 **Fields**:
+
 - `decision`: Whether to allow the tool call
 - `reason`: Explanation (required if blocking)
 - `permissionDecision`: Override permission system
@@ -66,6 +69,7 @@ All hooks receive these fields:
 ## PostToolUse
 
 **Input**:
+
 ```json
 {
   "session_id": "abc123",
@@ -83,6 +87,7 @@ All hooks receive these fields:
 ```
 
 **Output** (optional):
+
 ```json
 {
   "systemMessage": "Code formatted successfully",
@@ -91,6 +96,7 @@ All hooks receive these fields:
 ```
 
 **Fields**:
+
 - `systemMessage`: Additional message to display
 - `suppressOutput`: Hide tool output from user
 
@@ -99,6 +105,7 @@ All hooks receive these fields:
 ## UserPromptSubmit
 
 **Input**:
+
 ```json
 {
   "session_id": "abc123",
@@ -111,6 +118,7 @@ All hooks receive these fields:
 ```
 
 **Output**:
+
 ```json
 {
   "decision": "approve" | "block",
@@ -120,6 +128,7 @@ All hooks receive these fields:
 ```
 
 **Fields**:
+
 - `decision`: Whether to allow the prompt
 - `reason`: Explanation (required if blocking)
 - `systemMessage`: Message shown to user
@@ -129,6 +138,7 @@ All hooks receive these fields:
 ## Stop
 
 **Input**:
+
 ```json
 {
   "session_id": "abc123",
@@ -141,6 +151,7 @@ All hooks receive these fields:
 ```
 
 **Output**:
+
 ```json
 {
   "decision": "block" | undefined,
@@ -152,6 +163,7 @@ All hooks receive these fields:
 ```
 
 **Fields**:
+
 - `decision`: `"block"` to prevent stopping, `undefined` to allow
 - `reason`: Why Claude should continue (required if blocking)
 - `continue`: If true and blocking, Claude continues working
@@ -182,6 +194,7 @@ if (input.stop_hook_active) {
 ## SessionStart
 
 **Input**:
+
 ```json
 {
   "session_id": "abc123",
@@ -194,6 +207,7 @@ if (input.stop_hook_active) {
 ```
 
 **Output**:
+
 ```json
 {
   "hookSpecificOutput": {
@@ -204,6 +218,7 @@ if (input.stop_hook_active) {
 ```
 
 **Fields**:
+
 - `additionalContext`: Text injected into session context
 - Multiple SessionStart hooks' contexts are concatenated
 
@@ -212,6 +227,7 @@ if (input.stop_hook_active) {
 ## SessionEnd
 
 **Input**:
+
 ```json
 {
   "session_id": "abc123",
@@ -232,6 +248,7 @@ if (input.stop_hook_active) {
 ## PreCompact
 
 **Input**:
+
 ```json
 {
   "session_id": "abc123",
@@ -245,6 +262,7 @@ if (input.stop_hook_active) {
 ```
 
 **Output**:
+
 ```json
 {
   "decision": "approve" | "block",
@@ -253,6 +271,7 @@ if (input.stop_hook_active) {
 ```
 
 **Fields**:
+
 - `trigger`: How compaction was initiated
 - `custom_instructions`: User's compaction preferences (if manual)
 - `decision`: Whether to proceed with compaction
@@ -263,6 +282,7 @@ if (input.stop_hook_active) {
 ## Notification
 
 **Input**:
+
 ```json
 {
   "session_id": "abc123",
@@ -293,6 +313,7 @@ These fields can be returned by any hook:
 ```
 
 **Fields**:
+
 - `continue`: If false, stop Claude's execution immediately
 - `stopReason`: Message displayed when execution stops
 - `suppressOutput`: If true, hide hook's stdout/stderr from user
@@ -315,8 +336,9 @@ When using `type: "prompt"`, the LLM must return JSON:
 ```
 
 **Example prompt**:
+
 ```
-Evaluate this command: $ARGUMENTS
+Evaluate this command: #$ARGUMENTS
 
 Check if it's safe to execute.
 
@@ -327,7 +349,7 @@ Return JSON:
 }
 ```
 
-The `$ARGUMENTS` placeholder is replaced with the hook's input JSON.
+The `#$ARGUMENTS` placeholder is replaced with the hook's input JSON.
 
 ---
 
@@ -336,6 +358,7 @@ The `$ARGUMENTS` placeholder is replaced with the hook's input JSON.
 Different tools provide different `tool_input` fields:
 
 ### Bash
+
 ```json
 {
   "tool_input": {
@@ -348,6 +371,7 @@ Different tools provide different `tool_input` fields:
 ```
 
 ### Write
+
 ```json
 {
   "tool_input": {
@@ -358,6 +382,7 @@ Different tools provide different `tool_input` fields:
 ```
 
 ### Edit
+
 ```json
 {
   "tool_input": {
@@ -370,6 +395,7 @@ Different tools provide different `tool_input` fields:
 ```
 
 ### Read
+
 ```json
 {
   "tool_input": {
@@ -381,6 +407,7 @@ Different tools provide different `tool_input` fields:
 ```
 
 ### Grep
+
 ```json
 {
   "tool_input": {
@@ -392,6 +419,7 @@ Different tools provide different `tool_input` fields:
 ```
 
 ### MCP tools
+
 ```json
 {
   "tool_input": {
@@ -401,6 +429,7 @@ Different tools provide different `tool_input` fields:
 ```
 
 Access these in hooks:
+
 ```bash
 command=$(echo "$input" | jq -r '.tool_input.command')
 file_path=$(echo "$input" | jq -r '.tool_input.file_path')
@@ -413,6 +442,7 @@ file_path=$(echo "$input" | jq -r '.tool_input.file_path')
 PreToolUse hooks can modify `tool_input` before execution:
 
 **Original input**:
+
 ```json
 {
   "tool_input": {
@@ -422,6 +452,7 @@ PreToolUse hooks can modify `tool_input` before execution:
 ```
 
 **Hook output**:
+
 ```json
 {
   "decision": "approve",
@@ -435,10 +466,11 @@ PreToolUse hooks can modify `tool_input` before execution:
 **Result**: Tool executes with modified input.
 
 **Partial updates**: Only specify fields you want to change:
+
 ```json
 {
   "updatedInput": {
-    "timeout": 300000  // Only update timeout, keep other fields
+    "timeout": 300000 // Only update timeout, keep other fields
   }
 }
 ```
@@ -448,6 +480,7 @@ PreToolUse hooks can modify `tool_input` before execution:
 ## Error Handling
 
 **Command hooks**: Return non-zero exit code to indicate error
+
 ```bash
 if [ error ]; then
   echo '{"decision": "block", "reason": "Error occurred"}' >&2
@@ -458,6 +491,7 @@ fi
 **Prompt hooks**: LLM should return valid JSON. If malformed, hook fails gracefully.
 
 **Timeout**: Set `timeout` (ms) to prevent hanging:
+
 ```json
 {
   "type": "command",

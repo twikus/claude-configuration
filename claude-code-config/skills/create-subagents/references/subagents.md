@@ -430,6 +430,124 @@ Recent changes: {varies per invocation}
 </cache_management>
 </prompt_caching>
 
+<background_execution>
+<overview>
+The Task tool supports `run_in_background` parameter to launch agents asynchronously. This enables parallel execution of multiple agents while the main conversation continues.
+</overview>
+
+<task_tool_parameters>
+**Task tool input for background execution:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `description` | string | Yes | Short (3-5 word) description of the task |
+| `prompt` | string | Yes | The task for the agent to perform |
+| `subagent_type` | string | Yes | Type of specialized agent to use |
+| `run_in_background` | boolean | No | Set `true` to run asynchronously |
+| `resume` | string | No | Agent ID to resume from previous execution |
+| `model` | string | No | Override model: `sonnet`, `opus`, `haiku` |
+</task_tool_parameters>
+
+<taskoutput_tool>
+**Retrieving results from background agents:**
+
+Use `TaskOutput` tool to get results from running or completed tasks:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `task_id` | string | Required | The agent ID from Task tool |
+| `block` | boolean | `true` | Wait for completion or check status |
+| `timeout` | number | `30000` | Max wait time in ms (max: 600000) |
+
+**Example workflow:**
+```
+Step 1: Launch background agent
+Task tool:
+- description: "Security review"
+- prompt: "Review authentication code..."
+- subagent_type: "security-reviewer"
+- run_in_background: true
+→ Returns: agent_id: "abc123"
+
+Step 2: Continue with other work...
+
+Step 3: Retrieve results
+TaskOutput tool:
+- task_id: "abc123"
+- block: true
+→ Returns: Agent's final output
+```
+</taskoutput_tool>
+
+<parallel_execution_patterns>
+**Pattern 1: Parallel Analysis**
+Launch multiple independent agents, then collect results:
+
+```
+# Single message with multiple Task calls
+Task 1: code-reviewer (background)
+Task 2: security-scanner (background)
+Task 3: test-analyzer (background)
+
+# Later: collect all results
+TaskOutput for each agent_id
+```
+
+**Pattern 2: Fan-out / Fan-in**
+```
+1. Main agent breaks work into subtasks
+2. Launch Haiku workers in parallel (background)
+3. Collect all results
+4. Main agent synthesizes findings
+```
+
+**Pattern 3: Long-running with Progress Check**
+```
+1. Launch long-running agent (background)
+2. Periodically check status (block: false)
+3. Continue other work while waiting
+4. Get final results when ready
+```
+</parallel_execution_patterns>
+
+<best_use_cases>
+**When to use background execution:**
+
+✅ **Good candidates:**
+- Security audits across multiple files
+- Comprehensive code reviews
+- Documentation generation
+- Test coverage analysis
+- Multi-file refactoring analysis
+- Research tasks (API docs, library exploration)
+
+❌ **Not recommended:**
+- Quick single-file operations
+- Tasks with sequential dependencies
+- Operations needing immediate results
+- Simple validation checks
+</best_use_cases>
+
+<resume_capability>
+**Resuming agents:**
+
+Agents preserve full context when resumed:
+
+```
+Task tool:
+- description: "Continue analysis"
+- prompt: "Please continue..."
+- subagent_type: "security-reviewer"
+- resume: "abc123"  # Previous agent_id
+```
+
+**Use cases for resuming:**
+- Agent hit context limit, needs to continue
+- Follow-up work on previous analysis
+- Iterative refinement of agent output
+</resume_capability>
+</background_execution>
+
 <best_practices>
 <be_specific>
 Create task-specific subagents, not generic helpers.

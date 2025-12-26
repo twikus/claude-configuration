@@ -767,6 +767,125 @@ Review PR #$1 with priority $2
 Analyze @ #$ARGUMENTS
 ```
 
+## Subagent Patterns
+
+Slash commands can instruct Claude to use the Task tool to launch subagents for specialized work. This is powerful for delegating complex tasks to focused agents.
+
+### Pattern: Launch Subagent for Analysis
+
+```markdown
+---
+description: Deep security analysis with subagent
+argument-hint: [file-path or directory]
+---
+
+<objective>
+Perform comprehensive security analysis on #$ARGUMENTS using specialized security subagent.
+</objective>
+
+<process>
+1. Use the Task tool to launch the `security-scanner` subagent
+2. Pass the target path #$ARGUMENTS to the subagent
+3. Wait for subagent to complete analysis
+4. Present findings to user with severity ratings
+</process>
+
+<success_criteria>
+- Security subagent completed analysis
+- All findings reported with severity
+- Remediation suggestions provided
+</success_criteria>
+```
+
+### Pattern: Parallel Subagents
+
+Launch multiple subagents in parallel for comprehensive analysis:
+
+```markdown
+---
+description: Comprehensive code review with multiple subagents
+---
+
+<objective>
+Perform multi-faceted code review using parallel subagents.
+</objective>
+
+<context>
+Changed files: ! `git diff --name-only HEAD~1`
+</context>
+
+<process>
+1. Launch these subagents IN PARALLEL using run_in_background: true
+   - `code-reviewer` for code quality
+   - `security-scanner` for security issues
+   - `test-analyzer` for test coverage
+2. Collect results from all subagents using TaskOutput
+3. Synthesize findings into unified report
+</process>
+
+<success_criteria>
+- All three subagents completed
+- Findings consolidated
+- Unified report provided
+</success_criteria>
+```
+
+### Pattern: Background Agent with Progress
+
+```markdown
+---
+description: Long-running documentation generation
+argument-hint: [module-name]
+---
+
+<objective>
+Generate comprehensive documentation for #$ARGUMENTS using background subagent.
+</objective>
+
+<process>
+1. Launch `doc-generator` subagent in background (run_in_background: true)
+2. Report to user that documentation generation started
+3. Use TaskOutput with block: false to periodically check status
+4. Present final documentation when complete
+</process>
+
+<output>
+Files created:
+- `docs/#$ARGUMENTS/README.md`
+- `docs/#$ARGUMENTS/api-reference.md`
+</output>
+
+<success_criteria>
+- Documentation generated for all public APIs
+- Examples included
+- Links verified
+</success_criteria>
+```
+
+### Best Practices for Subagent Commands
+
+**1. Specify the subagent type clearly**
+```markdown
+Use the Task tool to launch the `code-reviewer` subagent...
+```
+
+**2. Pass context to subagents**
+```markdown
+Pass these files to the subagent:
+- Current changes: ! `git diff --name-only`
+- Target path: #$ARGUMENTS
+```
+
+**3. Use background for long-running tasks**
+```markdown
+Launch with run_in_background: true for tasks > 30 seconds
+```
+
+**4. Collect and synthesize results**
+```markdown
+After all subagents complete, synthesize findings into a unified report
+```
+
 ## Anti-Patterns to Avoid
 
 ### ❌ No Description

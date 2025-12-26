@@ -228,6 +228,123 @@ You can explicitly invoke a subagent:
 </explicit>
 </invocation>
 
+<background_execution>
+Subagents can run in the background using the `run_in_background` parameter, allowing parallel execution while the main conversation continues.
+
+<how_it_works>
+**Starting a background subagent:**
+The Task tool accepts `run_in_background: true` to launch agents asynchronously:
+
+```
+Task tool call:
+- description: "Analyze security vulnerabilities"
+- prompt: "Review all authentication code for security issues..."
+- subagent_type: "security-reviewer"
+- run_in_background: true
+```
+
+The agent starts immediately and returns an `agent_id` for tracking.
+</how_it_works>
+
+<retrieving_results>
+**Getting results with TaskOutput:**
+Use the `TaskOutput` tool to retrieve results from background agents:
+
+```
+TaskOutput tool call:
+- task_id: "agent-12345"  # The agent_id from the Task call
+- block: true            # Wait for completion (default)
+- timeout: 30000         # Max wait time in ms
+```
+
+**Parameters:**
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `task_id` | Required | The agent ID returned from Task tool |
+| `block` | `true` | Wait for completion or check current status |
+| `timeout` | `30000` | Max wait time in milliseconds (up to 600000) |
+
+**Non-blocking check:**
+Set `block: false` to check status without waiting:
+```
+TaskOutput tool call:
+- task_id: "agent-12345"
+- block: false
+```
+Returns current status: running, completed, or the final result.
+</retrieving_results>
+
+<parallel_agents>
+**Launching multiple agents in parallel:**
+
+To maximize performance, launch multiple independent agents simultaneously:
+
+```
+Single message with multiple Task tool calls:
+
+Task 1:
+- description: "Review code quality"
+- prompt: "Check code quality..."
+- subagent_type: "code-reviewer"
+- run_in_background: true
+
+Task 2:
+- description: "Run security scan"
+- prompt: "Scan for vulnerabilities..."
+- subagent_type: "security-scanner"
+- run_in_background: true
+
+Task 3:
+- description: "Check test coverage"
+- prompt: "Analyze test coverage..."
+- subagent_type: "test-analyzer"
+- run_in_background: true
+```
+
+Then retrieve all results:
+```
+TaskOutput calls for each agent_id
+```
+</parallel_agents>
+
+<when_to_use_background>
+**Use background agents for:**
+- Long-running analysis (security review, comprehensive code analysis)
+- Multiple independent tasks that can run in parallel
+- Tasks where you want to continue working while waiting
+- Research tasks that may take significant time
+
+**Don't use background for:**
+- Quick operations (< 10 seconds)
+- Tasks that depend on each other sequentially
+- Tasks where immediate results are needed for next step
+- Simple single-file operations
+
+**Pattern: Parallel Analysis Pipeline**
+```
+1. Launch multiple analysis agents in background
+2. Continue with other work or wait
+3. Collect all results
+4. Synthesize findings in main conversation
+```
+</when_to_use_background>
+
+<resuming_agents>
+**Resuming agents:**
+Agents can be resumed using the `resume` parameter with their agent ID:
+
+```
+Task tool call:
+- description: "Continue security review"
+- prompt: "Please continue with the remaining files..."
+- subagent_type: "security-reviewer"
+- resume: "agent-12345"  # Previous agent ID
+```
+
+The agent continues with its full previous context preserved.
+</resuming_agents>
+</background_execution>
+
 <management>
 <using_agents_command>
 Run `/agents` for an interactive interface to:
@@ -252,6 +369,7 @@ You can also edit subagent files directly:
 - Model selection (Sonnet 4.5 + Haiku 4.5 orchestration)
 - Tool security and least privilege
 - Prompt caching optimization
+- **Background execution** (run_in_background, TaskOutput, parallel agents)
 - Complete examples
 
 **Writing effective prompts**: [references/writing-subagent-prompts.md](references/writing-subagent-prompts.md)

@@ -1,0 +1,321 @@
+# CLAUDE.md Best Practices Guide
+
+## Core Principles
+
+**Minimalism First**
+- Only include information needed in EVERY session
+- Keep file under 200 lines when possible
+- Use @imports for detailed documentation
+
+**Specificity Over Generality**
+- Bad: "Write clean code"
+- Good: "Use 2-space indentation, no semicolons"
+
+**Clarity Over Comprehensiveness**
+- Provide concrete examples
+- Avoid vague platitudes
+- Balance detail with brevity
+
+## Memory File Hierarchy
+
+Files are loaded in this order (higher takes precedence):
+
+1. Enterprise Policy (organization-wide)
+2. Project Memory: `./CLAUDE.md` or `./.claude/CLAUDE.md`
+3. User Memory: `~/.claude/CLAUDE.md`
+4. Subdirectory Memory (loaded on demand)
+
+Check loaded files: `/memory` command
+
+## What to Include
+
+### Essential Sections
+
+**Common Commands**
+```markdown
+## Common Commands
+- `npm run dev` - Start dev server (port 3000)
+- `npm test` - Run test suite
+- `npm run build` - Production build
+```
+
+**Code Style & Conventions**
+```markdown
+## Code Style
+- Use 2-space indentation
+- Prefer arrow functions
+- TypeScript strict mode enabled
+- No `any` types allowed
+```
+
+**Architecture Patterns**
+```markdown
+## Architecture
+- Feature-based folder structure
+- SOLID principles (especially SRP)
+- Dependency injection for services
+```
+
+**Critical Restrictions**
+```markdown
+## Do NOT
+- Never modify test files without permission
+- Don't edit database migrations
+- Avoid committing .env files
+- Don't push directly to main branch
+```
+
+**Project Structure**
+```markdown
+## Folder Structure
+- `/src` - Application code
+- `/tests` - Test files
+- `/docs` - Detailed docs (use @docs/file.md)
+```
+
+**Git Workflow**
+```markdown
+## Git Workflow
+- Branches: feature/*, fix/*, refactor/*
+- Commits: Conventional Commits format
+- Always create PR before merging
+```
+
+## What to Avoid
+
+**Anti-Patterns**
+- Generic statements like "follow best practices"
+- Overly verbose documentation
+- Redundant information needed rarely
+- Documenting what linters/formatters handle
+- Explaining MCP tools (let Claude figure them out)
+
+**Token Waste**
+- Huge files loaded every session
+- Information used in <20% of sessions
+- Duplicate content already in README
+- Extensive code examples
+
+## Advanced Features
+
+### File Imports
+
+Use `@path/to/file` syntax to reference other files:
+
+```markdown
+See @README for overview
+See @package.json for scripts
+
+## Architecture
+@docs/architecture.md
+
+## Personal Preferences
+@~/.claude/my-preferences.md
+```
+
+**Import Rules**
+- Max recursion depth: 5 levels
+- Don't work in code blocks or inline code
+- Check with `/memory` command
+
+### Local Variations
+
+```markdown
+CLAUDE.md          # Committed to git (team shared)
+CLAUDE.local.md    # Add to .gitignore (personal)
+```
+
+### Monorepo Structure
+
+```
+/CLAUDE.md              # Root defaults
+/apps/web/CLAUDE.md     # App-specific
+/packages/ui/CLAUDE.md  # Package-specific
+```
+
+### Quick Memory Addition
+
+Prefix input with `#` to auto-add to CLAUDE.md:
+```
+# Always use pnpm instead of npm
+```
+
+## Recommended Template Structure
+
+```markdown
+# [Project Name]
+
+## Overview
+[1-2 sentence description]
+
+## Tech Stack
+- Language: TypeScript
+- Framework: Next.js
+- Database: PostgreSQL
+- Testing: Vitest
+
+## Common Commands
+- `pnpm dev` - Development
+- `pnpm test` - Tests
+- `pnpm build` - Build
+
+## Code Conventions
+### TypeScript
+- Strict mode enabled
+- No `any` types
+
+### React
+- Functional components only
+- Use hooks over HOCs
+
+### File Naming
+- Components: PascalCase.tsx
+- Utils: camelCase.ts
+- Tests: *.test.ts
+
+## Architecture
+- Feature-based structure
+- Colocation preferred
+- See @docs/architecture.md
+
+## Git Workflow
+- Branch: feature/*, fix/*
+- Commits: Conventional format
+- PR required
+
+## Testing
+- Required for features
+- 80% coverage minimum
+- E2E for critical paths
+
+## Do NOT
+- Modify tests without permission
+- Edit migrations
+- Commit secrets
+- Push to main directly
+
+## Project Structure
+@docs/structure.md
+```
+
+## Best Practices by Use Case
+
+### For Teams
+- Document protected areas (tests, migrations, configs)
+- Include PR requirements
+- Specify code review standards
+- List required approvals
+
+### For Monorepos
+- Root CLAUDE.md for shared conventions
+- App-specific files for unique patterns
+- Use @imports to reduce duplication
+
+### For Solo Projects
+- Store personal preferences in ~/.claude/CLAUDE.md
+- Keep project-specific in ./CLAUDE.md
+- Use CLAUDE.local.md for experiments
+
+## Memory Management Strategy
+
+### Use CLAUDE.md When
+- Information needed in 80%+ sessions
+- Critical project conventions
+- Common workflows
+- Protected areas and restrictions
+
+### Use /docs Instead When
+- Detailed architecture docs
+- API specifications
+- Onboarding guides
+- Reference material used occasionally
+
+### Decision Matrix
+```
+Every session?  → CLAUDE.md
+Occasionally?   → /docs with @import
+Rarely?         → Provide when needed
+```
+
+## Commands for Memory Management
+
+```bash
+/memory          # View loaded memory files
+/clear           # Reset context (use between tasks)
+/compact         # Compress context (slow, use sparingly)
+```
+
+## Common Mistakes & Fixes
+
+| Mistake | Fix |
+|---------|-----|
+| 5000+ lines | Split into /docs with @imports |
+| Vague instructions | Add concrete examples |
+| Generic advice | Document specific patterns |
+| Never updating | Review quarterly |
+| Everything documented | Only session-critical info |
+| No restrictions | Add "Do NOT" section |
+| Ignoring cost | Minimize; tokens matter |
+
+## Optimization Tips
+
+**Iterate Like a Prompt**
+- Test effectiveness over sessions
+- Remove unused sections
+- Add frequently-repeated instructions
+- Refine based on actual usage
+
+**Balance Investment**
+- Upfront token cost for long-term savings
+- Detailed context reduces iteration cycles
+- Don't be stingy with helpful information
+
+**Regular Maintenance**
+- Review quarterly or when patterns change
+- Remove outdated conventions
+- Update tech stack changes
+- Prune unused imports
+
+## Pre-Commit Checklist
+
+Before finalizing CLAUDE.md:
+
+- [ ] Common commands with descriptions
+- [ ] Specific code style (not generic)
+- [ ] Unique architectural patterns
+- [ ] Clear "Do NOT" section
+- [ ] Under 200 lines or uses @imports
+- [ ] No sensitive information
+- [ ] Organized with clear headings
+- [ ] Concrete examples
+- [ ] Team reviewed
+- [ ] Up to date with current practices
+
+## Quick Reference
+
+**File Locations**
+- Global: `~/.claude/CLAUDE.md`
+- Project: `./CLAUDE.md` or `./.claude/CLAUDE.md`
+- Local: `./CLAUDE.local.md` (gitignored)
+
+**Import Syntax**
+- Project file: `@README.md`
+- Docs folder: `@docs/architecture.md`
+- Home dir: `@~/.claude/preferences.md`
+
+**Check Memory**
+- Command: `/memory`
+- View hierarchy and loaded files
+
+**Context Management**
+- Fresh start: `/clear`
+- Between tasks: `/clear` (preferred)
+- Compress: `/compact` (slow, rare)
+
+## Philosophy
+
+"CLAUDE.md is not a documentation dump—it's a curated set of instructions that makes every session more effective."
+
+Start minimal. Add what saves repeated explanations. Iterate based on usage. Review and prune regularly.
+
+Specificity beats verbosity. Clarity beats comprehensiveness. Evolution beats perfection.

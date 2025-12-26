@@ -1,0 +1,36 @@
+{
+  "session_id": "ff4c3349-7ca8-4964-9371-956618e392a3",
+  "transcript_path": "/Users/melvynx/.claude/projects/-Users-melvynx-Brain-1-PROJECTS-AIBlueprint-projects-aiblueprint-cli-premium/ff4c3349-7ca8-4964-9371-956618e392a3.jsonl",
+  "cwd": "/Users/melvynx/Brain/1.PROJECTS/AIBlueprint/projects/aiblueprint-cli-premium",
+  "model": {
+    "id": "claude-opus-4-5-20251101",
+    "display_name": "Opus 4.5"
+  },
+  "workspace": {
+    "current_dir": "/Users/melvynx/Brain/1.PROJECTS/AIBlueprint/projects/aiblueprint-cli-premium",
+    "project_dir": "/Users/melvynx/Brain/1.PROJECTS/AIBlueprint/projects/aiblueprint-cli-premium"
+  },
+  "version": "2.0.76",
+  "output_style": {
+    "name": "default"
+  },
+  "cost": {
+    "total_cost_usd": 0.5772827499999998,
+    "total_duration_ms": 187122,
+    "total_api_duration_ms": 132082,
+    "total_lines_added": 0,
+    "total_lines_removed": 0
+  },
+  "context_window": {
+    "total_input_tokens": 15889,
+    "total_output_tokens": 3914,
+    "context_window_size": 200000,
+    "current_usage": {
+      "input_tokens": 8,
+      "output_tokens": 385,
+      "cache_creation_input_tokens": 312,
+      "cache_read_input_tokens": 33014
+    }
+  },
+  "exceeds_200k_tokens": false
+}

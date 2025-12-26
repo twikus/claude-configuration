@@ -589,7 +589,7 @@ See [references/patterns.md](references/patterns.md) for more examples.
 **Slash command specific references:**
 
 - [arguments.md](references/arguments.md) - #$ARGUMENTS, positional args, parsing strategies
-- [patterns.md](references/patterns.md) - Git workflows, code analysis, file operations
+- [patterns.md](references/patterns.md) - Git workflows, code analysis, file operations, **subagent patterns**
 - [tool-restrictions.md](references/tool-restrictions.md) - Bash patterns, security best practices
 - [prompt-examples.md](references/prompt-examples.md) - Real-world command examples by pattern
 

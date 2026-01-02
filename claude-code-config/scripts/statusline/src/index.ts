@@ -1,7 +1,8 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 import { readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { StatuslineConfig } from "../statusline.config";
 import { defaultConfig } from "../statusline.config";
 import { getContextData } from "./lib/context";
@@ -21,9 +22,12 @@ import { getTodayCostV2, saveSessionV2 } from "./lib/spend-v2";
 import type { HookInput } from "./lib/types";
 import { getUsageLimits } from "./lib/usage-limits";
 
-const CONFIG_FILE_PATH = join(import.meta.dir, "..", "statusline.config.json");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const CONFIG_FILE_PATH = join(__dirname, "..", "statusline.config.json");
 const LAST_PAYLOAD_PATH = join(
-	import.meta.dir,
+	__dirname,
 	"..",
 	"data",
 	"last_payload.txt",

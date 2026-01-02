@@ -37,7 +37,9 @@
       "Bash(grep:*)",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_take_screenshot",
-      "mcp__exa__get_code_context_exa"
+      "mcp__exa__get_code_context_exa",
+      "Bash(npx :*)",
+      "Bash(tsx :*)"
     ],
     "deny": [],
     "defaultMode": "bypassPermissions"
@@ -50,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun /Users/melvynx/.claude/scripts/command-validator/src/cli.ts"
+            "command": "npx tsx /home/student/.claude/scripts/command-validator/src/cli.ts"
           }
         ]
       }
@@ -61,7 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay -v 0.1 /Users/melvynx/.claude/song/finish.mp3"
+            "command": "paplay /home/student/.claude/song/finish.mp3 2>/dev/null || aplay /home/student/.claude/song/finish.mp3 2>/dev/null || true"
           }
         ]
       }
@@ -72,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay -v 0.1 /Users/melvynx/.claude/song/need-human.mp3"
+            "command": "paplay /home/student/.claude/song/need-human.mp3 2>/dev/null || aplay /home/student/.claude/song/need-human.mp3 2>/dev/null || true"
           }
         ]
       }
@@ -80,7 +82,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bun /Users/melvynx/.claude/scripts/statusline/src/index.ts",
+    "command": "npx tsx /home/student/.claude/scripts/statusline/src/index.ts",
     "padding": 0
   },
   "enabledPlugins": {

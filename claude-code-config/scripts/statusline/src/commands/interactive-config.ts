@@ -1,15 +1,19 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 import { readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { StatuslineConfig } from "../../statusline.config";
 import { defaultConfig } from "../../statusline.config";
 import { colors } from "../lib/formatters";
 import { renderStatusline } from "../lib/renderer";
 import type { HookInput } from "../lib/types";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const CONFIG_FILE_PATH = join(
-	import.meta.dir,
+	__dirname,
 	"..",
 	"..",
 	"statusline.config.json",
@@ -664,7 +668,7 @@ const menuOptions: MenuOption[] = [
 ];
 
 async function loadFixture(): Promise<HookInput> {
-	const projectRoot = join(import.meta.dir, "..", "..");
+	const projectRoot = join(__dirname, "..", "..");
 	const fixturePath = join(projectRoot, "fixtures", "test-input.json");
 	const content = await readFile(fixturePath, "utf-8");
 	return JSON.parse(content);

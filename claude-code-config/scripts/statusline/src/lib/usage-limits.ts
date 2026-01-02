@@ -1,7 +1,14 @@
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
-import { $ } from "bun";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
+import { homedir, platform } from "node:os";
+
+const execAsync = promisify(exec);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export interface UsageLimits {
 	five_hour: {
@@ -32,18 +39,41 @@ interface Credentials {
 const CACHE_DURATION_MS = 60 * 1000; // 1 minute
 
 function getCacheFilePath(): string {
-	const projectRoot = join(import.meta.dir, "..", "..");
+	const projectRoot = join(__dirname, "..", "..");
 	return join(projectRoot, "data", "usage-limits-cache.json");
 }
 
 export async function getCredentials(): Promise<string | null> {
 	try {
-		const result =
-			await $`security find-generic-password -s "Claude Code-credentials" -w`
-				.quiet()
-				.text();
-		const creds: Credentials = JSON.parse(result.trim());
-		return creds.claudeAiOauth.accessToken;
+		const os = platform();
+
+		if (os === "darwin") {
+			// macOS: use security command
+			const { stdout } = await execAsync(
+				'security find-generic-password -s "Claude Code-credentials" -w'
+			);
+			const creds: Credentials = JSON.parse(stdout.trim());
+			return creds.claudeAiOauth.accessToken;
+		} else {
+			// Linux: try to read from Claude's config directory
+			const credentialsPath = join(homedir(), ".claude", ".credentials.json");
+			if (existsSync(credentialsPath)) {
+				const content = await readFile(credentialsPath, "utf-8");
+				const creds: Credentials = JSON.parse(content);
+				return creds.claudeAiOauth.accessToken;
+			}
+
+			// Alternative: check for secret-tool (Linux keyring)
+			try {
+				const { stdout } = await execAsync(
+					'secret-tool lookup service "Claude Code-credentials"'
+				);
+				const creds: Credentials = JSON.parse(stdout.trim());
+				return creds.claudeAiOauth.accessToken;
+			} catch {
+				return null;
+			}
+		}
 	} catch {
 		return null;
 	}

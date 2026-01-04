@@ -1,13 +1,9 @@
-import Database from "better-sqlite3";
+import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { join } from "node:path";
 
 function getDbPath(): string {
-	const projectRoot = join(__dirname, "..", "..");
+	const projectRoot = join(import.meta.dir, "..", "..");
 	const dataDir = join(projectRoot, "data");
 
 	if (!existsSync(dataDir)) {
@@ -17,9 +13,29 @@ function getDbPath(): string {
 	return join(dataDir, "statusline.db");
 }
 
-let db: Database.Database | null = null;
+let db: Database | null = null;
 
-export function getDb(): Database.Database {
+function runCumulativeCountedMigration(database: Database): void {
+	const sessions = database
+		.query<{ session_id: string }, []>("SELECT session_id FROM sessions")
+		.all();
+
+	for (const session of sessions) {
+		const result = database
+			.query<{ total: number }, [string]>(
+				"SELECT COALESCE(SUM(counted_cost), 0) as total FROM session_period_tracking WHERE session_id = ?",
+			)
+			.get(session.session_id);
+		const totalCounted = result?.total ?? 0;
+
+		database.run(
+			"UPDATE sessions SET cumulative_counted = ? WHERE session_id = ?",
+			[totalCounted, session.session_id],
+		);
+	}
+}
+
+export function getDb(): Database {
 	if (!db) {
 		db = new Database(getDbPath());
 		initializeSchema();
@@ -30,7 +46,7 @@ export function getDb(): Database.Database {
 function initializeSchema(): void {
 	const database = db!;
 
-	database.exec(`
+	database.run(`
 		CREATE TABLE IF NOT EXISTS sessions (
 			session_id TEXT PRIMARY KEY,
 			total_cost REAL NOT NULL DEFAULT 0,
@@ -40,12 +56,24 @@ function initializeSchema(): void {
 			lines_added INTEGER NOT NULL DEFAULT 0,
 			lines_removed INTEGER NOT NULL DEFAULT 0,
 			last_resets_at TEXT,
+			cumulative_counted REAL NOT NULL DEFAULT 0,
 			created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
 			updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
 		)
 	`);
 
-	database.exec(`
+	// Migration: add cumulative_counted column if it doesn't exist
+	try {
+		database.run(
+			`ALTER TABLE sessions ADD COLUMN cumulative_counted REAL NOT NULL DEFAULT 0`,
+		);
+		// Column was just added, run migration to populate it
+		runCumulativeCountedMigration(database);
+	} catch {
+		// Column already exists
+	}
+
+	database.run(`
 		CREATE TABLE IF NOT EXISTS session_period_tracking (
 			session_id TEXT NOT NULL,
 			period_id TEXT NOT NULL,
@@ -56,7 +84,7 @@ function initializeSchema(): void {
 		)
 	`);
 
-	database.exec(`
+	database.run(`
 		CREATE TABLE IF NOT EXISTS periods (
 			period_id TEXT PRIMARY KEY,
 			total_cost REAL NOT NULL DEFAULT 0,
@@ -67,15 +95,15 @@ function initializeSchema(): void {
 		)
 	`);
 
-	database.exec(`
+	database.run(`
 		CREATE INDEX IF NOT EXISTS idx_sessions_date ON sessions(date)
 	`);
 
-	database.exec(`
+	database.run(`
 		CREATE INDEX IF NOT EXISTS idx_tracking_period ON session_period_tracking(period_id)
 	`);
 
-	database.exec(`
+	database.run(`
 		CREATE INDEX IF NOT EXISTS idx_periods_date ON periods(date)
 	`);
 }
@@ -89,6 +117,7 @@ export interface SessionRow {
 	lines_added: number;
 	lines_removed: number;
 	last_resets_at: string | null;
+	cumulative_counted: number;
 }
 
 export interface PeriodRow {
@@ -107,15 +136,17 @@ export interface TrackingRow {
 
 export function getSession(sessionId: string): SessionRow | null {
 	const database = getDb();
-	const stmt = database.prepare("SELECT * FROM sessions WHERE session_id = ?");
-	return stmt.get(sessionId) as SessionRow | null;
+	return database
+		.query<SessionRow, [string]>("SELECT * FROM sessions WHERE session_id = ?")
+		.get(sessionId);
 }
 
 export function upsertSession(session: SessionRow): void {
 	const database = getDb();
-	const stmt = database.prepare(`
-		INSERT INTO sessions (session_id, total_cost, cwd, date, duration_ms, lines_added, lines_removed, last_resets_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%s', 'now'))
+	database.run(
+		`
+		INSERT INTO sessions (session_id, total_cost, cwd, date, duration_ms, lines_added, lines_removed, last_resets_at, cumulative_counted, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, strftime('%s', 'now'))
 		ON CONFLICT(session_id) DO UPDATE SET
 			total_cost = excluded.total_cost,
 			cwd = excluded.cwd,
@@ -124,17 +155,20 @@ export function upsertSession(session: SessionRow): void {
 			lines_added = excluded.lines_added,
 			lines_removed = excluded.lines_removed,
 			last_resets_at = excluded.last_resets_at,
+			cumulative_counted = excluded.cumulative_counted,
 			updated_at = strftime('%s', 'now')
-	`);
-	stmt.run(
-		session.session_id,
-		session.total_cost,
-		session.cwd,
-		session.date,
-		session.duration_ms,
-		session.lines_added,
-		session.lines_removed,
-		session.last_resets_at,
+	`,
+		[
+			session.session_id,
+			session.total_cost,
+			session.cwd,
+			session.date,
+			session.duration_ms,
+			session.lines_added,
+			session.lines_removed,
+			session.last_resets_at,
+			session.cumulative_counted,
+		],
 	);
 }
 
@@ -143,39 +177,44 @@ export function getTracking(
 	periodId: string,
 ): TrackingRow | null {
 	const database = getDb();
-	const stmt = database.prepare(
-		"SELECT * FROM session_period_tracking WHERE session_id = ? AND period_id = ?",
-	);
-	return stmt.get(sessionId, periodId) as TrackingRow | null;
+	return database
+		.query<TrackingRow, [string, string]>(
+			"SELECT * FROM session_period_tracking WHERE session_id = ? AND period_id = ?",
+		)
+		.get(sessionId, periodId);
 }
 
 export function upsertTracking(tracking: TrackingRow): void {
 	const database = getDb();
-	const stmt = database.prepare(`
+	database.run(
+		`
 		INSERT INTO session_period_tracking (session_id, period_id, counted_cost, last_session_cost, updated_at)
 		VALUES (?, ?, ?, ?, strftime('%s', 'now'))
 		ON CONFLICT(session_id, period_id) DO UPDATE SET
 			counted_cost = excluded.counted_cost,
 			last_session_cost = excluded.last_session_cost,
 			updated_at = strftime('%s', 'now')
-	`);
-	stmt.run(
-		tracking.session_id,
-		tracking.period_id,
-		tracking.counted_cost,
-		tracking.last_session_cost,
+	`,
+		[
+			tracking.session_id,
+			tracking.period_id,
+			tracking.counted_cost,
+			tracking.last_session_cost,
+		],
 	);
 }
 
 export function getPeriod(periodId: string): PeriodRow | null {
 	const database = getDb();
-	const stmt = database.prepare("SELECT * FROM periods WHERE period_id = ?");
-	return stmt.get(periodId) as PeriodRow | null;
+	return database
+		.query<PeriodRow, [string]>("SELECT * FROM periods WHERE period_id = ?")
+		.get(periodId);
 }
 
 export function upsertPeriod(period: PeriodRow): void {
 	const database = getDb();
-	const stmt = database.prepare(`
+	database.run(
+		`
 		INSERT INTO periods (period_id, total_cost, utilization, date, updated_at)
 		VALUES (?, ?, ?, ?, strftime('%s', 'now'))
 		ON CONFLICT(period_id) DO UPDATE SET
@@ -183,49 +222,92 @@ export function upsertPeriod(period: PeriodRow): void {
 			utilization = excluded.utilization,
 			date = excluded.date,
 			updated_at = strftime('%s', 'now')
-	`);
-	stmt.run(period.period_id, period.total_cost, period.utilization, period.date);
+	`,
+		[period.period_id, period.total_cost, period.utilization, period.date],
+	);
 }
 
 export function addToPeriodCost(periodId: string, delta: number): void {
 	const database = getDb();
 	const today = new Date().toISOString().split("T")[0];
 
-	const stmt = database.prepare(`
+	database.run(
+		`
 		INSERT INTO periods (period_id, total_cost, utilization, date, updated_at)
 		VALUES (?, ?, 0, ?, strftime('%s', 'now'))
 		ON CONFLICT(period_id) DO UPDATE SET
 			total_cost = total_cost + ?,
 			updated_at = strftime('%s', 'now')
-	`);
-	stmt.run(periodId, delta, today, delta);
+	`,
+		[periodId, delta, today, delta],
+	);
 }
 
 export function getPeriodCost(periodId: string): number {
-	const period = getPeriod(periodId);
-	return period?.total_cost ?? 0;
+	const database = getDb();
+	// Calculate correct total by capping each session's counted_cost at its actual total_cost
+	// This handles cases where counted_cost was overcounted due to session restarts
+	const result = database
+		.query<{ total: number }, [string]>(
+			`
+			SELECT COALESCE(SUM(MIN(spt.counted_cost, s.total_cost)), 0) as total
+			FROM session_period_tracking spt
+			JOIN sessions s ON s.session_id = spt.session_id
+			WHERE spt.period_id = ?
+			`,
+		)
+		.get(periodId);
+	return result?.total ?? 0;
 }
 
 export function getSessionsByDate(date: string): SessionRow[] {
 	const database = getDb();
-	const stmt = database.prepare("SELECT * FROM sessions WHERE date = ?");
-	return stmt.all(date) as SessionRow[];
+	return database
+		.query<SessionRow, [string]>("SELECT * FROM sessions WHERE date = ?")
+		.all(date);
 }
 
 export function getTodaySessionsTotal(): number {
 	const database = getDb();
 	const today = new Date().toISOString().split("T")[0];
-	const stmt = database.prepare(
-		"SELECT COALESCE(SUM(total_cost), 0) as total FROM sessions WHERE date = ?",
-	);
-	const result = stmt.get(today) as { total: number } | undefined;
+	const result = database
+		.query<{ total: number }, [string]>(
+			"SELECT COALESCE(SUM(total_cost), 0) as total FROM sessions WHERE date = ?",
+		)
+		.get(today);
 	return result?.total ?? 0;
 }
 
 export function getAllSessions(): SessionRow[] {
 	const database = getDb();
-	const stmt = database.prepare("SELECT * FROM sessions ORDER BY date DESC");
-	return stmt.all() as SessionRow[];
+	return database
+		.query<SessionRow, []>("SELECT * FROM sessions ORDER BY date DESC")
+		.all();
+}
+
+export function getSessionTotalCounted(sessionId: string): number {
+	const database = getDb();
+	const result = database
+		.query<{ total: number }, [string]>(
+			"SELECT COALESCE(SUM(counted_cost), 0) as total FROM session_period_tracking WHERE session_id = ?",
+		)
+		.get(sessionId);
+	return result?.total ?? 0;
+}
+
+export function migrateSessionsCumulativeCounted(): void {
+	const database = getDb();
+	const sessions = database
+		.query<{ session_id: string }, []>("SELECT session_id FROM sessions")
+		.all();
+
+	for (const session of sessions) {
+		const totalCounted = getSessionTotalCounted(session.session_id);
+		database.run(
+			"UPDATE sessions SET cumulative_counted = ? WHERE session_id = ?",
+			[totalCounted, session.session_id],
+		);
+	}
 }
 
 export function closeDb(): void {

@@ -1,27 +1,4 @@
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
-
-const execAsync = promisify(exec);
-
-interface ShellResult {
-	stdout: string;
-	stderr: string;
-	exitCode: number;
-}
-
-async function runCommand(command: string): Promise<ShellResult> {
-	try {
-		const { stdout, stderr } = await execAsync(command);
-		return { stdout, stderr, exitCode: 0 };
-	} catch (error: unknown) {
-		const err = error as { stdout?: string; stderr?: string; code?: number };
-		return {
-			stdout: err.stdout || "",
-			stderr: err.stderr || "",
-			exitCode: err.code || 1,
-		};
-	}
-}
+import { $ } from "bun";
 
 export interface GitStatus {
 	branch: string;
@@ -40,7 +17,7 @@ export interface GitStatus {
 
 export async function getGitStatus(): Promise<GitStatus> {
 	try {
-		const isGitRepo = await runCommand("git rev-parse --git-dir");
+		const isGitRepo = await $`git rev-parse --git-dir`.quiet().nothrow();
 		if (isGitRepo.exitCode !== 0) {
 			return {
 				branch: "no-git",
@@ -50,17 +27,21 @@ export async function getGitStatus(): Promise<GitStatus> {
 			};
 		}
 
-		const branchResult = await runCommand("git branch --show-current");
-		const branch = branchResult.stdout.trim() || "detached";
+		const branchResult = await $`git branch --show-current`.quiet().text();
+		const branch = branchResult.trim() || "detached";
 
-		const diffCheck = await runCommand("git diff-index --quiet HEAD --");
-		const cachedCheck = await runCommand("git diff-index --quiet --cached HEAD --");
+		const diffCheck = await $`git diff-index --quiet HEAD --`.quiet().nothrow();
+		const cachedCheck = await $`git diff-index --quiet --cached HEAD --`
+			.quiet()
+			.nothrow();
 
 		if (diffCheck.exitCode !== 0 || cachedCheck.exitCode !== 0) {
-			const unstagedDiff = await runCommand("git diff --numstat");
-			const stagedDiff = await runCommand("git diff --cached --numstat");
-			const stagedFilesResult = await runCommand("git diff --cached --name-only");
-			const unstagedFilesResult = await runCommand("git diff --name-only");
+			const unstagedDiff = await $`git diff --numstat`.quiet().text();
+			const stagedDiff = await $`git diff --cached --numstat`.quiet().text();
+			const stagedFilesResult = await $`git diff --cached --name-only`
+				.quiet()
+				.text();
+			const unstagedFilesResult = await $`git diff --name-only`.quiet().text();
 
 			const parseStats = (diff: string) => {
 				let added = 0;
@@ -76,13 +57,13 @@ export async function getGitStatus(): Promise<GitStatus> {
 				return { added, deleted };
 			};
 
-			const unstagedStats = parseStats(unstagedDiff.stdout);
-			const stagedStats = parseStats(stagedDiff.stdout);
+			const unstagedStats = parseStats(unstagedDiff);
+			const stagedStats = parseStats(stagedDiff);
 
-			const stagedFilesCount = stagedFilesResult.stdout
+			const stagedFilesCount = stagedFilesResult
 				.split("\n")
 				.filter((f) => f.trim()).length;
-			const unstagedFilesCount = unstagedFilesResult.stdout
+			const unstagedFilesCount = unstagedFilesResult
 				.split("\n")
 				.filter((f) => f.trim()).length;
 

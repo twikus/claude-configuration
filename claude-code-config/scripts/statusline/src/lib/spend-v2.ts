@@ -30,13 +30,13 @@ function normalizeResetsAt(resetsAt: string): string {
 /**
  * Save a session and track the delta for the current period.
  *
- * Key insight: We only add the DELTA to the period cost, not the full session cost.
+ * Key insight: We track cumulative_counted to prevent double-counting after session restarts.
  *
- * Example:
- * - Session X has total cost $24
- * - We already tracked $10 for this session in this period
- * - Delta = $24 - $10 = $14
- * - We add $14 to the period cost (not $24!)
+ * When Claude Code restarts, the session's cost counter resets to 0 but the session_id stays the same.
+ * Without cumulative tracking, the new accumulation would be counted AGAIN.
+ *
+ * Solution: Only count cost that exceeds what we've EVER counted for this session.
+ * actualNewCost = max(0, newTotalCost - cumulative_counted)
  */
 export async function saveSessionV2(
 	input: HookInput,
@@ -58,7 +58,14 @@ export async function saveSessionV2(
 		: null;
 
 	const existingSession = getSession(sessionId);
-	const oldTotalCost = existingSession?.total_cost ?? 0;
+	const cumulativeCounted = existingSession?.cumulative_counted ?? 0;
+
+	// Calculate the actual new cost that hasn't been counted yet
+	// This handles session restarts: if newTotalCost < cumulativeCounted, actualNewCost = 0
+	const actualNewCost = Math.max(0, newTotalCost - cumulativeCounted);
+
+	// Update session with new cumulative counted value
+	const newCumulativeCounted = cumulativeCounted + actualNewCost;
 
 	upsertSession({
 		session_id: sessionId,
@@ -69,61 +76,36 @@ export async function saveSessionV2(
 		lines_added: input.cost.total_lines_added,
 		lines_removed: input.cost.total_lines_removed,
 		last_resets_at: normalizedPeriodId,
+		cumulative_counted: newCumulativeCounted,
 	});
 
 	if (!normalizedPeriodId) {
 		return;
 	}
 
-	const tracking = getTracking(sessionId, normalizedPeriodId);
+	// Only add to period if there's actual new cost
+	if (actualNewCost > 0) {
+		const tracking = getTracking(sessionId, normalizedPeriodId);
 
-	let periodDelta: number;
+		upsertTracking({
+			session_id: sessionId,
+			period_id: normalizedPeriodId,
+			counted_cost: (tracking?.counted_cost ?? 0) + actualNewCost,
+			last_session_cost: newTotalCost,
+		});
 
-	if (tracking) {
-		const lastTrackedSessionCost = tracking.last_session_cost;
-		periodDelta = newTotalCost - lastTrackedSessionCost;
-
-		if (periodDelta > 0) {
-			upsertTracking({
-				session_id: sessionId,
-				period_id: normalizedPeriodId,
-				counted_cost: tracking.counted_cost + periodDelta,
-				last_session_cost: newTotalCost,
-			});
-		}
+		addToPeriodCost(normalizedPeriodId, actualNewCost);
 	} else {
-		// First time tracking this session in this period
-		// CRITICAL: We only track the DELTA from this point forward.
-		// If the session already has cost from previous periods, we DON'T count it.
-		// We set last_session_cost = newTotalCost so future updates only count the delta.
-		periodDelta = newTotalCost - oldTotalCost;
-
-		// Only add to period if this is a true new cost delta (not just first time seeing an old session)
-		const shouldCountDelta =
-			!existingSession || existingSession.last_resets_at === normalizedPeriodId;
-
-		if (periodDelta > 0 && shouldCountDelta) {
-			upsertTracking({
-				session_id: sessionId,
-				period_id: normalizedPeriodId,
-				counted_cost: periodDelta,
-				last_session_cost: newTotalCost,
-			});
-		} else {
-			// Session from a previous period - just start tracking from current cost
-			// Don't add anything to period cost (the cost was from before this period)
+		// No new cost, but update tracking to record we've seen this session
+		const tracking = getTracking(sessionId, normalizedPeriodId);
+		if (!tracking) {
 			upsertTracking({
 				session_id: sessionId,
 				period_id: normalizedPeriodId,
 				counted_cost: 0,
 				last_session_cost: newTotalCost,
 			});
-			periodDelta = 0; // Don't add to period total
 		}
-	}
-
-	if (periodDelta > 0) {
-		addToPeriodCost(normalizedPeriodId, periodDelta);
 	}
 }
 
@@ -155,6 +137,7 @@ export interface SpendSessionV2 {
 	lines_added: number;
 	lines_removed: number;
 	last_resets_at: string | null;
+	cumulative_counted: number;
 }
 
 export function getAllSessionsV2(): SpendSessionV2[] {
@@ -167,6 +150,7 @@ export function getAllSessionsV2(): SpendSessionV2[] {
 		lines_added: row.lines_added,
 		lines_removed: row.lines_removed,
 		last_resets_at: row.last_resets_at,
+		cumulative_counted: row.cumulative_counted,
 	}));
 }
 
@@ -180,6 +164,7 @@ export function getSessionsByDateV2(date: string): SpendSessionV2[] {
 		lines_added: row.lines_added,
 		lines_removed: row.lines_removed,
 		last_resets_at: row.last_resets_at,
+		cumulative_counted: row.cumulative_counted,
 	}));
 }
 

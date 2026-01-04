@@ -1,13 +1,9 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { getDb, upsertPeriod, upsertSession } from "../lib/database";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 interface OldSpendSession {
 	id: string;
@@ -33,7 +29,7 @@ interface OldDailyUsageEntry {
 }
 
 async function loadOldSpendData(): Promise<OldSpendData | null> {
-	const projectRoot = join(__dirname, "..", "..");
+	const projectRoot = join(import.meta.dir, "..", "..");
 	const spendFile = join(projectRoot, "data", "spend.json");
 
 	if (!existsSync(spendFile)) {
@@ -46,7 +42,7 @@ async function loadOldSpendData(): Promise<OldSpendData | null> {
 }
 
 async function loadOldDailyUsage(): Promise<OldDailyUsageEntry[]> {
-	const projectRoot = join(__dirname, "..", "..");
+	const projectRoot = join(import.meta.dir, "..", "..");
 	const dailyUsageFile = join(projectRoot, "data", "daily-usage.json");
 
 	if (!existsSync(dailyUsageFile)) {

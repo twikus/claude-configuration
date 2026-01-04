@@ -1,6 +1,0 @@
-# Ignore all data files
-*.db
-*.json
-
-# But keep this .gitignore
-!.gitignore

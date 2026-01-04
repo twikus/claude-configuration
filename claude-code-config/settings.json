@@ -81,7 +81,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "npx tsx /home/student/.claude/scripts/statusline/src/index.ts",
+    "command": "bun run /home/student/.claude/scripts/statusline/src/index.ts",
     "padding": 0
   },
   "spinnerTipsEnabled": false,

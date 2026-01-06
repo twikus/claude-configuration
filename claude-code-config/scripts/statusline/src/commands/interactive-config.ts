@@ -3,7 +3,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { defaultConfig, type StatuslineConfig } from "../lib/config";
-import { renderStatuslineRaw, type RawStatuslineData } from "../lib/render-pure";
 import { colors } from "../lib/formatters";
 import {
 	cycle,
@@ -16,8 +15,17 @@ import {
 	toggle,
 } from "../lib/menu-factories";
 import { PRESETS } from "../lib/presets";
+import {
+	type RawStatuslineData,
+	renderStatuslineRaw,
+} from "../lib/render-pure";
 
-const CONFIG_FILE_PATH = join(import.meta.dir, "..", "..", "statusline.config.json");
+const CONFIG_FILE_PATH = join(
+	import.meta.dir,
+	"..",
+	"..",
+	"statusline.config.json",
+);
 
 // ─────────────────────────────────────────────────────────────
 // RAW MOCK DATA
@@ -37,8 +45,14 @@ const MOCK_DATA: RawStatuslineData = {
 	contextTokens: 75000,
 	contextPercentage: 38,
 	usageLimits: {
-		five_hour: { utilization: 29, resets_at: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString() },
-		seven_day: { utilization: 45, resets_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() },
+		five_hour: {
+			utilization: 29,
+			resets_at: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
+		},
+		seven_day: {
+			utilization: 45,
+			resets_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+		},
 	},
 	periodCost: 36,
 	todayCost: 12.5,
@@ -50,22 +64,38 @@ const MOCK_DATA: RawStatuslineData = {
 
 const PROGRESS_STYLES = ["None", "Braille", "Rectangle", "Filled"] as const;
 
-function progressStyleCycle(basePath: string, parentHidden: (c: StatuslineConfig) => boolean): MenuOption {
+function progressStyleCycle(
+	basePath: string,
+	parentHidden: (c: StatuslineConfig) => boolean,
+): MenuOption {
 	return {
 		path: `${basePath}.progressBar.style`,
 		label: "Progress bar",
 		type: "cycle",
 		choices: [...PROGRESS_STYLES],
 		getValue: (c) => {
-			const bar = getNestedValue(c, `${basePath}.progressBar`) as { enabled: boolean; style: string };
+			const bar = getNestedValue(c, `${basePath}.progressBar`) as {
+				enabled: boolean;
+				style: string;
+			};
 			if (!bar.enabled) return "None";
 			return bar.style.charAt(0).toUpperCase() + bar.style.slice(1);
 		},
 		cycle: (c, dir) => {
-			const bar = getNestedValue(c, `${basePath}.progressBar`) as { enabled: boolean; style: string };
-			const current = bar.enabled ? bar.style.charAt(0).toUpperCase() + bar.style.slice(1) : "None";
-			const idx = PROGRESS_STYLES.indexOf(current as typeof PROGRESS_STYLES[number]);
-			const next = PROGRESS_STYLES[(idx + dir + PROGRESS_STYLES.length) % PROGRESS_STYLES.length];
+			const bar = getNestedValue(c, `${basePath}.progressBar`) as {
+				enabled: boolean;
+				style: string;
+			};
+			const current = bar.enabled
+				? bar.style.charAt(0).toUpperCase() + bar.style.slice(1)
+				: "None";
+			const idx = PROGRESS_STYLES.indexOf(
+				current as (typeof PROGRESS_STYLES)[number],
+			);
+			const next =
+				PROGRESS_STYLES[
+					(idx + dir + PROGRESS_STYLES.length) % PROGRESS_STYLES.length
+				];
 			if (next === "None") {
 				setNestedValue(c, `${basePath}.progressBar.enabled`, false);
 			} else {
@@ -135,17 +165,40 @@ const tabs: Tab[] = [
 			toggle("session.cost.enabled", "Cost display"),
 			toggle("session.duration.enabled", "Duration"),
 			toggle("session.tokens.enabled", "Token count"),
-			toggle("session.tokens.showMax", "  Show max", { hidden: (c) => !c.session.tokens.enabled }),
-			toggle("session.tokens.showDecimals", "  Decimals", { hidden: (c) => !c.session.tokens.enabled }),
+			toggle("session.tokens.showMax", "  Show max", {
+				hidden: (c) => !c.session.tokens.enabled,
+			}),
+			toggle("session.tokens.showDecimals", "  Decimals", {
+				hidden: (c) => !c.session.tokens.enabled,
+			}),
 			toggle("session.percentage.enabled", "Context %"),
-			toggle("session.percentage.showValue", "  Show value", { hidden: (c) => !c.session.percentage.enabled }),
-			progressStyleCycle("session.percentage", (c) => !c.session.percentage.enabled),
-			cycle("session.percentage.progressBar.length", "    Length", PROGRESS_BAR_LENGTHS, {
-				hidden: (c) => !c.session.percentage.enabled || !c.session.percentage.progressBar.enabled,
+			toggle("session.percentage.showValue", "  Show value", {
+				hidden: (c) => !c.session.percentage.enabled,
 			}),
-			cycle("session.percentage.progressBar.color", "    Color", PROGRESS_BAR_COLORS, {
-				hidden: (c) => !c.session.percentage.enabled || !c.session.percentage.progressBar.enabled,
-			}),
+			progressStyleCycle(
+				"session.percentage",
+				(c) => !c.session.percentage.enabled,
+			),
+			cycle(
+				"session.percentage.progressBar.length",
+				"    Length",
+				PROGRESS_BAR_LENGTHS,
+				{
+					hidden: (c) =>
+						!c.session.percentage.enabled ||
+						!c.session.percentage.progressBar.enabled,
+				},
+			),
+			cycle(
+				"session.percentage.progressBar.color",
+				"    Color",
+				PROGRESS_BAR_COLORS,
+				{
+					hidden: (c) =>
+						!c.session.percentage.enabled ||
+						!c.session.percentage.progressBar.enabled,
+				},
+			),
 			toggle("context.useUsableContextOnly", "45k buffer"),
 		],
 	},
@@ -158,19 +211,39 @@ const tabs: Tab[] = [
 				label: "5-hour limit",
 				type: "cycle" as const,
 				choices: ["Enabled", "Disabled"],
-				getValue: (c) => c.limits.enabled ? "Enabled" : "Disabled",
-				cycle: (c) => { c.limits.enabled = !c.limits.enabled; },
+				getValue: (c) => (c.limits.enabled ? "Enabled" : "Disabled"),
+				cycle: (c) => {
+					c.limits.enabled = !c.limits.enabled;
+				},
 			},
-			toggle("limits.showTimeLeft", "  Time remaining", { hidden: (c) => !c.limits.enabled }),
-			toggle("limits.cost.enabled", "  Period cost", { hidden: (c) => !c.limits.enabled }),
-			toggle("limits.percentage.showValue", "  Show % value", { hidden: (c) => !c.limits.enabled }),
+			toggle("limits.showTimeLeft", "  Time remaining", {
+				hidden: (c) => !c.limits.enabled,
+			}),
+			toggle("limits.cost.enabled", "  Period cost", {
+				hidden: (c) => !c.limits.enabled,
+			}),
+			toggle("limits.percentage.showValue", "  Show % value", {
+				hidden: (c) => !c.limits.enabled,
+			}),
 			progressStyleCycle("limits.percentage", (c) => !c.limits.enabled),
-			cycle("limits.percentage.progressBar.length", "    Length", PROGRESS_BAR_LENGTHS, {
-				hidden: (c) => !c.limits.enabled || !c.limits.percentage.progressBar.enabled,
-			}),
-			cycle("limits.percentage.progressBar.color", "    Color", PROGRESS_BAR_COLORS, {
-				hidden: (c) => !c.limits.enabled || !c.limits.percentage.progressBar.enabled,
-			}),
+			cycle(
+				"limits.percentage.progressBar.length",
+				"    Length",
+				PROGRESS_BAR_LENGTHS,
+				{
+					hidden: (c) =>
+						!c.limits.enabled || !c.limits.percentage.progressBar.enabled,
+				},
+			),
+			cycle(
+				"limits.percentage.progressBar.color",
+				"    Color",
+				PROGRESS_BAR_COLORS,
+				{
+					hidden: (c) =>
+						!c.limits.enabled || !c.limits.percentage.progressBar.enabled,
+				},
+			),
 		],
 	},
 	{
@@ -189,20 +262,48 @@ const tabs: Tab[] = [
 				},
 				cycle: (c, dir) => {
 					const modes = [true, "90%", false] as const;
-					const idx = c.weeklyUsage.enabled === true ? 0 : c.weeklyUsage.enabled === "90%" ? 1 : 2;
+					const idx =
+						c.weeklyUsage.enabled === true
+							? 0
+							: c.weeklyUsage.enabled === "90%"
+								? 1
+								: 2;
 					c.weeklyUsage.enabled = modes[(idx + dir + 3) % 3];
 				},
 			},
-			toggle("weeklyUsage.showTimeLeft", "  Time remaining", { hidden: (c) => c.weeklyUsage.enabled === false }),
-			toggle("weeklyUsage.cost.enabled", "  Cost", { hidden: (c) => c.weeklyUsage.enabled === false }),
-			toggle("weeklyUsage.percentage.showValue", "  Show % value", { hidden: (c) => c.weeklyUsage.enabled === false }),
-			progressStyleCycle("weeklyUsage.percentage", (c) => c.weeklyUsage.enabled === false),
-			cycle("weeklyUsage.percentage.progressBar.length", "    Length", PROGRESS_BAR_LENGTHS, {
-				hidden: (c) => c.weeklyUsage.enabled === false || !c.weeklyUsage.percentage.progressBar.enabled,
+			toggle("weeklyUsage.showTimeLeft", "  Time remaining", {
+				hidden: (c) => c.weeklyUsage.enabled === false,
 			}),
-			cycle("weeklyUsage.percentage.progressBar.color", "    Color", PROGRESS_BAR_COLORS, {
-				hidden: (c) => c.weeklyUsage.enabled === false || !c.weeklyUsage.percentage.progressBar.enabled,
+			toggle("weeklyUsage.cost.enabled", "  Cost", {
+				hidden: (c) => c.weeklyUsage.enabled === false,
 			}),
+			toggle("weeklyUsage.percentage.showValue", "  Show % value", {
+				hidden: (c) => c.weeklyUsage.enabled === false,
+			}),
+			progressStyleCycle(
+				"weeklyUsage.percentage",
+				(c) => c.weeklyUsage.enabled === false,
+			),
+			cycle(
+				"weeklyUsage.percentage.progressBar.length",
+				"    Length",
+				PROGRESS_BAR_LENGTHS,
+				{
+					hidden: (c) =>
+						c.weeklyUsage.enabled === false ||
+						!c.weeklyUsage.percentage.progressBar.enabled,
+				},
+			),
+			cycle(
+				"weeklyUsage.percentage.progressBar.color",
+				"    Color",
+				PROGRESS_BAR_COLORS,
+				{
+					hidden: (c) =>
+						c.weeklyUsage.enabled === false ||
+						!c.weeklyUsage.percentage.progressBar.enabled,
+				},
+			),
 		],
 	},
 	{
@@ -214,14 +315,26 @@ const tabs: Tab[] = [
 				label: "Git info",
 				type: "cycle" as const,
 				choices: ["Enabled", "Disabled"],
-				getValue: (c) => c.git.enabled ? "Enabled" : "Disabled",
-				cycle: (c) => { c.git.enabled = !c.git.enabled; },
+				getValue: (c) => (c.git.enabled ? "Enabled" : "Disabled"),
+				cycle: (c) => {
+					c.git.enabled = !c.git.enabled;
+				},
 			},
-			toggle("git.showBranch", "  Branch name", { hidden: (c) => !c.git.enabled }),
-			toggle("git.showDirtyIndicator", "  Dirty indicator (*)", { hidden: (c) => !c.git.enabled }),
-			toggle("git.showChanges", "  Line changes (+/-)", { hidden: (c) => !c.git.enabled }),
-			toggle("git.showStaged", "  Staged files", { hidden: (c) => !c.git.enabled }),
-			toggle("git.showUnstaged", "  Unstaged files", { hidden: (c) => !c.git.enabled }),
+			toggle("git.showBranch", "  Branch name", {
+				hidden: (c) => !c.git.enabled,
+			}),
+			toggle("git.showDirtyIndicator", "  Dirty indicator (*)", {
+				hidden: (c) => !c.git.enabled,
+			}),
+			toggle("git.showChanges", "  Line changes (+/-)", {
+				hidden: (c) => !c.git.enabled,
+			}),
+			toggle("git.showStaged", "  Staged files", {
+				hidden: (c) => !c.git.enabled,
+			}),
+			toggle("git.showUnstaged", "  Unstaged files", {
+				hidden: (c) => !c.git.enabled,
+			}),
 		],
 	},
 	{
@@ -263,11 +376,19 @@ function renderPreview(config: StatuslineConfig): string {
 
 function renderTabs(activeIdx: number): string {
 	return tabs
-		.map((t, i) => (i === activeIdx ? colors.yellow(`[${t.label}]`) : colors.gray(` ${t.label} `)))
+		.map((t, i) =>
+			i === activeIdx
+				? colors.yellow(`[${t.label}]`)
+				: colors.gray(` ${t.label} `),
+		)
 		.join("");
 }
 
-function renderOptions(config: StatuslineConfig, tab: Tab, selIdx: number): string {
+function renderOptions(
+	config: StatuslineConfig,
+	tab: Tab,
+	selIdx: number,
+): string {
 	const visible = tab.options.filter((o) => !o.hidden || !o.hidden(config));
 	return visible
 		.map((opt, i) => {
@@ -277,7 +398,8 @@ function renderOptions(config: StatuslineConfig, tab: Tab, selIdx: number): stri
 
 			let display: string;
 			if (isPreset) {
-				const desc = "description" in opt ? colors.gray(` - ${opt.description}`) : "";
+				const desc =
+					"description" in opt ? colors.gray(` - ${opt.description}`) : "";
 				display = `${colors.cyan("◈")} ${opt.label}${desc}`;
 			} else if (opt.type === "boolean") {
 				display = `${val ? colors.green("●") : colors.gray("○")} ${opt.label}`;
@@ -291,7 +413,11 @@ function renderOptions(config: StatuslineConfig, tab: Tab, selIdx: number): stri
 		.join("\n");
 }
 
-function render(config: StatuslineConfig, tabIdx: number, selIdx: number): string {
+function render(
+	config: StatuslineConfig,
+	tabIdx: number,
+	selIdx: number,
+): string {
 	const tab = tabs[tabIdx];
 	const preview = renderPreview(config);
 	const previewLines = preview.split("\n");
@@ -322,7 +448,9 @@ async function main() {
 	process.stdin.resume();
 
 	const draw = () => {
-		const visible = tabs[tabIdx].options.filter((o) => !o.hidden || !o.hidden(config));
+		const visible = tabs[tabIdx].options.filter(
+			(o) => !o.hidden || !o.hidden(config),
+		);
 		if (selIdx >= visible.length) selIdx = Math.max(0, visible.length - 1);
 		process.stdout.write("\x1b[2J\x1b[H" + render(config, tabIdx, selIdx));
 	};
@@ -341,13 +469,19 @@ async function main() {
 		} else if (key === "\u001b[A" || key === "k") {
 			if (selIdx > 0) selIdx--;
 		} else if (key === "\u001b[B" || key === "j") {
-			const visible = tabs[tabIdx].options.filter((o) => !o.hidden || !o.hidden(config));
+			const visible = tabs[tabIdx].options.filter(
+				(o) => !o.hidden || !o.hidden(config),
+			);
 			if (selIdx < visible.length - 1) selIdx++;
 		} else if (key === "\r" || key === " ") {
-			const visible = tabs[tabIdx].options.filter((o) => !o.hidden || !o.hidden(config));
+			const visible = tabs[tabIdx].options.filter(
+				(o) => !o.hidden || !o.hidden(config),
+			);
 			const opt = visible[selIdx];
 			if ("isPreset" in opt && "presetIndex" in opt) {
-				config = JSON.parse(JSON.stringify(PRESETS[opt.presetIndex as number].config));
+				config = JSON.parse(
+					JSON.stringify(PRESETS[opt.presetIndex as number].config),
+				);
 			} else if (opt.type === "cycle" && opt.cycle) {
 				opt.cycle(config, 1);
 			} else if (opt.toggle) {

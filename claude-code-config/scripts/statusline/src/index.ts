@@ -5,15 +5,29 @@ import { join } from "node:path";
 import { defaultConfig, type StatuslineConfig } from "./lib/config";
 import { getContextData } from "./lib/context";
 import { getPeriodCost } from "./lib/database";
-import { colors, formatBranch, formatCost, formatDuration, formatPath } from "./lib/formatters";
+import {
+	colors,
+	formatBranch,
+	formatCost,
+	formatDuration,
+	formatPath,
+} from "./lib/formatters";
 import { getGitStatus } from "./lib/git";
-import { renderStatusline, type StatuslineData, type UsageLimit } from "./lib/render-pure";
+import {
+	renderStatusline,
+	type StatuslineData,
+	type UsageLimit,
+} from "./lib/render-pure";
 import { getTodayCostV2, saveSessionV2 } from "./lib/spend-v2";
 import type { HookInput } from "./lib/types";
 import { getUsageLimits } from "./lib/usage-limits";
 
 // Re-export from render-pure for backwards compatibility
-export { renderStatusline, type StatuslineData, type UsageLimit } from "./lib/render-pure";
+export {
+	renderStatusline,
+	type StatuslineData,
+	type UsageLimit,
+} from "./lib/render-pure";
 
 const CONFIG_FILE_PATH = join(import.meta.dir, "..", "statusline.config.json");
 const LAST_PAYLOAD_PATH = join(
@@ -68,21 +82,31 @@ async function main() {
 
 		const git = await getGitStatus();
 
-		let contextTokens: number;
-		let contextPercentage: number;
+		let contextTokens: number | null;
+		let contextPercentage: number | null;
 
 		const usePayloadContext =
 			config.context.usePayloadContextWindow && input.context_window;
 
-		if (usePayloadContext && input.context_window) {
-			const maxTokens =
-				input.context_window.context_window_size ||
-				config.context.maxContextTokens;
-			contextTokens = input.context_window.total_input_tokens;
-			contextPercentage = Math.min(
-				100,
-				Math.round((contextTokens / maxTokens) * 100),
-			);
+		if (usePayloadContext) {
+			const current = input.context_window?.current_usage;
+			if (current) {
+				contextTokens =
+					(current.input_tokens || 0) +
+					(current.cache_creation_input_tokens || 0) +
+					(current.cache_read_input_tokens || 0);
+				const maxTokens =
+					input.context_window?.context_window_size ||
+					config.context.maxContextTokens;
+				contextPercentage = Math.min(
+					100,
+					Math.round((contextTokens / maxTokens) * 100),
+				);
+			} else {
+				// No context data yet - session not started
+				contextTokens = null;
+				contextPercentage = null;
+			}
 		} else {
 			const contextData = await getContextData({
 				transcriptPath: input.transcript_path,

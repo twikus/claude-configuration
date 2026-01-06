@@ -44,8 +44,8 @@ export interface RawStatuslineData {
 	modelName: string;
 	cost: number;
 	durationMs: number;
-	contextTokens: number;
-	contextPercentage: number;
+	contextTokens: number | null;
+	contextPercentage: number | null;
 	usageLimits: {
 		five_hour: UsageLimit | null;
 		seven_day: UsageLimit | null;
@@ -61,8 +61,8 @@ export interface StatuslineData {
 	modelName: string;
 	sessionCost: string;
 	sessionDuration: string;
-	contextTokens: number;
-	contextPercentage: number;
+	contextTokens: number | null;
+	contextPercentage: number | null;
 	usageLimits: {
 		five_hour: UsageLimit | null;
 		seven_day: UsageLimit | null;
@@ -75,7 +75,10 @@ export interface StatuslineData {
 // FORMATTING - All config-aware formatting in one place
 // ─────────────────────────────────────────────────────────────
 
-function formatGitPart(git: RawGitData | null, config: StatuslineConfig["git"]): string {
+function formatGitPart(
+	git: RawGitData | null,
+	config: StatuslineConfig["git"],
+): string {
 	if (!git || !config.enabled) return "";
 
 	const parts: string[] = [];
@@ -120,11 +123,16 @@ function formatGitPart(git: RawGitData | null, config: StatuslineConfig["git"]):
 function formatSessionPart(
 	cost: number,
 	durationMs: number,
-	contextTokens: number,
-	contextPercentage: number,
+	contextTokens: number | null,
+	contextPercentage: number | null,
 	maxTokens: number,
 	config: StatuslineConfig["session"],
 ): string {
+	// No context data yet - show placeholder
+	if (contextTokens === null || contextPercentage === null) {
+		return `${colors.gray("S:")} ${colors.gray("-")}`;
+	}
+
 	const items: string[] = [];
 
 	if (config.cost.enabled) {
@@ -133,7 +141,10 @@ function formatSessionPart(
 	}
 
 	if (config.tokens.enabled) {
-		const formattedUsed = formatTokens(contextTokens, config.tokens.showDecimals);
+		const formattedUsed = formatTokens(
+			contextTokens,
+			config.tokens.showDecimals,
+		);
 		if (config.tokens.showMax) {
 			const formattedMax = formatTokens(maxTokens, config.tokens.showDecimals);
 			items.push(`${formattedUsed}${colors.gray("/")}${formattedMax}`);
@@ -146,17 +157,21 @@ function formatSessionPart(
 		const pctParts: string[] = [];
 
 		if (config.percentage.progressBar.enabled) {
-			pctParts.push(formatProgressBar({
-				percentage: contextPercentage,
-				length: config.percentage.progressBar.length,
-				style: config.percentage.progressBar.style,
-				colorMode: config.percentage.progressBar.color,
-				background: config.percentage.progressBar.background,
-			}));
+			pctParts.push(
+				formatProgressBar({
+					percentage: contextPercentage,
+					length: config.percentage.progressBar.length,
+					style: config.percentage.progressBar.style,
+					colorMode: config.percentage.progressBar.color,
+					background: config.percentage.progressBar.background,
+				}),
+			);
 		}
 
 		if (config.percentage.showValue) {
-			pctParts.push(`${colors.lightGray(contextPercentage.toString())}${colors.gray("%")}`);
+			pctParts.push(
+				`${colors.lightGray(contextPercentage.toString())}${colors.gray("%")}`,
+			);
 		}
 
 		if (pctParts.length > 0) {
@@ -170,7 +185,9 @@ function formatSessionPart(
 
 	if (items.length === 0) return "";
 
-	const sep = config.infoSeparator ? ` ${colors.gray(config.infoSeparator)} ` : " ";
+	const sep = config.infoSeparator
+		? ` ${colors.gray(config.infoSeparator)} `
+		: " ";
 	return `${colors.gray("S:")} ${items.join(sep)}`;
 }
 
@@ -184,22 +201,28 @@ function formatLimitsPart(
 	const parts: string[] = [];
 
 	if (config.cost.enabled && periodCost > 0) {
-		parts.push(`${colors.gray("$")}${colors.dimWhite(formatCost(periodCost, config.cost.format))}`);
+		parts.push(
+			`${colors.gray("$")}${colors.dimWhite(formatCost(periodCost, config.cost.format))}`,
+		);
 	}
 
 	if (config.percentage.enabled) {
 		if (config.percentage.progressBar.enabled) {
-			parts.push(formatProgressBar({
-				percentage: fiveHour.utilization,
-				length: config.percentage.progressBar.length,
-				style: config.percentage.progressBar.style,
-				colorMode: config.percentage.progressBar.color,
-				background: config.percentage.progressBar.background,
-			}));
+			parts.push(
+				formatProgressBar({
+					percentage: fiveHour.utilization,
+					length: config.percentage.progressBar.length,
+					style: config.percentage.progressBar.style,
+					colorMode: config.percentage.progressBar.color,
+					background: config.percentage.progressBar.background,
+				}),
+			);
 		}
 
 		if (config.percentage.showValue) {
-			parts.push(`${colors.lightGray(fiveHour.utilization.toString())}${colors.gray("%")}`);
+			parts.push(
+				`${colors.lightGray(fiveHour.utilization.toString())}${colors.gray("%")}`,
+			);
 		}
 	}
 
@@ -233,22 +256,28 @@ function formatWeeklyPart(
 	const parts: string[] = [];
 
 	if (config.cost.enabled && periodCost > 0) {
-		parts.push(`${colors.gray("$")}${colors.dimWhite(formatCost(periodCost, config.cost.format))}`);
+		parts.push(
+			`${colors.gray("$")}${colors.dimWhite(formatCost(periodCost, config.cost.format))}`,
+		);
 	}
 
 	if (config.percentage.enabled) {
 		if (config.percentage.progressBar.enabled) {
-			parts.push(formatProgressBar({
-				percentage: sevenDay.utilization,
-				length: config.percentage.progressBar.length,
-				style: config.percentage.progressBar.style,
-				colorMode: config.percentage.progressBar.color,
-				background: config.percentage.progressBar.background,
-			}));
+			parts.push(
+				formatProgressBar({
+					percentage: sevenDay.utilization,
+					length: config.percentage.progressBar.length,
+					style: config.percentage.progressBar.style,
+					colorMode: config.percentage.progressBar.color,
+					background: config.percentage.progressBar.background,
+				}),
+			);
 		}
 
 		if (config.percentage.showValue) {
-			parts.push(`${colors.lightGray(sevenDay.utilization.toString())}${colors.gray("%")}`);
+			parts.push(
+				`${colors.lightGray(sevenDay.utilization.toString())}${colors.gray("%")}`,
+			);
 		}
 	}
 
@@ -259,7 +288,10 @@ function formatWeeklyPart(
 	return parts.length > 0 ? `${colors.gray("W:")} ${parts.join(" ")}` : "";
 }
 
-function formatDailyPart(todayCost: number, config: StatuslineConfig["dailySpend"]): string {
+function formatDailyPart(
+	todayCost: number,
+	config: StatuslineConfig["dailySpend"],
+): string {
 	if (!config.cost.enabled || todayCost <= 0) return "";
 	return `${colors.gray("D:")} ${colors.gray("$")}${colors.dimWhite(formatCost(todayCost, config.cost.format))}`;
 }
@@ -303,7 +335,11 @@ export function renderStatuslineRaw(
 	if (sessionPart) sections.push(sessionPart);
 
 	// Limits
-	const limitsPart = formatLimitsPart(data.usageLimits.five_hour, data.periodCost, config.limits);
+	const limitsPart = formatLimitsPart(
+		data.usageLimits.five_hour,
+		data.periodCost,
+		config.limits,
+	);
 	if (limitsPart) sections.push(limitsPart);
 
 	// Weekly
@@ -361,7 +397,8 @@ function parseGitFromBranch(branch: string): RawGitData | null {
 
 	// Parse "main* +10 -5" format
 	const dirty = branch.includes("*");
-	const branchName = branch.replace(/\*.*$/, "").replace(/\*/, "").trim() || "main";
+	const branchName =
+		branch.replace(/\*.*$/, "").replace(/\*/, "").trim() || "main";
 
 	const addMatch = branch.match(/\+(\d+)/);
 	const delMatch = branch.match(/-(\d+)/);
@@ -371,8 +408,16 @@ function parseGitFromBranch(branch: string): RawGitData | null {
 	return {
 		branch: branchName,
 		dirty,
-		staged: { files: 0, added: Math.floor(added / 2), deleted: Math.floor(deleted / 2) },
-		unstaged: { files: 0, added: Math.ceil(added / 2), deleted: Math.ceil(deleted / 2) },
+		staged: {
+			files: 0,
+			added: Math.floor(added / 2),
+			deleted: Math.floor(deleted / 2),
+		},
+		unstaged: {
+			files: 0,
+			added: Math.ceil(added / 2),
+			deleted: Math.ceil(deleted / 2),
+		},
 	};
 }
 

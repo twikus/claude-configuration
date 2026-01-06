@@ -1,5 +1,21 @@
 # Claude Code Config Changelog
 
+## [2026-01-06]
+
+### Scripts - Full Replacement
+- **New**: `auto-rename-session/` - Auto-rename Claude sessions with AI-generated titles
+- **New**: `claude-code-ai/` - Claude Code AI helper utilities
+- **New**: `statusline/__tests__/` - Test suite for statusline
+- **New**: `statusline/src/lib/config.ts` - Configuration management
+- **New**: `statusline/src/lib/config-types.ts` - Config type definitions
+- **New**: `statusline/src/lib/menu-factories.ts` - Menu factory functions
+- **New**: `statusline/src/lib/presets.ts` - Statusline presets
+- **New**: `statusline/src/lib/render-pure.ts` - Pure render functions
+- **New**: `statusline/defaults.json` - Default configuration
+- Added root `biome.json` and `CLAUDE.md` for scripts workspace
+
+---
+
 ## [2026-01-04]
 
 ### Commands

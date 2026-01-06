@@ -1,3 +1,5 @@
+import { homedir } from "node:os";
+import { sep } from "node:path";
 import pc from "picocolors";
 import type {
 	CostFormat,
@@ -5,7 +7,7 @@ import type {
 	ProgressBarColor,
 	ProgressBarStyle,
 	StatuslineConfig,
-} from "../../statusline.config";
+} from "./config-types";
 import type { GitStatus } from "./git";
 
 type ColorFunction = (text: string | number) => string;
@@ -98,7 +100,7 @@ export function formatPath(
 	path: string,
 	mode: "full" | "truncated" | "basename" = "truncated",
 ): string {
-	const home = process.env.HOME || "";
+	const home = homedir();
 	let formattedPath = path;
 
 	if (home && path.startsWith(home)) {
@@ -106,14 +108,14 @@ export function formatPath(
 	}
 
 	if (mode === "basename") {
-		const segments = path.split("/").filter((s) => s.length > 0);
+		const segments = path.split(/[/\\]/).filter((s) => s.length > 0);
 		return segments[segments.length - 1] || path;
 	}
 
 	if (mode === "truncated") {
-		const segments = formattedPath.split("/").filter((s) => s.length > 0);
+		const segments = formattedPath.split(/[/\\]/).filter((s) => s.length > 0);
 		if (segments.length > 2) {
-			return `…/${segments.slice(-2).join("/")}`;
+			return `…${sep}${segments.slice(-2).join(sep)}`;
 		}
 	}
 
@@ -161,6 +163,10 @@ export function formatDuration(ms: number): string {
 export function formatResetTime(resetsAt: string): string {
 	try {
 		const resetDate = new Date(resetsAt);
+		if (Number.isNaN(resetDate.getTime())) {
+			return "N/A";
+		}
+
 		const now = new Date();
 		const diffMs = resetDate.getTime() - now.getTime();
 

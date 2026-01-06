@@ -39,7 +39,10 @@ async function main() {
 			`$${formatCost(session.total_cost)}`,
 			formatDuration(session.duration_ms),
 			`+${session.lines_added} -${session.lines_removed}`,
-			session.cwd.replace(/^\/Users\/[^/]+\//, "~/"),
+			session.cwd.replace(
+				/^(?:\/Users\/[^/]+\/|[A-Z]:\\Users\\[^\\]+\\)/,
+				"~/",
+			),
 		]),
 	];
 

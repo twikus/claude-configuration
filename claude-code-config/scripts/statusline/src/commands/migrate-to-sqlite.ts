@@ -78,6 +78,7 @@ async function migrate() {
 					lines_added: session.lines_added,
 					lines_removed: session.lines_removed,
 					last_resets_at: session.last_resets_at ?? null,
+					cumulative_counted: 0,
 				});
 				migrated++;
 			} catch (error) {

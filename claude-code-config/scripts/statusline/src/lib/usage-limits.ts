@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { $ } from "bun";
+import { getClaudeCodeTokenSafe } from "../../../claude-code-ai/helper/credentials";
 
 export interface UsageLimits {
 	five_hour: {
@@ -19,16 +19,6 @@ interface CachedUsageLimits {
 	timestamp: number;
 }
 
-interface Credentials {
-	claudeAiOauth: {
-		accessToken: string;
-		refreshToken: string;
-		expiresAt: number;
-		scopes: string[];
-		subscriptionType: string;
-	};
-}
-
 const CACHE_DURATION_MS = 60 * 1000; // 1 minute
 
 function getCacheFilePath(): string {
@@ -37,16 +27,7 @@ function getCacheFilePath(): string {
 }
 
 export async function getCredentials(): Promise<string | null> {
-	try {
-		const result =
-			await $`security find-generic-password -s "Claude Code-credentials" -w`
-				.quiet()
-				.text();
-		const creds: Credentials = JSON.parse(result.trim());
-		return creds.claudeAiOauth.accessToken;
-	} catch {
-		return null;
-	}
+	return getClaudeCodeTokenSafe();
 }
 
 export async function fetchUsageLimits(

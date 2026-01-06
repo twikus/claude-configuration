@@ -120,7 +120,7 @@ describe("SQLite Delta Tracking", () => {
 			)
 			.get(sessionId, periodId);
 
-		const newCountedCost = tracking!.counted_cost + delta;
+		const newCountedCost = (tracking?.counted_cost ?? 0) + delta;
 
 		db.run(
 			"UPDATE session_period_tracking SET counted_cost = ?, last_session_cost = ? WHERE session_id = ? AND period_id = ?",
@@ -173,7 +173,7 @@ describe("SQLite Delta Tracking", () => {
 				"SELECT total_cost FROM sessions WHERE session_id = ?",
 			)
 			.get(sessionId);
-		const delta = newSessionCost - session!.total_cost;
+		const delta = newSessionCost - (session?.total_cost ?? 0);
 
 		db.run(
 			"UPDATE sessions SET total_cost = ?, last_resets_at = ? WHERE session_id = ?",
@@ -220,7 +220,9 @@ describe("SQLite Delta Tracking", () => {
 		expect(trackingA?.counted_cost).toBe(10.0);
 		expect(trackingB?.counted_cost).toBe(14.0);
 
-		expect(periodACost!.total_cost + periodBCost!.total_cost).toBe(24.0);
+		expect(
+			(periodACost?.total_cost ?? 0) + (periodBCost?.total_cost ?? 0),
+		).toBe(24.0);
 	});
 
 	test("Multiple sessions in same period: costs sum correctly", () => {
@@ -289,7 +291,7 @@ describe("SQLite Delta Tracking", () => {
 			.get(sessionId, periodId);
 
 		const currentSessionCost = 10.0;
-		const delta = currentSessionCost - tracking!.last_session_cost;
+		const delta = currentSessionCost - (tracking?.last_session_cost ?? 0);
 
 		expect(delta).toBe(0);
 

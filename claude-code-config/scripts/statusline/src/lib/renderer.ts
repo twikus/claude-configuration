@@ -1,6 +1,6 @@
-import type { StatuslineConfig } from "../../statusline.config";
 import type { StatuslineData } from "../index";
 import { renderStatusline as render } from "../index";
+import type { StatuslineConfig } from "./config-types";
 import { getContextData } from "./context";
 import { getPeriodCost } from "./database";
 import {

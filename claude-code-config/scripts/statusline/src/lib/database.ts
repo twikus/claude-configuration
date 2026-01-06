@@ -38,14 +38,12 @@ function runCumulativeCountedMigration(database: Database): void {
 export function getDb(): Database {
 	if (!db) {
 		db = new Database(getDbPath());
-		initializeSchema();
+		initializeSchema(db);
 	}
 	return db;
 }
 
-function initializeSchema(): void {
-	const database = db!;
-
+function initializeSchema(database: Database): void {
 	database.run(`
 		CREATE TABLE IF NOT EXISTS sessions (
 			session_id TEXT PRIMARY KEY,

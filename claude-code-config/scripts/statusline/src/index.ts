@@ -2,24 +2,18 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { StatuslineConfig } from "../statusline.config";
-import { defaultConfig } from "../statusline.config";
+import { defaultConfig, type StatuslineConfig } from "./lib/config";
 import { getContextData } from "./lib/context";
 import { getPeriodCost } from "./lib/database";
-import {
-	colors,
-	formatBranch,
-	formatCost,
-	formatDuration,
-	formatPath,
-	formatProgressBar,
-	formatResetTime,
-	formatSession,
-} from "./lib/formatters";
+import { colors, formatBranch, formatCost, formatDuration, formatPath } from "./lib/formatters";
 import { getGitStatus } from "./lib/git";
+import { renderStatusline, type StatuslineData, type UsageLimit } from "./lib/render-pure";
 import { getTodayCostV2, saveSessionV2 } from "./lib/spend-v2";
 import type { HookInput } from "./lib/types";
 import { getUsageLimits } from "./lib/usage-limits";
+
+// Re-export from render-pure for backwards compatibility
+export { renderStatusline, type StatuslineData, type UsageLimit } from "./lib/render-pure";
 
 const CONFIG_FILE_PATH = join(import.meta.dir, "..", "statusline.config.json");
 const LAST_PAYLOAD_PATH = join(
@@ -52,156 +46,6 @@ async function loadConfig(): Promise<StatuslineConfig> {
 	} catch {
 		return defaultConfig;
 	}
-}
-
-export interface UsageLimit {
-	utilization: number;
-	resets_at: string | null;
-}
-
-export interface StatuslineData {
-	branch: string;
-	dirPath: string;
-	modelName: string;
-	sessionCost: string;
-	sessionDuration: string;
-	contextTokens: number;
-	contextPercentage: number;
-	usageLimits: {
-		five_hour: UsageLimit | null;
-		seven_day: UsageLimit | null;
-	};
-	periodCost: number;
-	todayCost: number;
-}
-
-function shouldShowWeekly(
-	weeklyConfig: StatuslineConfig["weeklyUsage"],
-	fiveHourUtilization: number | null,
-): boolean {
-	if (weeklyConfig.enabled === true) return true;
-	if (weeklyConfig.enabled === false) return false;
-	if (weeklyConfig.enabled === "90%" && fiveHourUtilization !== null) {
-		return fiveHourUtilization >= 90;
-	}
-	return false;
-}
-
-export function renderStatusline(
-	data: StatuslineData,
-	config: StatuslineConfig,
-): string {
-	const sep = colors.gray(config.separator);
-	const parts: string[] = [];
-
-	const isSonnet = data.modelName.toLowerCase().includes("sonnet");
-	if (isSonnet && !config.showSonnetModel) {
-		parts.push(`${data.branch} ${sep} ${colors.gray(data.dirPath)}`);
-	} else {
-		parts.push(
-			`${data.branch} ${sep} ${colors.gray(data.dirPath)} ${sep} ${colors.peach(data.modelName)}`,
-		);
-	}
-
-	const sessionPart = formatSession(
-		data.sessionCost,
-		data.sessionDuration,
-		data.contextTokens,
-		config.context.maxContextTokens,
-		data.contextPercentage,
-		config.session,
-	);
-	parts.push(sessionPart);
-
-	const fiveHour = data.usageLimits.five_hour;
-	if (config.limits.enabled && config.limits.percentage.enabled && fiveHour) {
-		const limitsParts: string[] = [];
-
-		if (config.limits.cost.enabled && data.periodCost > 0) {
-			limitsParts.push(
-				`${colors.gray("$")}${colors.dimWhite(formatCost(data.periodCost, config.limits.cost.format))}`,
-			);
-		}
-
-		if (config.limits.percentage.progressBar.enabled) {
-			const bar = formatProgressBar({
-				percentage: fiveHour.utilization,
-				length: config.limits.percentage.progressBar.length,
-				style: config.limits.percentage.progressBar.style,
-				colorMode: config.limits.percentage.progressBar.color,
-				background: config.limits.percentage.progressBar.background,
-			});
-			limitsParts.push(bar);
-		}
-
-		if (config.limits.percentage.showValue) {
-			limitsParts.push(
-				`${colors.lightGray(fiveHour.utilization.toString())}${colors.gray("%")}`,
-			);
-		}
-
-		if (config.limits.showTimeLeft && fiveHour.resets_at) {
-			const resetTime = formatResetTime(fiveHour.resets_at);
-			limitsParts.push(colors.gray(`(${resetTime})`));
-		}
-
-		if (limitsParts.length > 0) {
-			parts.push(`${colors.gray("L:")} ${limitsParts.join(" ")}`);
-		}
-	}
-
-	const sevenDay = data.usageLimits.seven_day;
-	if (
-		shouldShowWeekly(config.weeklyUsage, fiveHour?.utilization ?? null) &&
-		config.weeklyUsage.percentage.enabled &&
-		sevenDay
-	) {
-		const weeklyParts: string[] = [];
-
-		if (config.weeklyUsage.cost.enabled && data.periodCost > 0) {
-			weeklyParts.push(
-				`${colors.gray("$")}${colors.dimWhite(formatCost(data.periodCost, config.weeklyUsage.cost.format))}`,
-			);
-		}
-
-		if (config.weeklyUsage.percentage.progressBar.enabled) {
-			const bar = formatProgressBar({
-				percentage: sevenDay.utilization,
-				length: config.weeklyUsage.percentage.progressBar.length,
-				style: config.weeklyUsage.percentage.progressBar.style,
-				colorMode: config.weeklyUsage.percentage.progressBar.color,
-				background: config.weeklyUsage.percentage.progressBar.background,
-			});
-			weeklyParts.push(bar);
-		}
-
-		if (config.weeklyUsage.percentage.showValue) {
-			weeklyParts.push(
-				`${colors.lightGray(sevenDay.utilization.toString())}${colors.gray("%")}`,
-			);
-		}
-
-		if (config.weeklyUsage.showTimeLeft && sevenDay.resets_at) {
-			const resetTime = formatResetTime(sevenDay.resets_at);
-			weeklyParts.push(colors.gray(`(${resetTime})`));
-		}
-
-		if (weeklyParts.length > 0) {
-			parts.push(`${colors.gray("W:")} ${weeklyParts.join(" ")}`);
-		}
-	}
-
-	if (config.dailySpend.cost.enabled && data.todayCost > 0) {
-		parts.push(
-			`${colors.gray("D:")} ${colors.gray("$")}${colors.dimWhite(formatCost(data.todayCost, config.dailySpend.cost.format))}`,
-		);
-	}
-
-	const output = parts.join(` ${sep} `);
-
-	return config.oneLine
-		? output
-		: output.replace(sessionPart, `\n${sessionPart}`);
 }
 
 async function main() {

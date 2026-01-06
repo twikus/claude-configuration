@@ -1,840 +1,375 @@
 #!/usr/bin/env bun
 
-import { readFile, writeFile } from "node:fs/promises";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { StatuslineConfig } from "../../statusline.config";
-import { defaultConfig } from "../../statusline.config";
+import { defaultConfig, type StatuslineConfig } from "../lib/config";
+import { renderStatuslineRaw, type RawStatuslineData } from "../lib/render-pure";
 import { colors } from "../lib/formatters";
-import { renderStatusline } from "../lib/renderer";
-import type { HookInput } from "../lib/types";
+import {
+	cycle,
+	type MenuOption,
+	PATH_DISPLAY_MODES,
+	PROGRESS_BAR_BACKGROUNDS,
+	PROGRESS_BAR_COLORS,
+	PROGRESS_BAR_LENGTHS,
+	SEPARATORS,
+	toggle,
+} from "../lib/menu-factories";
+import { PRESETS } from "../lib/presets";
 
-const CONFIG_FILE_PATH = join(
-	import.meta.dir,
-	"..",
-	"..",
-	"statusline.config.json",
-);
+const CONFIG_FILE_PATH = join(import.meta.dir, "..", "..", "statusline.config.json");
 
-interface MenuOption {
-	path: string;
-	label: string;
-	type: "boolean" | "cycle" | "section";
-	getValue?: (config: StatuslineConfig) => boolean | string;
-	toggle?: (config: StatuslineConfig) => void;
-	cycle?: (config: StatuslineConfig, direction: 1 | -1) => void;
-	choices?: string[];
-	indent?: number;
-	hidden?: (config: StatuslineConfig) => boolean;
+// ─────────────────────────────────────────────────────────────
+// RAW MOCK DATA
+// ─────────────────────────────────────────────────────────────
+
+const MOCK_DATA: RawStatuslineData = {
+	git: {
+		branch: "main",
+		dirty: true,
+		staged: { files: 2, added: 45, deleted: 12 },
+		unstaged: { files: 3, added: 23, deleted: 8 },
+	},
+	path: "/Users/dev/.claude/project",
+	modelName: "Sonnet 4.5",
+	cost: 0.24,
+	durationMs: 720000,
+	contextTokens: 75000,
+	contextPercentage: 38,
+	usageLimits: {
+		five_hour: { utilization: 29, resets_at: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString() },
+		seven_day: { utilization: 45, resets_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() },
+	},
+	periodCost: 36,
+	todayCost: 12.5,
+};
+
+// ─────────────────────────────────────────────────────────────
+// HELPER: Progress bar style cycle (includes "None")
+// ─────────────────────────────────────────────────────────────
+
+const PROGRESS_STYLES = ["None", "Braille", "Rectangle", "Filled"] as const;
+
+function progressStyleCycle(basePath: string, parentHidden: (c: StatuslineConfig) => boolean): MenuOption {
+	return {
+		path: `${basePath}.progressBar.style`,
+		label: "Progress bar",
+		type: "cycle",
+		choices: [...PROGRESS_STYLES],
+		getValue: (c) => {
+			const bar = getNestedValue(c, `${basePath}.progressBar`) as { enabled: boolean; style: string };
+			if (!bar.enabled) return "None";
+			return bar.style.charAt(0).toUpperCase() + bar.style.slice(1);
+		},
+		cycle: (c, dir) => {
+			const bar = getNestedValue(c, `${basePath}.progressBar`) as { enabled: boolean; style: string };
+			const current = bar.enabled ? bar.style.charAt(0).toUpperCase() + bar.style.slice(1) : "None";
+			const idx = PROGRESS_STYLES.indexOf(current as typeof PROGRESS_STYLES[number]);
+			const next = PROGRESS_STYLES[(idx + dir + PROGRESS_STYLES.length) % PROGRESS_STYLES.length];
+			if (next === "None") {
+				setNestedValue(c, `${basePath}.progressBar.enabled`, false);
+			} else {
+				setNestedValue(c, `${basePath}.progressBar.enabled`, true);
+				setNestedValue(c, `${basePath}.progressBar.style`, next.toLowerCase());
+			}
+		},
+		hidden: parentHidden,
+	};
 }
 
-const menuOptions: MenuOption[] = [
-	// SESSION SECTION
+function getNestedValue(obj: unknown, path: string): unknown {
+	return path.split(".").reduce((current, key) => {
+		if (current && typeof current === "object" && key in current) {
+			return (current as Record<string, unknown>)[key];
+		}
+		return undefined;
+	}, obj);
+}
+
+function setNestedValue(obj: unknown, path: string, value: unknown): void {
+	const keys = path.split(".");
+	const lastKey = keys.pop();
+	if (!lastKey) return;
+	let current = obj;
+	for (const key of keys) {
+		if (current && typeof current === "object" && key in current) {
+			current = (current as Record<string, unknown>)[key];
+		} else {
+			return;
+		}
+	}
+	if (current && typeof current === "object") {
+		(current as Record<string, unknown>)[lastKey] = value;
+	}
+}
+
+// ─────────────────────────────────────────────────────────────
+// MENU STRUCTURE
+// ─────────────────────────────────────────────────────────────
+
+interface Tab {
+	id: string;
+	label: string;
+	options: MenuOption[];
+}
+
+const tabs: Tab[] = [
 	{
-		path: "session.header",
+		id: "presets",
+		label: "PRESETS",
+		options: PRESETS.map((preset, index) => ({
+			path: `preset.${index}`,
+			label: preset.name,
+			description: preset.description,
+			type: "boolean" as const,
+			getValue: () => false,
+			toggle: () => {},
+			isPreset: true,
+			presetIndex: index,
+		})),
+	},
+	{
+		id: "session",
 		label: "SESSION",
-		type: "section",
+		options: [
+			toggle("session.cost.enabled", "Cost display"),
+			toggle("session.duration.enabled", "Duration"),
+			toggle("session.tokens.enabled", "Token count"),
+			toggle("session.tokens.showMax", "  Show max", { hidden: (c) => !c.session.tokens.enabled }),
+			toggle("session.tokens.showDecimals", "  Decimals", { hidden: (c) => !c.session.tokens.enabled }),
+			toggle("session.percentage.enabled", "Context %"),
+			toggle("session.percentage.showValue", "  Show value", { hidden: (c) => !c.session.percentage.enabled }),
+			progressStyleCycle("session.percentage", (c) => !c.session.percentage.enabled),
+			cycle("session.percentage.progressBar.length", "    Length", PROGRESS_BAR_LENGTHS, {
+				hidden: (c) => !c.session.percentage.enabled || !c.session.percentage.progressBar.enabled,
+			}),
+			cycle("session.percentage.progressBar.color", "    Color", PROGRESS_BAR_COLORS, {
+				hidden: (c) => !c.session.percentage.enabled || !c.session.percentage.progressBar.enabled,
+			}),
+			toggle("context.useUsableContextOnly", "45k buffer"),
+		],
 	},
 	{
-		path: "session.cost",
-		label: "Cost display",
-		type: "boolean",
-		getValue: (c) => c.session.cost.enabled,
-		toggle: (c) => {
-			c.session.cost.enabled = !c.session.cost.enabled;
-		},
-		indent: 1,
+		id: "limits",
+		label: "5-HOUR",
+		options: [
+			{
+				path: "limits.enabled",
+				label: "5-hour limit",
+				type: "cycle" as const,
+				choices: ["Enabled", "Disabled"],
+				getValue: (c) => c.limits.enabled ? "Enabled" : "Disabled",
+				cycle: (c) => { c.limits.enabled = !c.limits.enabled; },
+			},
+			toggle("limits.showTimeLeft", "  Time remaining", { hidden: (c) => !c.limits.enabled }),
+			toggle("limits.cost.enabled", "  Period cost", { hidden: (c) => !c.limits.enabled }),
+			toggle("limits.percentage.showValue", "  Show % value", { hidden: (c) => !c.limits.enabled }),
+			progressStyleCycle("limits.percentage", (c) => !c.limits.enabled),
+			cycle("limits.percentage.progressBar.length", "    Length", PROGRESS_BAR_LENGTHS, {
+				hidden: (c) => !c.limits.enabled || !c.limits.percentage.progressBar.enabled,
+			}),
+			cycle("limits.percentage.progressBar.color", "    Color", PROGRESS_BAR_COLORS, {
+				hidden: (c) => !c.limits.enabled || !c.limits.percentage.progressBar.enabled,
+			}),
+		],
 	},
 	{
-		path: "session.duration",
-		label: "Duration display",
-		type: "boolean",
-		getValue: (c) => c.session.duration.enabled,
-		toggle: (c) => {
-			c.session.duration.enabled = !c.session.duration.enabled;
-		},
-		indent: 1,
+		id: "weekly",
+		label: "WEEKLY",
+		options: [
+			{
+				path: "weeklyUsage.enabled",
+				label: "Weekly limit",
+				type: "cycle" as const,
+				choices: ["Always", "At 90%", "Never"],
+				getValue: (c) => {
+					if (c.weeklyUsage.enabled === true) return "Always";
+					if (c.weeklyUsage.enabled === "90%") return "At 90%";
+					return "Never";
+				},
+				cycle: (c, dir) => {
+					const modes = [true, "90%", false] as const;
+					const idx = c.weeklyUsage.enabled === true ? 0 : c.weeklyUsage.enabled === "90%" ? 1 : 2;
+					c.weeklyUsage.enabled = modes[(idx + dir + 3) % 3];
+				},
+			},
+			toggle("weeklyUsage.showTimeLeft", "  Time remaining", { hidden: (c) => c.weeklyUsage.enabled === false }),
+			toggle("weeklyUsage.cost.enabled", "  Cost", { hidden: (c) => c.weeklyUsage.enabled === false }),
+			toggle("weeklyUsage.percentage.showValue", "  Show % value", { hidden: (c) => c.weeklyUsage.enabled === false }),
+			progressStyleCycle("weeklyUsage.percentage", (c) => c.weeklyUsage.enabled === false),
+			cycle("weeklyUsage.percentage.progressBar.length", "    Length", PROGRESS_BAR_LENGTHS, {
+				hidden: (c) => c.weeklyUsage.enabled === false || !c.weeklyUsage.percentage.progressBar.enabled,
+			}),
+			cycle("weeklyUsage.percentage.progressBar.color", "    Color", PROGRESS_BAR_COLORS, {
+				hidden: (c) => c.weeklyUsage.enabled === false || !c.weeklyUsage.percentage.progressBar.enabled,
+			}),
+		],
 	},
 	{
-		path: "session.tokens",
-		label: "Tokens count",
-		type: "boolean",
-		getValue: (c) => c.session.tokens.enabled,
-		toggle: (c) => {
-			c.session.tokens.enabled = !c.session.tokens.enabled;
-		},
-		indent: 1,
-	},
-	{
-		path: "session.tokens.showMax",
-		label: "Show max (192k/200k)",
-		type: "boolean",
-		getValue: (c) => c.session.tokens.showMax,
-		toggle: (c) => {
-			c.session.tokens.showMax = !c.session.tokens.showMax;
-		},
-		indent: 2,
-		hidden: (c) => !c.session.tokens.enabled,
-	},
-	{
-		path: "session.tokens.showDecimals",
-		label: "Show decimals (192.5k)",
-		type: "boolean",
-		getValue: (c) => c.session.tokens.showDecimals,
-		toggle: (c) => {
-			c.session.tokens.showDecimals = !c.session.tokens.showDecimals;
-		},
-		indent: 2,
-		hidden: (c) => !c.session.tokens.enabled,
-	},
-	{
-		path: "session.percentage",
-		label: "Context percentage",
-		type: "boolean",
-		getValue: (c) => c.session.percentage.enabled,
-		toggle: (c) => {
-			c.session.percentage.enabled = !c.session.percentage.enabled;
-		},
-		indent: 1,
-	},
-	{
-		path: "session.percentage.showValue",
-		label: "Show percentage value",
-		type: "boolean",
-		getValue: (c) => c.session.percentage.showValue,
-		toggle: (c) => {
-			c.session.percentage.showValue = !c.session.percentage.showValue;
-		},
-		indent: 2,
-		hidden: (c) => !c.session.percentage.enabled,
-	},
-	{
-		path: "session.percentage.progressBar",
-		label: "Progress bar",
-		type: "boolean",
-		getValue: (c) => c.session.percentage.progressBar.enabled,
-		toggle: (c) => {
-			c.session.percentage.progressBar.enabled =
-				!c.session.percentage.progressBar.enabled;
-		},
-		indent: 2,
-		hidden: (c) => !c.session.percentage.enabled,
-	},
-	{
-		path: "session.percentage.progressBar.style",
-		label: "Style",
-		type: "cycle",
-		choices: ["filled", "rectangle", "braille"],
-		getValue: (c) => c.session.percentage.progressBar.style,
-		cycle: (c, dir) => {
-			const styles = ["filled", "rectangle", "braille"] as const;
-			const current = styles.indexOf(c.session.percentage.progressBar.style);
-			const next = (current + dir + styles.length) % styles.length;
-			c.session.percentage.progressBar.style = styles[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			!c.session.percentage.enabled ||
-			!c.session.percentage.progressBar.enabled,
-	},
-	{
-		path: "session.percentage.progressBar.length",
-		label: "Length",
-		type: "cycle",
-		choices: ["5", "10", "15"],
-		getValue: (c) => c.session.percentage.progressBar.length.toString(),
-		cycle: (c, dir) => {
-			const lengths = [5, 10, 15] as const;
-			const current = lengths.indexOf(c.session.percentage.progressBar.length);
-			const next = (current + dir + lengths.length) % lengths.length;
-			c.session.percentage.progressBar.length = lengths[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			!c.session.percentage.enabled ||
-			!c.session.percentage.progressBar.enabled,
-	},
-	{
-		path: "session.percentage.progressBar.color",
-		label: "Color",
-		type: "cycle",
-		choices: ["progressive", "green", "yellow", "red"],
-		getValue: (c) => c.session.percentage.progressBar.color,
-		cycle: (c, dir) => {
-			const colors = ["progressive", "green", "yellow", "red"] as const;
-			const current = colors.indexOf(c.session.percentage.progressBar.color);
-			const next = (current + dir + colors.length) % colors.length;
-			c.session.percentage.progressBar.color = colors[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			!c.session.percentage.enabled ||
-			!c.session.percentage.progressBar.enabled,
-	},
-	{
-		path: "session.percentage.progressBar.background",
-		label: "Background",
-		type: "cycle",
-		choices: ["none", "dark", "gray", "light", "blue", "purple", "cyan"],
-		getValue: (c) => c.session.percentage.progressBar.background,
-		cycle: (c, dir) => {
-			const backgrounds = [
-				"none",
-				"dark",
-				"gray",
-				"light",
-				"blue",
-				"purple",
-				"cyan",
-			] as const;
-			const current = backgrounds.indexOf(
-				c.session.percentage.progressBar.background,
-			);
-			const next = (current + dir + backgrounds.length) % backgrounds.length;
-			c.session.percentage.progressBar.background = backgrounds[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			!c.session.percentage.enabled ||
-			!c.session.percentage.progressBar.enabled,
-	},
-	{
-		path: "context.useUsableContextOnly",
-		label: "Add 45k auto-compact buffer",
-		type: "boolean",
-		getValue: (c) => c.context.useUsableContextOnly,
-		toggle: (c) => {
-			c.context.useUsableContextOnly = !c.context.useUsableContextOnly;
-		},
-		indent: 1,
-	},
-
-	// LIMITS SECTION
-	{
-		path: "limits.header",
-		label: "5-HOUR LIMITS",
-		type: "section",
-		getValue: (c) => c.limits.enabled,
-		toggle: (c) => {
-			c.limits.enabled = !c.limits.enabled;
-		},
-	},
-	{
-		path: "limits.showTimeLeft",
-		label: "Show time left",
-		type: "boolean",
-		getValue: (c) => c.limits.showTimeLeft,
-		toggle: (c) => {
-			c.limits.showTimeLeft = !c.limits.showTimeLeft;
-		},
-		indent: 1,
-		hidden: (c) => !c.limits.enabled,
-	},
-	{
-		path: "limits.showCost",
-		label: "Show cost",
-		type: "boolean",
-		getValue: (c) => c.limits.showCost,
-		toggle: (c) => {
-			c.limits.showCost = !c.limits.showCost;
-		},
-		indent: 1,
-		hidden: (c) => !c.limits.enabled,
-	},
-	{
-		path: "limits.percentage",
-		label: "Percentage display",
-		type: "boolean",
-		getValue: (c) => c.limits.percentage.enabled,
-		toggle: (c) => {
-			c.limits.percentage.enabled = !c.limits.percentage.enabled;
-		},
-		indent: 1,
-		hidden: (c) => !c.limits.enabled,
-	},
-	{
-		path: "limits.percentage.showValue",
-		label: "Show percentage value",
-		type: "boolean",
-		getValue: (c) => c.limits.percentage.showValue,
-		toggle: (c) => {
-			c.limits.percentage.showValue = !c.limits.percentage.showValue;
-		},
-		indent: 2,
-		hidden: (c) => !c.limits.enabled || !c.limits.percentage.enabled,
-	},
-	{
-		path: "limits.percentage.progressBar",
-		label: "Progress bar",
-		type: "boolean",
-		getValue: (c) => c.limits.percentage.progressBar.enabled,
-		toggle: (c) => {
-			c.limits.percentage.progressBar.enabled =
-				!c.limits.percentage.progressBar.enabled;
-		},
-		indent: 2,
-		hidden: (c) => !c.limits.enabled || !c.limits.percentage.enabled,
-	},
-	{
-		path: "limits.percentage.progressBar.style",
-		label: "Style",
-		type: "cycle",
-		choices: ["filled", "rectangle", "braille"],
-		getValue: (c) => c.limits.percentage.progressBar.style,
-		cycle: (c, dir) => {
-			const styles = ["filled", "rectangle", "braille"] as const;
-			const current = styles.indexOf(c.limits.percentage.progressBar.style);
-			const next = (current + dir + styles.length) % styles.length;
-			c.limits.percentage.progressBar.style = styles[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			!c.limits.enabled ||
-			!c.limits.percentage.enabled ||
-			!c.limits.percentage.progressBar.enabled,
-	},
-	{
-		path: "limits.percentage.progressBar.length",
-		label: "Length",
-		type: "cycle",
-		choices: ["5", "10", "15"],
-		getValue: (c) => c.limits.percentage.progressBar.length.toString(),
-		cycle: (c, dir) => {
-			const lengths = [5, 10, 15] as const;
-			const current = lengths.indexOf(c.limits.percentage.progressBar.length);
-			const next = (current + dir + lengths.length) % lengths.length;
-			c.limits.percentage.progressBar.length = lengths[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			!c.limits.enabled ||
-			!c.limits.percentage.enabled ||
-			!c.limits.percentage.progressBar.enabled,
-	},
-	{
-		path: "limits.percentage.progressBar.color",
-		label: "Color",
-		type: "cycle",
-		choices: ["progressive", "green", "yellow", "red"],
-		getValue: (c) => c.limits.percentage.progressBar.color,
-		cycle: (c, dir) => {
-			const colors = ["progressive", "green", "yellow", "red"] as const;
-			const current = colors.indexOf(c.limits.percentage.progressBar.color);
-			const next = (current + dir + colors.length) % colors.length;
-			c.limits.percentage.progressBar.color = colors[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			!c.limits.enabled ||
-			!c.limits.percentage.enabled ||
-			!c.limits.percentage.progressBar.enabled,
-	},
-	{
-		path: "limits.percentage.progressBar.background",
-		label: "Background",
-		type: "cycle",
-		choices: ["none", "dark", "gray", "light", "blue", "purple", "cyan"],
-		getValue: (c) => c.limits.percentage.progressBar.background,
-		cycle: (c, dir) => {
-			const backgrounds = [
-				"none",
-				"dark",
-				"gray",
-				"light",
-				"blue",
-				"purple",
-				"cyan",
-			] as const;
-			const current = backgrounds.indexOf(
-				c.limits.percentage.progressBar.background,
-			);
-			const next = (current + dir + backgrounds.length) % backgrounds.length;
-			c.limits.percentage.progressBar.background = backgrounds[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			!c.limits.enabled ||
-			!c.limits.percentage.enabled ||
-			!c.limits.percentage.progressBar.enabled,
-	},
-
-	// WEEKLY SECTION
-	{
-		path: "weekly.header",
-		label: "WEEKLY LIMITS",
-		type: "section",
-		getValue: (c) =>
-			typeof c.weeklyUsage.enabled === "boolean" ? c.weeklyUsage.enabled : true,
-		toggle: (c) => {
-			if (typeof c.weeklyUsage.enabled === "boolean") {
-				c.weeklyUsage.enabled = !c.weeklyUsage.enabled;
-			} else {
-				c.weeklyUsage.enabled = false;
-			}
-		},
-	},
-	{
-		path: "weeklyUsage.enabled.mode",
-		label: "Display mode",
-		type: "cycle",
-		choices: ["true", "false", "90%"],
-		getValue: (c) => {
-			if (typeof c.weeklyUsage.enabled === "boolean") {
-				return c.weeklyUsage.enabled ? "true" : "false";
-			}
-			return c.weeklyUsage.enabled;
-		},
-		cycle: (c, dir) => {
-			const modes = [true, false, "90%"] as const;
-			const currentValue = c.weeklyUsage.enabled;
-			const currentIndex =
-				currentValue === true ? 0 : currentValue === false ? 1 : 2;
-			const next = (currentIndex + dir + modes.length) % modes.length;
-			c.weeklyUsage.enabled = modes[next];
-		},
-		indent: 1,
-	},
-	{
-		path: "weeklyUsage.showTimeLeft",
-		label: "Show time left",
-		type: "boolean",
-		getValue: (c) => c.weeklyUsage.showTimeLeft,
-		toggle: (c) => {
-			c.weeklyUsage.showTimeLeft = !c.weeklyUsage.showTimeLeft;
-		},
-		indent: 1,
-		hidden: (c) => c.weeklyUsage.enabled === false,
-	},
-	{
-		path: "weeklyUsage.showCost",
-		label: "Show cost",
-		type: "boolean",
-		getValue: (c) => c.weeklyUsage.showCost,
-		toggle: (c) => {
-			c.weeklyUsage.showCost = !c.weeklyUsage.showCost;
-		},
-		indent: 1,
-		hidden: (c) => c.weeklyUsage.enabled === false,
-	},
-	{
-		path: "weeklyUsage.percentage",
-		label: "Percentage display",
-		type: "boolean",
-		getValue: (c) => c.weeklyUsage.percentage.enabled,
-		toggle: (c) => {
-			c.weeklyUsage.percentage.enabled = !c.weeklyUsage.percentage.enabled;
-		},
-		indent: 1,
-		hidden: (c) => c.weeklyUsage.enabled === false,
-	},
-	{
-		path: "weeklyUsage.percentage.showValue",
-		label: "Show percentage value",
-		type: "boolean",
-		getValue: (c) => c.weeklyUsage.percentage.showValue,
-		toggle: (c) => {
-			c.weeklyUsage.percentage.showValue = !c.weeklyUsage.percentage.showValue;
-		},
-		indent: 2,
-		hidden: (c) =>
-			c.weeklyUsage.enabled === false || !c.weeklyUsage.percentage.enabled,
-	},
-	{
-		path: "weeklyUsage.percentage.progressBar",
-		label: "Progress bar",
-		type: "boolean",
-		getValue: (c) => c.weeklyUsage.percentage.progressBar.enabled,
-		toggle: (c) => {
-			c.weeklyUsage.percentage.progressBar.enabled =
-				!c.weeklyUsage.percentage.progressBar.enabled;
-		},
-		indent: 2,
-		hidden: (c) =>
-			c.weeklyUsage.enabled === false || !c.weeklyUsage.percentage.enabled,
-	},
-	{
-		path: "weeklyUsage.percentage.progressBar.style",
-		label: "Style",
-		type: "cycle",
-		choices: ["filled", "rectangle", "braille"],
-		getValue: (c) => c.weeklyUsage.percentage.progressBar.style,
-		cycle: (c, dir) => {
-			const styles = ["filled", "rectangle", "braille"] as const;
-			const current = styles.indexOf(
-				c.weeklyUsage.percentage.progressBar.style,
-			);
-			const next = (current + dir + styles.length) % styles.length;
-			c.weeklyUsage.percentage.progressBar.style = styles[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			c.weeklyUsage.enabled === false ||
-			!c.weeklyUsage.percentage.enabled ||
-			!c.weeklyUsage.percentage.progressBar.enabled,
-	},
-	{
-		path: "weeklyUsage.percentage.progressBar.length",
-		label: "Length",
-		type: "cycle",
-		choices: ["5", "10", "15"],
-		getValue: (c) => c.weeklyUsage.percentage.progressBar.length.toString(),
-		cycle: (c, dir) => {
-			const lengths = [5, 10, 15] as const;
-			const current = lengths.indexOf(
-				c.weeklyUsage.percentage.progressBar.length,
-			);
-			const next = (current + dir + lengths.length) % lengths.length;
-			c.weeklyUsage.percentage.progressBar.length = lengths[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			c.weeklyUsage.enabled === false ||
-			!c.weeklyUsage.percentage.enabled ||
-			!c.weeklyUsage.percentage.progressBar.enabled,
-	},
-	{
-		path: "weeklyUsage.percentage.progressBar.color",
-		label: "Color",
-		type: "cycle",
-		choices: ["progressive", "green", "yellow", "red"],
-		getValue: (c) => c.weeklyUsage.percentage.progressBar.color,
-		cycle: (c, dir) => {
-			const colors = ["progressive", "green", "yellow", "red"] as const;
-			const current = colors.indexOf(
-				c.weeklyUsage.percentage.progressBar.color,
-			);
-			const next = (current + dir + colors.length) % colors.length;
-			c.weeklyUsage.percentage.progressBar.color = colors[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			c.weeklyUsage.enabled === false ||
-			!c.weeklyUsage.percentage.enabled ||
-			!c.weeklyUsage.percentage.progressBar.enabled,
-	},
-	{
-		path: "weeklyUsage.percentage.progressBar.background",
-		label: "Background",
-		type: "cycle",
-		choices: ["none", "dark", "gray", "light", "blue", "purple", "cyan"],
-		getValue: (c) => c.weeklyUsage.percentage.progressBar.background,
-		cycle: (c, dir) => {
-			const backgrounds = [
-				"none",
-				"dark",
-				"gray",
-				"light",
-				"blue",
-				"purple",
-				"cyan",
-			] as const;
-			const current = backgrounds.indexOf(
-				c.weeklyUsage.percentage.progressBar.background,
-			);
-			const next = (current + dir + backgrounds.length) % backgrounds.length;
-			c.weeklyUsage.percentage.progressBar.background = backgrounds[next];
-		},
-		indent: 3,
-		hidden: (c) =>
-			c.weeklyUsage.enabled === false ||
-			!c.weeklyUsage.percentage.enabled ||
-			!c.weeklyUsage.percentage.progressBar.enabled,
-	},
-
-	// GIT SECTION
-	{
-		path: "git.header",
+		id: "git",
 		label: "GIT",
-		type: "section",
-		getValue: (c) => c.git.enabled,
-		toggle: (c) => {
-			c.git.enabled = !c.git.enabled;
-		},
+		options: [
+			{
+				path: "git.enabled",
+				label: "Git info",
+				type: "cycle" as const,
+				choices: ["Enabled", "Disabled"],
+				getValue: (c) => c.git.enabled ? "Enabled" : "Disabled",
+				cycle: (c) => { c.git.enabled = !c.git.enabled; },
+			},
+			toggle("git.showBranch", "  Branch name", { hidden: (c) => !c.git.enabled }),
+			toggle("git.showDirtyIndicator", "  Dirty indicator (*)", { hidden: (c) => !c.git.enabled }),
+			toggle("git.showChanges", "  Line changes (+/-)", { hidden: (c) => !c.git.enabled }),
+			toggle("git.showStaged", "  Staged files", { hidden: (c) => !c.git.enabled }),
+			toggle("git.showUnstaged", "  Unstaged files", { hidden: (c) => !c.git.enabled }),
+		],
 	},
 	{
-		path: "git.showBranch",
-		label: "Show branch",
-		type: "boolean",
-		getValue: (c) => c.git.showBranch,
-		toggle: (c) => {
-			c.git.showBranch = !c.git.showBranch;
-		},
-		indent: 1,
-		hidden: (c) => !c.git.enabled,
-	},
-	{
-		path: "git.showDirtyIndicator",
-		label: "Show dirty indicator (*)",
-		type: "boolean",
-		getValue: (c) => c.git.showDirtyIndicator,
-		toggle: (c) => {
-			c.git.showDirtyIndicator = !c.git.showDirtyIndicator;
-		},
-		indent: 1,
-		hidden: (c) => !c.git.enabled,
-	},
-	{
-		path: "git.showChanges",
-		label: "Show line changes (+33 -44)",
-		type: "boolean",
-		getValue: (c) => c.git.showChanges,
-		toggle: (c) => {
-			c.git.showChanges = !c.git.showChanges;
-		},
-		indent: 1,
-		hidden: (c) => !c.git.enabled,
-	},
-	{
-		path: "git.showStaged",
-		label: "Show staged files count",
-		type: "boolean",
-		getValue: (c) => c.git.showStaged,
-		toggle: (c) => {
-			c.git.showStaged = !c.git.showStaged;
-		},
-		indent: 1,
-		hidden: (c) => !c.git.enabled,
-	},
-	{
-		path: "git.showUnstaged",
-		label: "Show unstaged files count",
-		type: "boolean",
-		getValue: (c) => c.git.showUnstaged,
-		toggle: (c) => {
-			c.git.showUnstaged = !c.git.showUnstaged;
-		},
-		indent: 1,
-		hidden: (c) => !c.git.enabled,
-	},
-
-	// DAILY SPEND SECTION
-	{
-		path: "dailySpend.header",
-		label: "DAILY SPEND",
-		type: "section",
-		getValue: (c) => c.dailySpend.enabled,
-		toggle: (c) => {
-			c.dailySpend.enabled = !c.dailySpend.enabled;
-		},
-	},
-
-	// GLOBAL SECTION
-	{
-		path: "global.header",
+		id: "global",
 		label: "GLOBAL",
-		type: "section",
-	},
-	{
-		path: "separator",
-		label: "Separator",
-		type: "cycle",
-		choices: ["|", "•", "·", "⋅", "●", "◆", "▪", "▸", "›", "→"],
-		getValue: (c) => c.separator,
-		cycle: (c, dir) => {
-			const seps = ["|", "•", "·", "⋅", "●", "◆", "▪", "▸", "›", "→"] as const;
-			const current = seps.indexOf(c.separator);
-			const next = (current + dir + seps.length) % seps.length;
-			c.separator = seps[next];
-		},
-		indent: 1,
-	},
-	{
-		path: "pathDisplayMode",
-		label: "Path display",
-		type: "cycle",
-		choices: ["truncated", "basename", "full"],
-		getValue: (c) => c.pathDisplayMode,
-		cycle: (c, dir) => {
-			const modes = ["truncated", "basename", "full"] as const;
-			const current = modes.indexOf(c.pathDisplayMode);
-			const next = (current + dir + modes.length) % modes.length;
-			c.pathDisplayMode = modes[next];
-		},
-		indent: 1,
-	},
-	{
-		path: "showSonnetModel",
-		label: "Show model when Sonnet",
-		type: "boolean",
-		getValue: (c) => c.showSonnetModel,
-		toggle: (c) => {
-			c.showSonnetModel = !c.showSonnetModel;
-		},
-		indent: 1,
+		options: [
+			cycle("separator", "Separator", SEPARATORS),
+			cycle("pathDisplayMode", "Path display", PATH_DISPLAY_MODES),
+			toggle("showSonnetModel", "Show Sonnet model"),
+			toggle("oneLine", "Single line mode"),
+			toggle("dailySpend.cost.enabled", "Daily spend"),
+		],
 	},
 ];
 
-async function loadFixture(): Promise<HookInput> {
-	const projectRoot = join(import.meta.dir, "..", "..");
-	const fixturePath = join(projectRoot, "fixtures", "test-input.json");
-	const content = await readFile(fixturePath, "utf-8");
-	return JSON.parse(content);
-}
+// ─────────────────────────────────────────────────────────────
+// CONFIG I/O
+// ─────────────────────────────────────────────────────────────
 
-async function loadConfig(): Promise<StatuslineConfig> {
+function loadConfig(): StatuslineConfig {
 	try {
-		const content = await readFile(CONFIG_FILE_PATH, "utf-8");
-		return JSON.parse(content);
+		return JSON.parse(readFileSync(CONFIG_FILE_PATH, "utf-8"));
 	} catch {
 		return JSON.parse(JSON.stringify(defaultConfig));
 	}
 }
 
-async function saveConfig(config: StatuslineConfig): Promise<void> {
-	await writeFile(CONFIG_FILE_PATH, JSON.stringify(config, null, 2), "utf-8");
+function saveConfig(config: StatuslineConfig): void {
+	writeFileSync(CONFIG_FILE_PATH, JSON.stringify(config, null, 2), "utf-8");
 }
 
-function renderMenu(config: StatuslineConfig, selectedIndex: number): string {
-	let output = "";
-	const visibleOptions = menuOptions.filter(
-		(opt) => !opt.hidden || !opt.hidden(config),
-	);
+// ─────────────────────────────────────────────────────────────
+// RENDERING
+// ─────────────────────────────────────────────────────────────
 
-	visibleOptions.forEach((option, visIndex) => {
-		const actualIndex = menuOptions.indexOf(option);
-		const isSelected = actualIndex === selectedIndex;
-		const indent = "  ".repeat(option.indent ?? 0);
+function renderPreview(config: StatuslineConfig): string {
+	return renderStatuslineRaw(MOCK_DATA, config);
+}
 
-		if (option.type === "section") {
-			if (visIndex > 0) output += "\n";
+function renderTabs(activeIdx: number): string {
+	return tabs
+		.map((t, i) => (i === activeIdx ? colors.yellow(`[${t.label}]`) : colors.gray(` ${t.label} `)))
+		.join("");
+}
 
-			if (option.getValue && option.toggle) {
-				const value = option.getValue(config);
-				const status = value ? colors.green("ON") : colors.red("OFF");
-				const cursor = isSelected ? `${colors.yellow("❯ ")}` : "  ";
-				const labelColor = isSelected ? colors.yellow : colors.purple;
-				output += `${cursor}${labelColor(`▌${option.label}`)} ${colors.gray("[")}${status}${colors.gray("]")}\n`;
+function renderOptions(config: StatuslineConfig, tab: Tab, selIdx: number): string {
+	const visible = tab.options.filter((o) => !o.hidden || !o.hidden(config));
+	return visible
+		.map((opt, i) => {
+			const sel = i === selIdx;
+			const val = opt.getValue?.(config);
+			const isPreset = "isPreset" in opt;
+
+			let display: string;
+			if (isPreset) {
+				const desc = "description" in opt ? colors.gray(` - ${opt.description}`) : "";
+				display = `${colors.cyan("◈")} ${opt.label}${desc}`;
+			} else if (opt.type === "boolean") {
+				display = `${val ? colors.green("●") : colors.gray("○")} ${opt.label}`;
 			} else {
-				const labelColor = colors.purple;
-				output += `  ${labelColor(`▌${option.label}`)}\n`;
+				display = `${opt.label}: ${colors.yellow(String(val))}`;
 			}
-			return;
-		}
 
-		const value = option.getValue?.(config);
-		let display = "";
-
-		if (option.type === "boolean") {
-			const checkbox = value ? colors.green("☑") : colors.gray("☐");
-			display = `${checkbox} ${option.label}`;
-		} else if (option.type === "cycle") {
-			display = `${option.label} ${colors.gray("[")}${colors.yellow(value as string)}${colors.gray("]")}`;
-		}
-
-		const cursor = isSelected ? colors.yellow("›") : " ";
-		const color = colors.lightGray;
-
-		const arrows =
-			isSelected && option.type === "cycle" ? ` ${colors.gray("←→")}` : "";
-
-		output += `${cursor} ${color(`${indent}${display}`)}${arrows}\n`;
-	});
-
-	return output;
+			const cursor = sel ? colors.yellow("›") : " ";
+			return `${cursor} ${sel ? colors.white(display) : colors.lightGray(display)}`;
+		})
+		.join("\n");
 }
 
-async function waitForKeypress(): Promise<string> {
-	return new Promise((resolve) => {
-		process.stdin.setRawMode(true);
-		process.stdin.resume();
-		process.stdin.once("data", (data) => {
-			const key = data.toString();
-			resolve(key);
-		});
-	});
+function render(config: StatuslineConfig, tabIdx: number, selIdx: number): string {
+	const tab = tabs[tabIdx];
+	const preview = renderPreview(config);
+	const previewLines = preview.split("\n");
+
+	return [
+		colors.purple("━━━ PREVIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"),
+		...previewLines,
+		"",
+		renderTabs(tabIdx),
+		colors.gray("─".repeat(52)),
+		renderOptions(config, tab, selIdx),
+		"",
+		colors.gray("←→ tabs  ↑↓ select  Enter toggle  s save  r reset  q quit"),
+	].join("\n");
 }
+
+// ─────────────────────────────────────────────────────────────
+// MAIN LOOP
+// ─────────────────────────────────────────────────────────────
 
 async function main() {
-	console.clear();
-
-	const fixture = await loadFixture();
-	let config: StatuslineConfig = await loadConfig();
-
-	const selectableOptions = menuOptions.filter((opt) => {
-		if (opt.type === "section" && !opt.toggle) return false;
-		return true;
-	});
-	let selectedIndex = menuOptions.indexOf(selectableOptions[0]);
+	let config = loadConfig();
+	let tabIdx = 0;
+	let selIdx = 0;
 
 	process.stdout.write("\x1b[?25l");
+	process.stdin.setRawMode(true);
+	process.stdin.resume();
 
-	while (true) {
-		const { output: combined } = await renderStatusline(fixture, config);
+	const draw = () => {
+		const visible = tabs[tabIdx].options.filter((o) => !o.hidden || !o.hidden(config));
+		if (selIdx >= visible.length) selIdx = Math.max(0, visible.length - 1);
+		process.stdout.write("\x1b[2J\x1b[H" + render(config, tabIdx, selIdx));
+	};
 
-		const menu = renderMenu(config, selectedIndex);
+	draw();
 
-		const output = [
-			colors.purple("━━━ PREVIEW"),
-			combined,
-			"",
-			menu,
-			colors.gray(
-				"↑↓ navigate · space toggle · ←→ cycle · s save · r reset · q quit",
-			),
-		].join("\n");
+	for await (const chunk of process.stdin) {
+		const key = chunk.toString();
 
-		process.stdout.write("\x1b[2J");
-		process.stdout.write("\x1b[H");
-		process.stdout.write(output);
-
-		const key = await waitForKeypress();
-
-		const selectableOptions = menuOptions.filter((opt) => {
-			if (opt.hidden?.(config)) return false;
-			if (opt.type === "section" && !opt.toggle) return false;
-			return true;
-		});
-		const selectableIndices = selectableOptions.map((opt) =>
-			menuOptions.indexOf(opt),
-		);
-
-		if (key === "\u001b[A" || key === "k") {
-			const currentPos = selectableIndices.indexOf(selectedIndex);
-			if (currentPos > 0) {
-				selectedIndex = selectableIndices[currentPos - 1];
-			} else if (currentPos === -1 && selectableIndices.length > 0) {
-				selectedIndex = selectableIndices[0];
-			}
-		} else if (key === "\u001b[B" || key === "j") {
-			const currentPos = selectableIndices.indexOf(selectedIndex);
-			if (currentPos < selectableIndices.length - 1) {
-				selectedIndex = selectableIndices[currentPos + 1];
-			} else if (currentPos === -1 && selectableIndices.length > 0) {
-				selectedIndex = selectableIndices[0];
-			}
-		} else if (key === " ") {
-			const option = menuOptions[selectedIndex];
-			if (option.toggle) {
-				option.toggle(config);
-			}
+		if (key === "\u001b[D" || key === "h") {
+			tabIdx = (tabIdx - 1 + tabs.length) % tabs.length;
+			selIdx = 0;
 		} else if (key === "\u001b[C" || key === "l") {
-			const option = menuOptions[selectedIndex];
-			if (option.type === "cycle" && option.cycle) {
-				option.cycle(config, 1);
-			}
-		} else if (key === "\u001b[D" || key === "h") {
-			const option = menuOptions[selectedIndex];
-			if (option.type === "cycle" && option.cycle) {
-				option.cycle(config, -1);
+			tabIdx = (tabIdx + 1) % tabs.length;
+			selIdx = 0;
+		} else if (key === "\u001b[A" || key === "k") {
+			if (selIdx > 0) selIdx--;
+		} else if (key === "\u001b[B" || key === "j") {
+			const visible = tabs[tabIdx].options.filter((o) => !o.hidden || !o.hidden(config));
+			if (selIdx < visible.length - 1) selIdx++;
+		} else if (key === "\r" || key === " ") {
+			const visible = tabs[tabIdx].options.filter((o) => !o.hidden || !o.hidden(config));
+			const opt = visible[selIdx];
+			if ("isPreset" in opt && "presetIndex" in opt) {
+				config = JSON.parse(JSON.stringify(PRESETS[opt.presetIndex as number].config));
+			} else if (opt.type === "cycle" && opt.cycle) {
+				opt.cycle(config, 1);
+			} else if (opt.toggle) {
+				opt.toggle(config);
 			}
 		} else if (key.toLowerCase() === "r") {
 			config = JSON.parse(JSON.stringify(defaultConfig));
 		} else if (key.toLowerCase() === "s") {
-			await saveConfig(config);
-			process.stdout.write("\x1b[2J");
-			process.stdout.write("\x1b[H");
-			console.log(colors.green(`✓ Configuration saved to ${CONFIG_FILE_PATH}`));
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+			saveConfig(config);
+			process.stdout.write("\x1b[2J\x1b[H");
+			console.log(colors.green("✓ Config saved!"));
+			await Bun.sleep(400);
 		} else if (key.toLowerCase() === "q" || key === "\u0003") {
-			await saveConfig(config);
+			saveConfig(config);
 			process.stdin.setRawMode(false);
-			process.stdin.pause();
 			process.stdout.write("\x1b[?25h");
 			console.clear();
-			console.log(
-				`${colors.green("✓ Configuration saved! Thanks for exploring!")}\n`,
-			);
+			console.log(colors.green("✓ Config saved!\n"));
 			process.exit(0);
 		}
+
+		draw();
 	}
 }
 

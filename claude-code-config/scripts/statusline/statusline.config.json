@@ -1,5 +1,4 @@
 {
-  "$schema": "./statusline.schema.json",
   "oneLine": true,
   "showSonnetModel": true,
   "pathDisplayMode": "truncated",
@@ -11,15 +10,15 @@
     "showStaged": true,
     "showUnstaged": true
   },
-  "separator": "•",
+  "separator": "·",
   "session": {
     "infoSeparator": null,
     "cost": {
-      "enabled": true,
+      "enabled": false,
       "format": "decimal1"
     },
     "duration": {
-      "enabled": true
+      "enabled": false
     },
     "tokens": {
       "enabled": true,
@@ -28,18 +27,18 @@
     },
     "percentage": {
       "enabled": true,
+      "showValue": true,
       "progressBar": {
         "enabled": true,
         "length": 10,
         "style": "braille",
         "color": "progressive",
         "background": "none"
-      },
-      "showValue": true
+      }
     }
   },
   "context": {
-    "usePayloadContextWindow": false,
+    "usePayloadContextWindow": true,
     "maxContextTokens": 200000,
     "autocompactBufferTokens": 45000,
     "useUsableContextOnly": false,
@@ -49,30 +48,31 @@
     "enabled": true,
     "showTimeLeft": true,
     "cost": {
-      "enabled": true,
-      "format": "integer"
+      "enabled": false,
+      "format": "decimal1"
     },
     "percentage": {
       "enabled": true,
+      "showValue": true,
       "progressBar": {
-        "enabled": true,
-        "length": 5,
-        "style": "braille",
+        "enabled": false,
+        "length": 10,
+        "style": "filled",
         "color": "progressive",
         "background": "none"
-      },
-      "showValue": true
+      }
     }
   },
   "weeklyUsage": {
-    "enabled": "90%",
+    "enabled": false,
     "showTimeLeft": true,
     "cost": {
-      "enabled": true,
-      "format": "integer"
+      "enabled": false,
+      "format": "decimal1"
     },
     "percentage": {
       "enabled": true,
+      "showValue": true,
       "progressBar": {
         "enabled": true,
         "length": 10,
@@ -84,7 +84,7 @@
   },
   "dailySpend": {
     "cost": {
-      "enabled": false,
+      "enabled": true,
       "format": "decimal1"
     }
   }

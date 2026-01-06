@@ -23,7 +23,9 @@ function main() {
 		console.log("\nAvailable project paths:");
 		const uniquePaths = [...new Set(allSessions.map((s) => s.cwd))];
 		for (const path of uniquePaths.slice(0, 10)) {
-			console.log(`  - ${path.replace(/^\/Users\/[^/]+\//, "~/")}`);
+			console.log(
+				`  - ${path.replace(/^(?:\/Users\/[^/]+\/|[A-Z]:\\Users\\[^\\]+\\)/, "~/")}`,
+			);
 		}
 		return;
 	}

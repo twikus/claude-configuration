@@ -96,7 +96,7 @@ async function main() {
 			workerPath,
 			input.session_id,
 			input.transcript_path,
-			firstUserMessage.slice(0, 400),
+			firstUserMessage.slice(-2000),
 			firstAssistantResponse.slice(0, 300),
 		],
 		{

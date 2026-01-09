@@ -34,23 +34,27 @@ Research competitors, select the optimal value metric, calculate price points us
 4. **Ask questions progressively** (not all at once):
 
 **Pricing Goals**:
+
 - Primary goal? (Fast growth, profitability, market share)
 - Target segments? (SMB, mid-market, enterprise, or all)
 - Target ARPU?
 - Any constraints? (Must be under $X, must have free tier)
 
 **Competitive Context**:
+
 - Top 3-5 direct competitors?
 - Mature market or new category?
 - Positioning goal? (Premium, competitive, penetration)
 
 **Customer Value**:
+
 - What value does product deliver? (Time saved, revenue, costs reduced)
 - Can you quantify? (e.g., "Saves 10 hours/week")
 - What do current solutions cost?
 - Cost of the problem you solve?
 
 **Usage Patterns**:
+
 - How do users naturally scale? (More projects, users, data)
 - Main resource constraint? (Storage, API calls, seats, features)
 - Do different users get different value?
@@ -67,6 +71,7 @@ Research competitors, select the optimal value metric, calculate price points us
      - Free tier limits
 
 6. **Create comparison table**:
+
 ```
 | Competitor | Model | Value Metric | Starter | Pro | Enterprise |
 |------------|-------|--------------|---------|-----|------------|
@@ -116,23 +121,27 @@ Research competitors, select the optimal value metric, calculate price points us
 14. **Design 3-4 tiers**:
 
 **Free/Starter** ($0 or $19-49):
+
 - Purpose: Lead generation, product validation
 - Limits: Entry level (can demonstrate value)
 - Features: Core only
 
 **Professional** ($Y - TARGET 50-60% of customers):
+
 - Purpose: Primary revenue driver
 - Price: 2-3x Starter
 - Limits: 2-5x Starter
 - Features: Full core + key differentiators
 
 **Business** ($Z):
+
 - Purpose: High-value customers
 - Price: 2-3x Pro
 - Limits: 5-10x Starter or unlimited
 - Features: Everything + advanced
 
 **Enterprise** (Custom):
+
 - Purpose: Strategic accounts
 - Features: SSO, dedicated support, custom SLAs
 
@@ -144,11 +153,14 @@ Research competitors, select the optimal value metric, calculate price points us
 # SaaS Pricing Strategy: [Product Name]
 
 ## Executive Summary
+
 [2-3 paragraphs: approach, value metric, positioning, expected outcomes]
 
 ## Value Metric
+
 **Selected**: [Primary metric]
 **Justification** (7 Criteria scores):
+
 1. Easy to Understand: [Score]
 2. Fair Perception: [Score]
 3. Competitive Alignment: [Score]
@@ -160,23 +172,27 @@ Research competitors, select the optimal value metric, calculate price points us
 ## Pricing Tiers
 
 ### Free/Starter - $X/month
+
 **Target**: [Segment]
 **Limits**: [Primary metric limit]
 **Features**: [List]
 **Best for**: [Use case]
 
 ### Professional - $Y/month ⭐ RECOMMENDED
+
 **Target**: [Segment]
 **Limits**: [Limits]
 **Features**: [List]
 **Upgrade trigger**: [What makes users outgrow Starter]
 
 ### Business - $Z/month
+
 **Target**: [Segment]
 **Limits**: [Limits]
 **Features**: [List]
 
 ### Enterprise - Custom
+
 **Target**: Large organizations
 **Features**: SSO, dedicated support, custom SLAs
 
@@ -185,15 +201,17 @@ Research competitors, select the optimal value metric, calculate price points us
 **Strategy**: [Premium/Competitive/Value]
 **Rationale**: [Based on research and PRD]
 
-| Competitor | Model | Metric | Starter | Pro | Enterprise |
-|------------|-------|--------|---------|-----|------------|
-| [Name] | [Type] | [Metric] | $X | $Y | $Z |
-| **Ours** | **[Type]** | **[Metric]** | **$X** | **$Y** | **$Z** |
+| Competitor | Model      | Metric       | Starter | Pro    | Enterprise |
+| ---------- | ---------- | ------------ | ------- | ------ | ---------- |
+| [Name]     | [Type]     | [Metric]     | $X      | $Y     | $Z         |
+| **Ours**   | **[Type]** | **[Metric]** | **$X**  | **$Y** | **$Z**     |
 
 ## Pricing Justification
 
 ### Value Calculation (10x Rule)
+
 **[Persona 1]**:
+
 - Value created: $[Amount]/month
 - Our price: $[Amount] ([X]% of value)
 - Customer ROI: [X]x
@@ -201,24 +219,29 @@ Research competitors, select the optimal value metric, calculate price points us
 ## Implementation Roadmap
 
 ### Phase 1: Launch (Month 1-3)
+
 - Launch tiers: [Which]
 - Free trial: [Duration]
 
 ### Phase 2: Validation (Month 4-6)
+
 - A/B tests: [What]
 - Metrics: Conversion, ARPU, churn by tier
 
 ### Phase 3: Optimization (Month 7-12)
+
 - Price adjustments
 - Feature migration
 
 ## Success Metrics
+
 - Pricing page → trial: [X]%
 - Trial → paid: [X]%
 - ARPU: $[X]
 - [50-60]% in Pro tier
 - Monthly churn: <[X]%
 ```
+
 </process>
 
 <constraints>
@@ -230,22 +253,25 @@ Research competitors, select the optimal value metric, calculate price points us
 - ALWAYS design 3-4 tiers (not more)
 
 **VALUE-BASED PRICING**:
+
 - Price on customer value, NOT your costs
 - 1% pricing improvement = 11% profit increase
 - Value metric selection > price point
 
 **DO NOT**:
+
 - Recommend pricing without competitor research
 - Skip value metric scoring
 - Copy competitors without understanding why
 - Create more than 4 tiers
 - Generate PRICING.md with gaps in research
-</constraints>
+  </constraints>
 
 <output>
 **File created**: `PRICING.md` in same directory as PRD
 
 **Contains**:
+
 - Executive summary
 - Value metric with 7-criteria scoring
 - 3-4 tier structure with limits and features
@@ -253,9 +279,10 @@ Research competitors, select the optimal value metric, calculate price points us
 - Pricing justification using 10x Rule
 - Implementation roadmap
 - Success metrics to track
-</output>
+  </output>
 
 <success_criteria>
+
 - PRD and ARCHI read and understood
 - 5-10 competitors researched with actual prices
 - Value metric scored on all 7 criteria (all 7+)
@@ -263,4 +290,4 @@ Research competitors, select the optimal value metric, calculate price points us
 - 3-4 tiers designed with clear upgrade triggers
 - Competitive positioning defined
 - PRICING.md created with complete research
-</success_criteria>
+  </success_criteria>

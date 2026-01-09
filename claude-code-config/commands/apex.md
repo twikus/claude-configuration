@@ -9,8 +9,8 @@ This methodology helps developers deliver high-quality features by breaking comp
 </objective>
 
 <context>
-Current git status: !`git status`
-Current branch: !`git branch --show-current`
+Current git status: !`git status 2>/dev/null || echo "Not a git repository"`
+Current branch: !`git branch --show-current 2>/dev/null || echo "Not a git branch"`
 </context>
 
 <process>

@@ -1,17 +1,21 @@
 ---
 description: Challenge and validate a business idea through competitive research and brutally honest market analysis
+argument-hint: [idea description]
 ---
 
 <objective>
-Challenge and validate a business idea through competitive research and market analysis.
+Challenge and validate $ARGUMENTS through competitive research, market analysis, and strategic brainstorming.
 
-Provide brutally honest, evidence-based feedback on whether the idea has genuine market potential or should be abandoned/pivoted. Save founders from wasting time on bad ideas.
+Provide brutally honest, evidence-based feedback on whether the idea has genuine market potential or should be abandoned/pivoted. Beyond validation, generate concrete MOAT and USP ideas that could make the SaaS defensible and successful in a crowded market.
+
+Save founders from wasting time on bad ideas - or help them find the angle that makes their idea actually work.
 </objective>
 
 <process>
+
 ## Phase 1: Gather the Idea
 
-1. **If idea not provided**, ask the user:
+1. **If idea not provided in $ARGUMENTS**, ask the user:
    > "Tell me about your idea:
    > - What problem does it solve?
    > - Who is it for?
@@ -37,6 +41,7 @@ Provide brutally honest, evidence-based feedback on whether the idea has genuine
    - Pricing model (free/paid/freemium)
    - Revenue signals: funding, team size, visible traction
    - Market positioning
+   - Weaknesses and gaps
 
 5. **Find 5-10 competitors minimum** - both direct and indirect:
    - **Direct**: Same problem, same solution approach
@@ -59,9 +64,37 @@ Provide brutally honest, evidence-based feedback on whether the idea has genuine
    - Is there room for another player?
    - What would truly differentiate this idea?
 
-## Phase 4: Deliver Honest Feedback
+## Phase 4: Brainstorm MOAT Ideas
 
-9. **Generate validation report** in this format:
+9. **Generate 3-5 MOAT (defensibility) ideas** - things that make the SaaS hard to recreate:
+   - **Data Network Effects**: How can user data make the product better over time?
+   - **Community/Ecosystem**: Can you build a community that competitors can't replicate?
+   - **Integrations/Partnerships**: What exclusive integrations create switching costs?
+   - **Proprietary Data/Algorithm**: What unique data or ML model could you build?
+   - **Brand/Trust**: What niche authority could you establish?
+   - **Speed/Execution**: What first-mover advantage is achievable?
+
+10. **Evaluate each MOAT idea**:
+    - How long to build?
+    - How defensible once built?
+    - Does it compound over time?
+
+## Phase 5: Brainstorm USP/Killer Feature Ideas
+
+11. **Generate 3-5 Unique Selling Proposition ideas** - the "hook" that makes people switch:
+    - What feature would make users say "I NEED this"?
+    - What pain point are competitors ignoring?
+    - What 10x improvement is possible in one specific area?
+    - What contrarian angle could work? (simpler vs complex, vertical vs horizontal, etc.)
+
+12. **For each USP idea**, consider:
+    - Is it defensible or easily copied?
+    - Does it matter to paying customers?
+    - Can you deliver it as a solo/small team?
+
+## Phase 6: Deliver Honest Feedback
+
+13. **Generate validation report** in this format:
 
 ```markdown
 # Validation: [Idea Name]
@@ -72,8 +105,8 @@ Provide brutally honest, evidence-based feedback on whether the idea has genuine
 ## What I Found
 
 **Competitors**:
-1. [Name] - [What they do, pricing, traction signals]
-2. [Name] - [What they do, pricing, traction signals]
+1. [Name] - [What they do, pricing, traction signals, key weakness]
+2. [Name] - [What they do, pricing, traction signals, key weakness]
 3. [Continue for 3-5 key competitors]
 
 **Market**: [Crowded/Moderate/Sparse] - [1 sentence why]
@@ -93,17 +126,70 @@ Provide brutally honest, evidence-based feedback on whether the idea has genuine
 - [Problem 2]
 - [Problem 3]
 
+---
+
+## MOAT Brainstorm (Defensibility Ideas)
+
+**What could make this hard to copy?**
+
+1. **[MOAT Type]**: [Specific idea]
+   - Build time: [X months]
+   - Defensibility: [Low/Medium/High]
+   - Compounds: [Yes/No - why]
+
+2. **[MOAT Type]**: [Specific idea]
+   - Build time: [X months]
+   - Defensibility: [Low/Medium/High]
+   - Compounds: [Yes/No - why]
+
+3. **[MOAT Type]**: [Specific idea]
+   - Build time: [X months]
+   - Defensibility: [Low/Medium/High]
+   - Compounds: [Yes/No - why]
+
+**Best MOAT opportunity**: [Which one and why]
+
+---
+
+## USP/Killer Feature Brainstorm
+
+**What could make users switch or choose you?**
+
+1. **[USP Name]**: [Description]
+   - Why it matters: [User pain it solves]
+   - Competitors doing this: [None/Some - who]
+   - Copyable: [Easy/Medium/Hard]
+
+2. **[USP Name]**: [Description]
+   - Why it matters: [User pain it solves]
+   - Competitors doing this: [None/Some - who]
+   - Copyable: [Easy/Medium/Hard]
+
+3. **[USP Name]**: [Description]
+   - Why it matters: [User pain it solves]
+   - Competitors doing this: [None/Some - who]
+   - Copyable: [Easy/Medium/Hard]
+
+**Best USP opportunity**: [Which one and why - this is your hook]
+
+---
+
 ## My Take
 
 **Would I build this?** [Yes/No/Maybe]
 
 **Why**: [Honest opinion in 1-2 sentences - don't hold back]
 
-**If you proceed**: [Specific advice on how to differentiate]
+**If you proceed**:
+- **Lead with**: [Best USP from brainstorm]
+- **Build toward**: [Best MOAT from brainstorm]
+- **Ignore**: [What competitors do that you shouldn't copy]
+
 **If you pivot**: [Specific pivot suggestion based on research]
 
-**Bottom line**: [Final direct recommendation - pursue, pivot, or kill]
+**Bottom line**: [Final direct recommendation - pursue with [specific angle], pivot to [X], or kill]
 ```
+
 </process>
 
 <constraints>
@@ -118,18 +204,29 @@ Provide brutally honest, evidence-based feedback on whether the idea has genuine
 - Challenge claims of "no competitors exist"
 - Focus on whether people actually PAY for solutions
 
+**MOAT/USP BRAINSTORMING RULES**:
+- Be specific, not generic ("AI-powered" is not a MOAT)
+- Consider founder's realistic resources (solo founder vs team)
+- Focus on compounding advantages, not one-time features
+- Prioritize ideas that are hard to copy AND valuable to users
+
 **RED FLAGS TO CALL OUT**:
 - "Uber for X" without unique insight
 - Solution looking for a problem
 - Targeting "everyone" (no clear user)
 - Ignoring dominant market leaders
 - Claims no competitors exist (almost always false)
+- MOATs that don't compound over time
+- USPs that are easily copied in a weekend
 </constraints>
 
 <success_criteria>
 - Found and documented 5+ real competitors with web research
 - Provided specific pricing and revenue signals for competitors
+- Identified competitor weaknesses and gaps
+- Generated 3+ concrete MOAT ideas with defensibility assessment
+- Generated 3+ concrete USP/killer feature ideas with copyability assessment
 - Gave honest viability score with clear reasoning
 - Called out what's NOT unique about the idea
-- Provided actionable recommendation: pursue, pivot, or kill
+- Provided actionable recommendation with specific MOAT + USP to pursue
 </success_criteria>

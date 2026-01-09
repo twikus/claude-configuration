@@ -31,6 +31,13 @@ export function isRealUserMessage(content: string): boolean {
 	return true;
 }
 
+function truncateUserMessage(message: string, maxLength: number): string {
+	if (message.length <= maxLength) {
+		return message;
+	}
+	return message.slice(-maxLength);
+}
+
 export function buildPrompt(
 	userMessage: string,
 	assistantResponse: string,
@@ -42,6 +49,7 @@ export function buildPrompt(
 - Start with a verb (action word)
 - Be concise and descriptive
 - Always respond in English
+- Focus on the ACTUAL question/task at the end of the user message, not instructions at the beginning
 </rules>
 
 <examples>
@@ -72,7 +80,7 @@ export function buildPrompt(
 </examples>
 
 <user_message>
-${userMessage.slice(0, 400)}
+${truncateUserMessage(userMessage, 2000)}
 </user_message>
 
 ${assistantResponse ? `<context>\n${assistantResponse.slice(0, 200)}\n</context>` : ""}

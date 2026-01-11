@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(cp :*), Bash(diff :*), Bash(ls :*), Bash(cat :*), Bash(mkdir :*), Bash(git :*), Bash(find :*), Bash(date :*), Bash(rsync :*), Bash(rm :*), Read, Write, Edit
+allowed-tools: Bash(cp :*), Bash(diff :*), Bash(ls :*), Bash(cat :*), Bash(mkdir :*), Bash(git status*), Bash(find :*), Bash(date :*), Bash(rsync :*), Bash(rm :*), Read, Write, Edit
 description: Sync files from ~/.claude to claude-code-config repository
 ---
 
@@ -28,14 +28,15 @@ Always exclude these from sync:
 - `*.log` - Log files
 - `bun.lockb` - Lock files
 - `.DS_Store` - macOS files
+- `melvyn/` - Personal commands (NEVER sync this folder)
 </exclusions>
 
 <process>
-1. **Sync each directory** using rsync with proper exclusions:
+1. **Sync each directory** using rsync with proper exclusions (--delete removes files not in source):
 
 ```bash
-# Sync commands
-rsync -av --delete ~/.claude/commands/ $CWD/claude-code-config/commands/
+# Sync commands (exclude melvyn/ folder)
+rsync -av --delete --exclude 'melvyn' ~/.claude/commands/ $CWD/claude-code-config/commands/
 
 # Sync skills
 rsync -av --delete ~/.claude/skills/ $CWD/claude-code-config/skills/
@@ -54,14 +55,14 @@ rsync -av --delete \
   ~/.claude/scripts/ $CWD/claude-code-config/scripts/
 ```
 
-2. **Review changes** with git status
-3. **Commit** with descriptive message
+2. **Review changes** with `git status`
+3. **DO NOT COMMIT** - Let the user review and commit manually
 </process>
 
 <success_criteria>
 - All directories synced without errors
-- Exclusions properly applied (no node_modules, data, etc.)
-- Changes committed to git
+- Exclusions properly applied (no node_modules, data, melvyn/, etc.)
+- Show git status at the end for user to review
 </success_criteria>
 
 User: Sync now #$ARGUMENTS

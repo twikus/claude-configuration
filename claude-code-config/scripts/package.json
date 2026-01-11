@@ -10,7 +10,6 @@
 		"validator:test": "bun test command-validator",
 		"validator:lint": "biome check --write command-validator",
 		"ai:test": "bun test claude-code-ai",
-		"cc-ai": "bun claude-code-ai/cli.ts",
 		"statusline:start": "bun statusline/src/index.ts",
 		"statusline:test": "bun test statusline",
 		"statusline:spend:today": "bun statusline/src/commands/spend-today.ts",
@@ -19,6 +18,7 @@
 		"statusline:stats": "bun statusline/src/stats.ts",
 		"statusline:config": "bun statusline/src/commands/interactive-config.ts",
 		"statusline:migrate": "bun statusline/src/commands/migrate-to-sqlite.ts",
+		"statusline:weekly": "bun statusline/src/commands/weekly-analysis.ts",
 		"statusline:lint": "biome check --write statusline",
 		"lint": "biome check --write .",
 		"format": "biome format --write ."
@@ -26,7 +26,6 @@
 	"dependencies": {
 		"@ai-sdk/anthropic": "^3.0.6",
 		"ai": "^6.0.11",
-		"commander": "^14.0.2",
 		"picocolors": "^1.1.1",
 		"table": "^6.9.0",
 		"zod": "^4.3.5"

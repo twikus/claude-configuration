@@ -219,6 +219,9 @@ const tabs: Tab[] = [
 			toggle("limits.showTimeLeft", "  Time remaining", {
 				hidden: (c) => !c.limits.enabled,
 			}),
+			toggle("limits.showPacingDelta", "  Pacing delta", {
+				hidden: (c) => !c.limits.enabled,
+			}),
 			toggle("limits.cost.enabled", "  Period cost", {
 				hidden: (c) => !c.limits.enabled,
 			}),
@@ -272,6 +275,9 @@ const tabs: Tab[] = [
 				},
 			},
 			toggle("weeklyUsage.showTimeLeft", "  Time remaining", {
+				hidden: (c) => c.weeklyUsage.enabled === false,
+			}),
+			toggle("weeklyUsage.showPacingDelta", "  Pacing delta", {
 				hidden: (c) => c.weeklyUsage.enabled === false,
 			}),
 			toggle("weeklyUsage.cost.enabled", "  Cost", {

@@ -57,13 +57,16 @@ Package.json: @package.json
 
 **Phase 6: Victory Report**
 
-10. Report to user: - Total tests passed - Fixes applied (list each one) - Status: READY TO USE
-    </process>
+10. Report to user:
+    - Total tests passed
+    - Fixes applied (list each one)
+    - Status: READY TO USE
+</process>
 
 <testing>
-Install: `bun install`
-Tests: `bun run test`
-Lint: `bun run lint`
+Install: !`bun install`
+Tests: !`bun run test`
+Lint: !`bun run lint`
 </testing>
 
 <verification>
@@ -75,11 +78,10 @@ Before declaring success:
 </verification>
 
 <success_criteria>
-
 - Bun installed and working
 - All dependencies installed
 - ALL tests passing (0 failures)
 - Lint check passes
 - User can run any command from package.json
 - Repository is READY TO USE
-  </success_criteria>
+</success_criteria>

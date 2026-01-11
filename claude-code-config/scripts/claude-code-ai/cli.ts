@@ -1,27 +1,46 @@
 #!/usr/bin/env bun
-import { Command } from "commander";
-import { generateTextCC, type Model } from "./claude";
+import { parseArgs } from "util";
+import { type Model, generateTextCC } from "./claude";
 
-const program = new Command();
+const { values, positionals } = parseArgs({
+	args: Bun.argv.slice(2),
+	options: {
+		model: {
+			type: "string",
+			short: "m",
+			default: "sonnet",
+		},
+		system: {
+			type: "string",
+			short: "s",
+		},
+	},
+	allowPositionals: true,
+});
 
-program
-	.name("cc-ai")
-	.description("CLI to interact with Claude using Claude Code credentials")
-	.version("1.0.0");
+const prompt = positionals.join(" ");
 
-program
-	.command("ask")
-	.description("Ask Claude a question")
-	.argument("<message>", "The message to send to Claude")
-	.option("-m, --model <model>", "Model to use (haiku, sonnet, opus)", "sonnet")
-	.option("-s, --system <prompt>", "Custom system prompt")
-	.action(async (message: string, options: { model: Model; system?: string }) => {
-		const response = await generateTextCC({
-			prompt: message,
-			model: options.model,
-			system: options.system,
-		});
-		console.log(response);
+if (!prompt) {
+	console.error(
+		"Usage: bun run cli.ts <prompt> [-m opus|sonnet|haiku] [-s system_prompt]"
+	);
+	process.exit(1);
+}
+
+const model = values.model as Model;
+if (!["haiku", "sonnet", "opus"].includes(model)) {
+	console.error(`Invalid model: ${model}. Use: opus, sonnet, or haiku`);
+	process.exit(1);
+}
+
+try {
+	const response = await generateTextCC({
+		prompt,
+		model,
+		system: values.system,
 	});
-
-program.parse();
+	console.log(response);
+} catch (error) {
+	console.error("Error:", error);
+	process.exit(1);
+}

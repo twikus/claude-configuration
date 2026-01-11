@@ -1,5 +1,24 @@
 # Claude Code Config Changelog
 
+## [2026-01-09] - Synced TO ~/.claude
+
+### New Command
+- `commands/debug-ccli.md` - Debug Claude CLI errors by analyzing debug logs
+
+### New Skills
+- `skills/apex-skills/` - APEX methodology skill
+- `skills/brainstorm-skills/` - Deep iterative research skill
+- `skills/ci-experts-skills/` - CI/CD debugging skill
+- `skills/claude-memory-skills/` - CLAUDE.md creation skill
+- `skills/create-hooks-skills/` - Hook configuration skill
+- `skills/create-meta-prompts-skills/` - Meta-prompt creation skill
+- `skills/create-prompt-skills/` - Prompt engineering skill
+- `skills/create-slash-commands-skills/` - Slash command creation skill
+- `skills/create-subagents-skills/` - Subagent creation skill
+- `skills/review-code-skills/` - Code review skill
+
+---
+
 ## [2026-01-06]
 
 ### Scripts - Full Replacement

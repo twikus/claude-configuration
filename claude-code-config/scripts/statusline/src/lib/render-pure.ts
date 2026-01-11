@@ -16,6 +16,9 @@ import {
 	formatTokens,
 } from "./formatters";
 
+const WEEKLY_HOURS = 168; // 7 days * 24 hours
+const FIVE_HOUR_MINUTES = 300; // 5 hours * 60 minutes
+
 // ─────────────────────────────────────────────────────────────
 // RAW DATA TYPES - No pre-formatting, just raw values
 // ─────────────────────────────────────────────────────────────
@@ -226,6 +229,16 @@ function formatLimitsPart(
 		}
 	}
 
+	if (config.showPacingDelta && fiveHour.resets_at) {
+		const delta = calculateFiveHourDelta(
+			fiveHour.utilization,
+			fiveHour.resets_at,
+		);
+		parts.push(
+			`${colors.gray("(")}${formatPacingDelta(delta)}${colors.gray(")")}`,
+		);
+	}
+
 	if (config.showTimeLeft && fiveHour.resets_at) {
 		parts.push(colors.gray(`(${formatResetTime(fiveHour.resets_at)})`));
 	}
@@ -243,6 +256,48 @@ function shouldShowWeekly(
 		return fiveHourUtilization >= 90;
 	}
 	return false;
+}
+
+function calculateWeeklyDelta(
+	utilization: number,
+	resetsAt: string | null,
+): number {
+	if (!resetsAt) return 0;
+
+	const resetDate = new Date(resetsAt);
+	const now = new Date();
+	const diffMs = resetDate.getTime() - now.getTime();
+	const hoursRemaining = Math.max(0, diffMs / 3600000);
+	const timeElapsedPercent =
+		((WEEKLY_HOURS - hoursRemaining) / WEEKLY_HOURS) * 100;
+
+	return utilization - timeElapsedPercent;
+}
+
+function formatPacingDelta(delta: number): string {
+	const sign = delta >= 0 ? "+" : "";
+	const value = `${sign}${delta.toFixed(1)}%`;
+
+	if (delta > 5) return colors.green(value);
+	if (delta > 0) return colors.lightGray(value);
+	if (delta > -10) return colors.yellow(value);
+	return colors.red(value);
+}
+
+function calculateFiveHourDelta(
+	utilization: number,
+	resetsAt: string | null,
+): number {
+	if (!resetsAt) return 0;
+
+	const resetDate = new Date(resetsAt);
+	const now = new Date();
+	const diffMs = resetDate.getTime() - now.getTime();
+	const minutesRemaining = Math.max(0, diffMs / 60000);
+	const timeElapsedPercent =
+		((FIVE_HOUR_MINUTES - minutesRemaining) / FIVE_HOUR_MINUTES) * 100;
+
+	return utilization - timeElapsedPercent;
 }
 
 function formatWeeklyPart(
@@ -279,6 +334,16 @@ function formatWeeklyPart(
 				`${colors.lightGray(sevenDay.utilization.toString())}${colors.gray("%")}`,
 			);
 		}
+	}
+
+	if (config.showPacingDelta && sevenDay.resets_at) {
+		const delta = calculateWeeklyDelta(
+			sevenDay.utilization,
+			sevenDay.resets_at,
+		);
+		parts.push(
+			`${colors.gray("(")}${formatPacingDelta(delta)}${colors.gray(")")}`,
+		);
 	}
 
 	if (config.showTimeLeft && sevenDay.resets_at) {

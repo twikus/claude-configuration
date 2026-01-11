@@ -38,6 +38,7 @@
 	"limits": {
 		"enabled": true,
 		"showTimeLeft": true,
+		"showPacingDelta": true,
 		"cost": { "enabled": false, "format": "decimal1" },
 		"percentage": {
 			"enabled": true,
@@ -54,6 +55,7 @@
 	"weeklyUsage": {
 		"enabled": "90%",
 		"showTimeLeft": true,
+		"showPacingDelta": true,
 		"cost": { "enabled": false, "format": "decimal1" },
 		"percentage": {
 			"enabled": true,

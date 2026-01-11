@@ -83,12 +83,14 @@ export interface StatuslineConfig {
 	limits: {
 		enabled: boolean;
 		showTimeLeft: boolean;
+		showPacingDelta: boolean;
 		cost: CostConfig;
 		percentage: PercentageConfig;
 	};
 	weeklyUsage: {
 		enabled: boolean | "90%";
 		showTimeLeft: boolean;
+		showPacingDelta: boolean;
 		cost: CostConfig;
 		percentage: PercentageConfig;
 	};

@@ -113,17 +113,11 @@ describe("buildPrompt", () => {
 		expect(prompt).not.toContain("<context>");
 	});
 
-	it("should truncate long user messages keeping the end", () => {
-		const longMessage = "START" + "a".repeat(2500) + "END";
+	it("should truncate long user messages", () => {
+		const longMessage = "a".repeat(500);
 		const prompt = buildPrompt(longMessage, "");
-		expect(prompt).not.toContain("START");
-		expect(prompt).toContain("END");
-	});
-
-	it("should not truncate messages under 2000 characters", () => {
-		const shortMessage = "a".repeat(1500);
-		const prompt = buildPrompt(shortMessage, "");
-		expect(prompt).toContain("a".repeat(1500));
+		expect(prompt).toContain("a".repeat(400));
+		expect(prompt).not.toContain("a".repeat(500));
 	});
 });
 

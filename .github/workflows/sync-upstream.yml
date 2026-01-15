@@ -28,6 +28,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Debug - Check token presence
+        env:
+          UPSTREAM_TOKEN: ${{ secrets.UPSTREAM_PAT }}
+        run: |
+          if [ -z "$UPSTREAM_TOKEN" ]; then
+            echo "❌ UPSTREAM_TOKEN is EMPTY!"
+            exit 1
+          fi
+          echo "✅ Token is set (length: ${#UPSTREAM_TOKEN} chars)"
+          echo "Token starts with: ${UPSTREAM_TOKEN:0:7}..."
+
       - name: Fetch from upstream repository
         env:
           UPSTREAM_TOKEN: ${{ secrets.UPSTREAM_PAT }}

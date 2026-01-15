@@ -28,26 +28,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Debug - Check token presence
-        env:
-          UPSTREAM_TOKEN: ${{ secrets.UPSTREAM_PAT }}
-        run: |
-          if [ -z "$UPSTREAM_TOKEN" ]; then
-            echo "❌ UPSTREAM_TOKEN is EMPTY!"
-            exit 1
-          fi
-          echo "✅ Token is set (length: ${#UPSTREAM_TOKEN} chars)"
-          echo "Token starts with: ${UPSTREAM_TOKEN:0:7}..."
-
-      - name: Fetch from upstream repository
-        env:
-          UPSTREAM_TOKEN: ${{ secrets.UPSTREAM_PAT }}
-        run: |
-          git fetch https://x-access-token:${UPSTREAM_TOKEN}@github.com/Melvynx/aiblueprint-cli-premium.git main:refs/remotes/upstream/main --tags
+      - name: Checkout upstream repository
+        uses: actions/checkout@v4
+        with:
+          repository: Melvynx/aiblueprint-cli-premium
+          ref: main
+          token: ${{ secrets.UPSTREAM_PAT }}
+          path: upstream-repo
+          fetch-depth: 0
 
       - name: Merge upstream changes
         run: |
-          git merge refs/remotes/upstream/main -X theirs --no-edit
+          git remote add upstream ../upstream-repo
+          git fetch upstream main
+          git merge upstream/main -X theirs --no-edit
         continue-on-error: false
 
       - name: Check if there are changes to push

@@ -1,0 +1,63 @@
+name: Sync from Upstream Repository
+
+on:
+  # Run daily at midnight UTC
+  schedule:
+    - cron: '0 0 * * *'
+
+  # Allow manual trigger from Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream repository as remote
+        run: |
+          git remote add upstream https://github.com/Melvynx/aiblueprint-cli-premium.git
+
+      - name: Fetch from upstream repository
+        run: |
+          git fetch upstream main --tags
+
+      - name: Merge upstream changes
+        run: |
+          git merge upstream/main -X theirs --no-edit
+        continue-on-error: false
+
+      - name: Check if there are changes to push
+        id: check_changes
+        run: |
+          if git diff --quiet origin/main; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No changes to push"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected, will push"
+          fi
+
+      - name: Push synchronized changes
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git push origin main
+
+      - name: Summary
+        run: |
+          echo "✅ Sync complete"
+          echo "📦 Latest commit: $(git log -1 --pretty=format:'%h - %s')"

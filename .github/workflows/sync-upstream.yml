@@ -30,7 +30,7 @@ jobs:
 
       - name: Add upstream repository as remote
         run: |
-          git remote add upstream https://github.com/Melvynx/aiblueprint-cli-premium.git
+          git remote add upstream https://x-access-token:${{ secrets.UPSTREAM_PAT }}@github.com/Melvynx/aiblueprint-cli-premium.git
 
       - name: Fetch from upstream repository
         run: |

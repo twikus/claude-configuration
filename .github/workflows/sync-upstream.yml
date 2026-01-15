@@ -28,6 +28,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Check if UPSTREAM_PAT is set
+        run: |
+          if [ -z "${{ secrets.UPSTREAM_PAT }}" ]; then
+            echo "❌ ERROR: UPSTREAM_PAT secret is not set!"
+            exit 1
+          else
+            echo "✅ UPSTREAM_PAT secret is set"
+          fi
+
       - name: Add upstream repository as remote
         run: |
           git remote add upstream https://x-access-token:${{ secrets.UPSTREAM_PAT }}@github.com/Melvynx/aiblueprint-cli-premium.git

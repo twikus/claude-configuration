@@ -41,7 +41,7 @@ jobs:
         run: |
           git remote add upstream $GITHUB_WORKSPACE/upstream-repo
           git fetch upstream main
-          git merge upstream/main -X theirs --no-edit
+          git merge upstream/main -X theirs --no-edit --allow-unrelated-histories
         continue-on-error: false
 
       - name: Check if there are changes to push

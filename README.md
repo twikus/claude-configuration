@@ -33,3 +33,5 @@ To trigger a sync manually:
 - This repository should be treated as read-only to avoid merge conflicts
 - The upstream repository always wins in case of conflicts
 - Sync logs are available in the Actions tab for 90 days
+
+

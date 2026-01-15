@@ -28,24 +28,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Configure git credentials
+      - name: Fetch from upstream repository
         env:
           UPSTREAM_TOKEN: ${{ secrets.UPSTREAM_PAT }}
         run: |
-          git config --global credential.helper store
-          echo "https://x-access-token:${UPSTREAM_TOKEN}@github.com" > ~/.git-credentials
-
-      - name: Add upstream repository as remote
-        run: |
-          git remote add upstream https://github.com/Melvynx/aiblueprint-cli-premium.git
-
-      - name: Fetch from upstream repository
-        run: |
-          git fetch upstream main --tags
+          git fetch https://x-access-token:${UPSTREAM_TOKEN}@github.com/Melvynx/aiblueprint-cli-premium.git main:refs/remotes/upstream/main --tags
 
       - name: Merge upstream changes
         run: |
-          git merge upstream/main -X theirs --no-edit
+          git merge refs/remotes/upstream/main -X theirs --no-edit
         continue-on-error: false
 
       - name: Check if there are changes to push

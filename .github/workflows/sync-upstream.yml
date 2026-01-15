@@ -60,7 +60,109 @@ jobs:
         run: |
           git push origin main
 
-      - name: Summary
+      - name: Get commit details
+        id: commit_info
         run: |
-          echo "✅ Sync complete"
-          echo "📦 Latest commit: $(git log -1 --pretty=format:'%h - %s')"
+          COMMIT_HASH=$(git log -1 --pretty=format:'%h')
+          COMMIT_MSG=$(git log -1 --pretty=format:'%s')
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/$(git log -1 --pretty=format:'%H')"
+          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+          echo "url=$COMMIT_URL" >> $GITHUB_OUTPUT
+
+      - name: Discord notification - Success
+        if: success()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          CHANGES="${{ steps.check_changes.outputs.changes }}"
+          if [ "$CHANGES" = "true" ]; then
+            STATUS_MSG="✅ Sync completed with new changes"
+            COLOR="3066993"
+          else
+            STATUS_MSG="✅ Sync completed - Already up to date"
+            COLOR="10181046"
+          fi
+
+          curl -H "Content-Type: application/json" \
+               -d "{
+                 \"embeds\": [{
+                   \"title\": \"🔄 Repository Sync\",
+                   \"description\": \"$STATUS_MSG\",
+                   \"color\": $COLOR,
+                   \"fields\": [
+                     {
+                       \"name\": \"Repository\",
+                       \"value\": \"[\`${{ github.repository }}\`](https://github.com/${{ github.repository }})\",
+                       \"inline\": true
+                     },
+                     {
+                       \"name\": \"Branch\",
+                       \"value\": \"\`main\`\",
+                       \"inline\": true
+                     },
+                     {
+                       \"name\": \"Latest Commit\",
+                       \"value\": \"[\`${{ steps.commit_info.outputs.hash }}\`](${{ steps.commit_info.outputs.url }}) - ${{ steps.commit_info.outputs.message }}\",
+                       \"inline\": false
+                     },
+                     {
+                       \"name\": \"Triggered By\",
+                       \"value\": \"\`${{ github.event_name }}\`\",
+                       \"inline\": true
+                     },
+                     {
+                       \"name\": \"Workflow\",
+                       \"value\": \"[View Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\",
+                       \"inline\": true
+                     }
+                   ],
+                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"
+                 }]
+               }" \
+               "$DISCORD_WEBHOOK"
+
+      - name: Discord notification - Failure
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d "{
+                 \"embeds\": [{
+                   \"title\": \"❌ Repository Sync Failed\",
+                   \"description\": \"The automated sync from upstream repository has failed.\",
+                   \"color\": 15158332,
+                   \"fields\": [
+                     {
+                       \"name\": \"Repository\",
+                       \"value\": \"[\`${{ github.repository }}\`](https://github.com/${{ github.repository }})\",
+                       \"inline\": true
+                     },
+                     {
+                       \"name\": \"Branch\",
+                       \"value\": \"\`main\`\",
+                       \"inline\": true
+                     },
+                     {
+                       \"name\": \"Error Details\",
+                       \"value\": \"Check the workflow logs for more information.\",
+                       \"inline\": false
+                     },
+                     {
+                       \"name\": \"Triggered By\",
+                       \"value\": \"\`${{ github.event_name }}\`\",
+                       \"inline\": true
+                     },
+                     {
+                       \"name\": \"Workflow\",
+                       \"value\": \"[View Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\",
+                       \"inline\": true
+                     }
+                   ],
+                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"
+                 }]
+               }" \
+               "$DISCORD_WEBHOOK"

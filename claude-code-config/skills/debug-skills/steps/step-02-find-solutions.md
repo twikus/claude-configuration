@@ -34,7 +34,8 @@ Research and identify multiple potential solutions to the error, documenting tra
 
 ---
 
-<available_state>
+## Available State
+
 From previous steps:
 
 | Variable | Description |
@@ -42,7 +43,6 @@ From previous steps:
 | `{error_context}` | Original error description |
 | `{auto_mode}` | Skip confirmations flag |
 | `{error_analysis}` | Analysis from step 1 with root cause, affected files |
-</available_state>
 
 ---
 
@@ -71,25 +71,26 @@ From previous steps:
 
 ### 3. Document Solutions
 
-**For each solution found (minimum 2, ideally 3-4):**
+**For each solution found (minimum 2, ideally 3-4), document:**
 
-```yaml
-solutions:
-  - id: 1
-    name: "{descriptive name}"
-    approach: "{what this solution does}"
-    files_to_modify:
-      - "{file1}"
-      - "{file2}"
-    pros:
-      - "{advantage 1}"
-      - "{advantage 2}"
-    cons:
-      - "{disadvantage 1}"
-    effort: "{low | medium | high}"
-    risk: "{low | medium | high}"
-    recommended: {true | false}
-```
+#### Solution 1: *Name*
+
+| Field | Value |
+|-------|-------|
+| **Approach** | *What this solution does* |
+| **Files to modify** | *file1, file2, ...* |
+| **Effort** | Low / Medium / High |
+| **Risk** | Low / Medium / High |
+| **Recommended?** | Yes / No |
+
+**Pros:**
+- Advantage 1
+- Advantage 2
+
+**Cons:**
+- Disadvantage 1
+
+*(Repeat for each solution)*
 
 ### 4. Rank Solutions
 
@@ -99,26 +100,11 @@ solutions:
 - Alignment with codebase patterns
 - Long-term maintainability
 
-**Mark ONE solution as `recommended: true`**
+**Mark ONE solution as recommended**
 
 ### 5. Proceed to Proposal
 
-**If `{auto_mode}` = true:**
-→ Proceed to step-03 automatically
-
-**If `{auto_mode}` = false:**
-Present solution count, then use AskUserQuestion:
-```yaml
-questions:
-  - header: "Solutions"
-    question: "Found {N} potential solutions. Ready to review them?"
-    options:
-      - label: "Review solutions (Recommended)"
-        description: "See detailed options and choose one"
-      - label: "Find more options"
-        description: "Research additional solutions first"
-    multiSelect: false
-```
+→ Proceed directly to step-03 (no confirmation needed)
 
 ---
 

@@ -14,6 +14,32 @@ Autonomously fix CI/CD pipeline failures by:
 5. Cleaning up artifacts when done
 </objective>
 
+<quick_start>
+**Basic usage (watch and fix CI):**
+```bash
+/ci-fixer
+```
+
+**Auto mode (no confirmations):**
+```bash
+/ci-fixer --auto
+```
+
+**With max attempts limit:**
+```bash
+/ci-fixer --max-attempts=3
+```
+
+The skill will:
+1. Detect your current branch's CI run
+2. Watch for failures
+3. Fix errors locally (tests, lint, build)
+4. Commit and push
+5. Loop until green ✅
+
+**CRITICAL**: Zero tolerance for hacks - fixes must be proper, no `@ts-ignore`, `eslint-disable`, or test skipping.
+</quick_start>
+
 <parameters>
 | Flag | Description |
 |------|-------------|
@@ -89,9 +115,10 @@ Artifacts are stored in `.claude/data/ci-{run_id}/`:
 </artifacts_storage>
 
 <core_principles>
-## ZERO TOLERANCE FOR HACKS
+<zero_tolerance_policy>
+**ZERO TOLERANCE FOR HACKS**
 
-**If you can't fix it properly, ASK FOR HELP. Never bypass or hack.**
+If you can't fix it properly, ASK FOR HELP. Never bypass or hack.
 
 1. **NEVER skip tests** - All tests must pass locally before committing
 2. **NEVER hack around issues** - Fix the root cause, don't disable checks
@@ -103,7 +130,19 @@ Artifacts are stored in `.claude/data/ci-{run_id}/`:
 8. **Clean up** - Delete artifacts when workflow completes
 
 **Forbidden hacks include:** `@ts-ignore`, `eslint-disable`, `.skip`, `as any`, `--no-verify`, `--legacy-peer-deps`, commenting out tests, changing assertions to match wrong output, adding files to ignore lists.
+</zero_tolerance_policy>
 </core_principles>
+
+<success_criteria>
+- CI pipeline status successfully monitored
+- Errors analyzed and root cause identified
+- Fixes applied locally and verified (all tests/lint passing)
+- Changes committed with clear messages
+- CI pipeline green ✅ after fixes
+- Artifacts cleaned up
+- No hacks or bypasses used
+- Maximum attempts limit respected
+</success_criteria>
 
 <references>
 - [CLI Commands](references/cli-commands.md) - GitHub, Vercel, Netlify CLI reference

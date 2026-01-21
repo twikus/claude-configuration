@@ -19,17 +19,22 @@ function toClaudeProjectPath(inputPath: string): string {
 }
 
 async function main() {
-	const inputPath = process.argv[2];
+	const args = process.argv.slice(2);
+	const override = args.includes("--override");
+	const inputPath = args.find((arg) => !arg.startsWith("--"));
 
 	if (!inputPath) {
-		console.error("Usage: bun run rename-all <project-path>");
+		console.error("Usage: bun run rename-all <project-path> [--override]");
 		console.error("Example: bun run rename-all /Users/melvynx/cc");
-		console.error("Example: bun run rename-all .");
+		console.error("Example: bun run rename-all . --override");
+		console.error("\nFlags:");
+		console.error("  --override  Override existing titles");
 		process.exit(1);
 	}
 
 	const projectPath = toClaudeProjectPath(inputPath);
-	console.log(`Session folder: ${projectPath}\n`);
+	console.log(`Session folder: ${projectPath}`);
+	console.log(`Override mode: ${override ? "ON" : "OFF"}\n`);
 
 	const glob = new Bun.Glob("*.jsonl");
 	const files = await Array.fromAsync(glob.scan({ cwd: projectPath }));
@@ -86,7 +91,7 @@ async function main() {
 			} catch {}
 		}
 
-		if (hasCustomTitle) {
+		if (hasCustomTitle && !override) {
 			skipped++;
 			continue;
 		}
@@ -106,11 +111,27 @@ async function main() {
 			const title = parseTitle(text);
 
 			if (title) {
+				// If overriding, we need to remove the old custom-title line first
+				let finalContent = content;
+				if (hasCustomTitle && override) {
+					const contentLines = content.trim().split("\n");
+					const filteredLines = contentLines.filter((line) => {
+						try {
+							const parsed = JSON.parse(line);
+							return parsed.type !== "custom-title";
+						} catch {
+							return true;
+						}
+					});
+					finalContent = filteredLines.join("\n") + "\n";
+				}
+
 				await Bun.write(
 					filePath,
-					`${content + createCustomTitleLine(title, sessionId)}\n`,
+					`${finalContent + createCustomTitleLine(title, sessionId)}\n`,
 				);
-				console.log(`✅ ${file} → "${title}"`);
+				const prefix = hasCustomTitle && override ? "🔄" : "✅";
+				console.log(`${prefix} ${file} → "${title}"`);
 				renamed++;
 			} else {
 				console.log(`⏭️  ${file} - No meaningful title`);

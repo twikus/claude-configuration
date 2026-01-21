@@ -62,17 +62,11 @@ From previous steps:
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/04-validate.md`:
-```markdown
-# Step 04: Validate
-
-**Task:** {task_description}
-**Started:** {ISO timestamp}
-
----
-
-## Validation Results
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "04" "validate" "in_progress"
 ```
+
+Append results to `{output_dir}/04-validate.md` as you work.
 
 ### 2. Discover Available Commands
 

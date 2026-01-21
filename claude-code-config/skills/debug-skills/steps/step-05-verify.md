@@ -34,7 +34,8 @@ Prove the fix works through multi-layer verification: static checks → automate
 
 ---
 
-<available_state>
+## Available State
+
 From previous steps:
 
 | Variable | Description |
@@ -44,7 +45,6 @@ From previous steps:
 | `{error_analysis}` | Analysis with root cause and verification method |
 | `{selected_solution}` | Solution that was implemented |
 | `{files_modified}` | Files that were changed |
-</available_state>
 
 ---
 
@@ -115,29 +115,22 @@ python -m py_compile {file}   # Python
 
 **Execute:**
 ```bash
-# Run build first (catches most issues)
 npm run build
-
-# Then type check
 npm run typecheck  # or: npx tsc --noEmit
-
-# Then lint
 npm run lint
-
-# Finally, run relevant tests
 npm test -- --testPathPattern="{related-test-file}"
 ```
 
 **Document Layer 2 results:**
-```yaml
-verification_result:
-  layer_2:
-    build: {passed | failed}
-    types: {passed | failed | skipped}
-    lint: {passed | failed | skipped}
-    tests: {passed | failed | skipped}
-    test_output: "{relevant output if failed}"
-```
+
+| Check | Result |
+|-------|--------|
+| Build | ✅ Passed / ❌ Failed |
+| Types | ✅ Passed / ❌ Failed / ⏭️ Skipped |
+| Lint | ✅ Passed / ❌ Failed / ⏭️ Skipped |
+| Tests | ✅ Passed / ❌ Failed / ⏭️ Skipped |
+
+*If failed, include relevant output*
 
 **If Layer 2 fails:** Fix the issue, return to Layer 1.
 
@@ -162,9 +155,7 @@ This is the most important layer. Tests can pass while real execution fails.
 
 **Frontend Verification:**
 ```bash
-# Start dev server
 npm run dev
-
 # Open in Chrome, check DevTools Console for:
 # - No new errors
 # - Network requests succeed
@@ -173,9 +164,7 @@ npm run dev
 
 **Backend/API Verification:**
 ```bash
-# Test the specific endpoint
 curl -X GET http://localhost:3000/api/{endpoint}
-
 # Or for POST:
 curl -X POST http://localhost:3000/api/{endpoint} \
   -H "Content-Type: application/json" \
@@ -184,24 +173,20 @@ curl -X POST http://localhost:3000/api/{endpoint} \
 
 **CLI Verification:**
 ```bash
-# Run the exact command that was failing
 {the-original-failing-command}
-
 # Verify output matches expected behavior
 ```
 
 **Document Layer 3 results:**
-```yaml
-verification_result:
-  # ... layer 2
-  layer_3:
-    method: "{what was executed}"
-    original_error_reproduced: false  # Should be false now!
-    new_errors: {none | list}
-    actual_behavior: "{what happened}"
-    expected_behavior: "{what should happen}"
-    passed: {true | false}
-```
+
+| Field | Value |
+|-------|-------|
+| Method | *What was executed* |
+| Original error still occurs? | No (should be fixed!) |
+| New errors? | None / *list if any* |
+| Actual behavior | *What happened* |
+| Expected behavior | *What should happen* |
+| **Passed?** | ✅ Yes / ❌ No |
 
 **If Layer 3 fails:** The fix doesn't work. Return to step-03 or step-04.
 
@@ -211,70 +196,26 @@ verification_result:
 
 **Check for regressions:**
 ```bash
-# Run broader test suite
 npm test
-
 # Or run full CI check
 npm run ci  # if available
 ```
 
 **Document:**
-```yaml
-verification_result:
-  # ... previous layers
-  layer_4:
-    regression_check: "{what was run}"
-    regressions_found: {true | false}
-    regression_details: "{if any}"
-```
 
-**If `{auto_mode}` = true and all layers passed:**
-→ Report success automatically
+| Field | Value |
+|-------|-------|
+| Regression check | *What was run* |
+| Regressions found? | Yes / No |
+| Details | *If any* |
 
-**If `{auto_mode}` = false:**
-Present full verification summary, then use AskUserQuestion:
-```yaml
-questions:
-  - header: "Verified"
-    question: "All verification layers passed. Confirm the fix works?"
-    options:
-      - label: "Confirm - fix works (Recommended)"
-        description: "I've verified the behavior is correct"
-      - label: "Need more testing"
-        description: "I want to test additional scenarios"
-      - label: "Something's still wrong"
-        description: "The fix doesn't fully resolve the issue"
-    multiSelect: false
-```
-
----
-
-### Verification Failed - Recovery Paths
+**If all layers passed:**
+→ Report success, workflow complete
 
 **If any layer fails:**
-
-Use AskUserQuestion:
-```yaml
-questions:
-  - header: "Failed"
-    question: "Verification failed at Layer {N}. How should we proceed?"
-    options:
-      - label: "Debug further"
-        description: "Re-analyze with new information from verification"
-      - label: "Try different solution"
-        description: "Go back and pick another approach"
-      - label: "Partial fix accepted"
-        description: "The fix helps but doesn't fully resolve"
-      - label: "Revert changes"
-        description: "Undo all modifications"
-    multiSelect: false
-```
-
-**Handle responses:**
-- **"Debug further":** Return to step-01 with Layer N failure info
-- **"Try different solution":** Return to step-03
-- **"Partial fix accepted":** Document limitations, end workflow
-- **"Revert changes":** `git checkout -- {files}`, end workflow
+→ Report failure with details
+→ Automatically attempt to fix the issue and re-verify
+→ If unable to fix, present the failure clearly and end workflow
 
 ---
 
@@ -285,7 +226,6 @@ questions:
 ✅ Layer 3 (Runtime): ACTUAL execution works - error no longer occurs
 ✅ Layer 4 (Regression): No new issues introduced
 ✅ All results documented in `{verification_result}`
-✅ User confirmed (if not auto_mode)
 
 ## FAILURE MODES:
 
@@ -308,14 +248,17 @@ questions:
 ## WORKFLOW COMPLETE:
 
 **If ALL layers passed:**
-```markdown
-## Fix Verified Successfully
 
-**Error:** {original error}
-**Solution:** {selected_solution.name}
-**Files Modified:** {count}
+## ✅ Fix Verified Successfully
+
+| Field | Value |
+|-------|-------|
+| **Error** | {original error} |
+| **Solution** | {selected_solution.name} |
+| **Files Modified** | {count} |
 
 **Verification Results:**
+
 | Layer | Check | Result |
 |-------|-------|--------|
 | 1 | Static Analysis | ✅ Passed |
@@ -327,7 +270,6 @@ questions:
 | 4 | Regression Check | ✅ No regressions |
 
 The fix has been verified across all layers.
-```
 
 **If FAILED:** Offer paths forward (retry, revert, accept partial)
 

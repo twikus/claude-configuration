@@ -144,7 +144,8 @@ Rules can be scoped to specific files using YAML frontmatter:
 
 ```yaml
 ---
-paths: src/api/**/*.ts
+paths:
+  - "src/api/**/*.ts"
 ---
 # API Development Rules
 
@@ -161,6 +162,8 @@ paths: src/api/**/*.ts
 | `src/components/*.tsx` | React components in specific directory     |
 | `src/**/*.{ts,tsx}`    | TypeScript and TSX files (brace expansion) |
 | `{src,lib}/**/*.ts`    | Files in multiple directories              |
+
+**Syntax note:** The `paths` field must be a YAML array (list format with `-` prefix and quoted strings).
 
 **Rules without `paths` frontmatter** load unconditionally for all files.
 </path_scoped_rules>
@@ -576,7 +579,8 @@ Use AskUserQuestion to present these options before proceeding.
 3. Add path-scoped rules as needed:
    ```yaml
    ---
-   paths: src/api/**/*.ts
+   paths:
+     - "src/api/**/*.ts"
    ---
    # API rules here
    ```
@@ -682,6 +686,7 @@ A well-crafted Claude memory system:
 <reference_guides>
 For deeper topics:
 
+- **Rules directory guide**: [references/rules-directory-guide.md](references/rules-directory-guide.md) - Complete guide to .claude/rules/ with official documentation, path-scoping, YAML syntax, and examples
 - **Prompting techniques**: [references/prompting-techniques.md](references/prompting-techniques.md) - Master guide for writing effective instructions, emphasis strategies, clarity techniques
 - **Comprehensive example**: [references/comprehensive-example.md](references/comprehensive-example.md) - Full production SaaS CLAUDE.md
 - **Section templates**: [references/section-templates.md](references/section-templates.md) - Copy-paste templates for each section

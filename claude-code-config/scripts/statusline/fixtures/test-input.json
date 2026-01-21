@@ -24,7 +24,12 @@
 	"context_window": {
 		"total_input_tokens": 136349,
 		"total_output_tokens": 21612,
-		"context_window_size": 200000
+		"context_window_size": 200000,
+		"current_usage": {
+			"input_tokens": 62500,
+			"cache_creation_input_tokens": 0,
+			"cache_read_input_tokens": 0
+		}
 	},
 	"exceeds_200k_tokens": false
 }

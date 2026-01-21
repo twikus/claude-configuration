@@ -1,4 +1,8 @@
 {
+	"features": {
+		"usageLimits": true,
+		"spendTracking": true
+	},
 	"oneLine": true,
 	"showSonnetModel": false,
 	"pathDisplayMode": "truncated",
@@ -71,5 +75,8 @@
 	},
 	"dailySpend": {
 		"cost": { "enabled": true, "format": "decimal1" }
+	},
+	"thinking": {
+		"showDisabledWarning": true
 	}
 }

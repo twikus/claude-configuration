@@ -8,6 +8,30 @@ argument-hint: "[-a] [-e] [-s] [-r <id>] <feature/file>"
 Fast, systematic clean code improvements using parallel agents.
 </objective>
 
+<quick_start>
+**Basic usage (analyze and apply clean code principles):**
+```bash
+/clean-code auth feature
+```
+
+**Auto mode (skip confirmations):**
+```bash
+/clean-code -a dashboard
+```
+
+**With save (output to `.claude/output/clean-code/`):**
+```bash
+/clean-code -s -a refactor api
+```
+
+**What it does:**
+1. Scans codebase for issues (React, Next.js, Zustand, TanStack Query)
+2. Loads relevant best practices docs
+3. Applies clean code improvements
+4. Verifies with build and tests
+5. Commits changes
+</quick_start>
+
 <parameters>
 
 | Flag | Description |
@@ -92,3 +116,14 @@ Load `steps/step-01-scan.md`
 - Always run build before completing
 - Follow patterns from reference files exactly
 </execution_rules>
+
+<success_criteria>
+- Technologies correctly detected (React, Next.js, Zustand, TanStack Query)
+- Issues identified and documented
+- Relevant reference docs loaded
+- Clean code improvements applied
+- Build passes without errors
+- Tests pass (if tests exist)
+- Changes committed with clear message
+- No hacks or shortcuts used
+</success_criteria>

@@ -1,4 +1,8 @@
 {
+	"features": {
+		"usageLimits": true,
+		"spendTracking": true
+	},
 	"oneLine": true,
 	"showSonnetModel": true,
 	"pathDisplayMode": "truncated",
@@ -21,7 +25,7 @@
 			"enabled": false
 		},
 		"tokens": {
-			"enabled": true,
+			"enabled": false,
 			"showMax": false,
 			"showDecimals": false
 		},
@@ -30,7 +34,7 @@
 			"showValue": true,
 			"progressBar": {
 				"enabled": true,
-				"length": 10,
+				"length": 5,
 				"style": "braille",
 				"color": "progressive",
 				"background": "none"
@@ -45,6 +49,26 @@
 		"overheadTokens": 0
 	},
 	"limits": {
+		"enabled": true,
+		"showTimeLeft": true,
+		"showPacingDelta": false,
+		"cost": {
+			"enabled": false,
+			"format": "decimal1"
+		},
+		"percentage": {
+			"enabled": true,
+			"showValue": true,
+			"progressBar": {
+				"enabled": false,
+				"length": 10,
+				"style": "filled",
+				"color": "progressive",
+				"background": "none"
+			}
+		}
+	},
+	"weeklyUsage": {
 		"enabled": true,
 		"showTimeLeft": true,
 		"showPacingDelta": true,
@@ -64,30 +88,13 @@
 			}
 		}
 	},
-	"weeklyUsage": {
-		"enabled": "90%",
-		"showTimeLeft": true,
-		"showPacingDelta": true,
-		"cost": {
-			"enabled": false,
-			"format": "decimal1"
-		},
-		"percentage": {
-			"enabled": true,
-			"showValue": true,
-			"progressBar": {
-				"enabled": true,
-				"length": 10,
-				"style": "braille",
-				"color": "progressive",
-				"background": "none"
-			}
-		}
-	},
 	"dailySpend": {
 		"cost": {
 			"enabled": true,
 			"format": "decimal1"
 		}
+	},
+	"thinking": {
+		"showDisabledWarning": true
 	}
 }

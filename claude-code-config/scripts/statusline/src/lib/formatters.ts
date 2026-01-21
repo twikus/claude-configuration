@@ -201,6 +201,9 @@ function getProgressBarColor(
 	if (colorMode === "peach") return colors.peach;
 	if (colorMode === "black") return colors.black;
 	if (colorMode === "white") return colors.white;
+	if (colorMode === "purple") return colors.purple;
+	if (colorMode === "blue") return colors.blue;
+	if (colorMode === "cyan") return colors.cyan;
 	return colors.red;
 }
 
@@ -320,6 +323,43 @@ export function formatProgressBar({
 		return formatProgressBarBraille(percentage, length, colorMode, background);
 	}
 	return formatProgressBarFilled(percentage, length, colorMode, background);
+}
+
+export function formatDualBar({
+	leftLabel,
+	leftPercentage,
+	leftColorFn,
+	rightLabel,
+	rightValue,
+	rightColorFn,
+	barLength,
+}: {
+	leftLabel: string;
+	leftPercentage: number;
+	leftColorFn: ColorFunction;
+	rightLabel: string;
+	rightValue: number;
+	rightColorFn: ColorFunction;
+	barLength: number;
+}): string {
+	const leftFilled = Math.round((leftPercentage / 100) * barLength);
+	const leftEmpty = barLength - leftFilled;
+	const leftBar = leftColorFn("█".repeat(leftFilled) + "░".repeat(leftEmpty));
+
+	const absRightValue = Math.abs(rightValue);
+	const rightFilled = Math.round(
+		(Math.min(absRightValue, 50) / 50) * barLength,
+	);
+	const rightEmpty = barLength - rightFilled;
+	const rightBar = rightColorFn(
+		"█".repeat(rightFilled) + "░".repeat(rightEmpty),
+	);
+
+	const leftText = `${leftColorFn(leftLabel)} ${leftBar} ${colors.lightGray(leftPercentage.toFixed(1))}${colors.gray("%")}`;
+	const sign = rightValue >= 0 ? "+" : "";
+	const rightText = `${rightColorFn(rightLabel)} ${rightBar} ${rightColorFn(`${sign}${rightValue.toFixed(1)}%`)}`;
+
+	return `${leftText}\n${rightText}`;
 }
 
 export function formatSession(

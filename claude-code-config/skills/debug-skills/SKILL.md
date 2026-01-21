@@ -8,14 +8,42 @@ argument-hint: "[error description or context] [-a for auto mode]"
 Debug errors systematically through a 5-step workflow: analyze the error, find potential solutions, propose options to the user, implement the fix, and verify it works through multi-layer verification.
 </objective>
 
+<quick_start>
+**Debug an error (interactive):**
+```bash
+/debug login page crashes on submit
+```
+
+**Auto mode (fully automatic, use recommended solutions):**
+```bash
+/debug -a API returning 500 on POST
+```
+
+**What it does:**
+1. **Analyze**: Reproduce error, identify root cause → **ask if you have more context**
+2. **Find Solutions**: Research 2-3+ potential fixes with pros/cons
+3. **Propose**: Present options → **you choose which solution**
+4. **Fix**: Implement solution with strategic logging
+5. **Verify**: Multi-layer verification (Static → Build → Runtime)
+
+**Key principle**: Tests passing ≠ fix working. Always execute the actual code path.
+
+**Note:** Only 2 questions in the entire workflow:
+1. After analysis: "Do you have additional info?"
+2. After finding solutions: "Which solution to implement?"
+</quick_start>
+
 <methodology>
-## Core Principles (Battle-Tested)
+<core_principles>
+**Battle-Tested Principles:**
 
 1. **Reproduce Before Anything Else** - If you can't reproduce it, you can't verify the fix
 2. **Hypothesis-Driven Analysis** - List 3-5 causes ranked by likelihood, test systematically
 3. **Multi-Layer Verification** - Tests alone give false confidence (20-40% still fail in production)
+</core_principles>
 
-## Verification Pyramid
+<verification_pyramid>
+**Verification Pyramid:**
 
 ```
         ┌─────────────┐
@@ -33,6 +61,7 @@ Debug errors systematically through a 5-step workflow: analyze the error, find p
 ```
 
 **Key Insight**: Tests passing ≠ fix working. ALWAYS execute the actual code path.
+</verification_pyramid>
 </methodology>
 
 <parameters>
@@ -74,3 +103,17 @@ Load `steps/step-00-init.md`
 | 4 | `step-04-fix.md` | Implement with strategic logging |
 | 5 | `step-05-verify.md` | Multi-layer verification (Static → Build → Runtime → User) |
 </step_files>
+
+<success_criteria>
+- Error successfully reproduced
+- Root cause identified through hypothesis testing
+- 2-3+ potential solutions researched with pros/cons
+- Solution selected (by user or auto mode)
+- Fix implemented with strategic logging
+- Static analysis passes (syntax, imports)
+- Build completes successfully
+- Tests pass (if tests exist)
+- **Runtime execution verified** (actual code path executed)
+- User confirms fix resolves the original issue
+- No regressions introduced
+</success_criteria>

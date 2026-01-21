@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: Expert code review guidance covering security (OWASP), clean code (SOLID, naming), code smells, complexity metrics, and high-value feedback patterns. Use when reviewing PRs, conducting code audits, or providing code feedback. Focuses on impactful issues, not nitpicks.
+description: This skill should be used when the user asks to "review code", "review this PR", "code review", "audit this code", or mentions reviewing pull requests, security checks, or code quality. Covers security (OWASP), clean code (SOLID), code smells, complexity metrics, and high-value feedback patterns. Focuses on impactful issues, not nitpicks.
 ---
 
 <objective>
@@ -42,7 +42,7 @@ Based on research from Google, Microsoft, OWASP, and academic studies on code re
 - Authorization checks on every endpoint
 - No `eval()`, `exec()`, dangerous functions
 
-See: [references/security-checklist.md](references/security-checklist.md)
+See [references/security-checklist.md](references/security-checklist.md) for OWASP Top 10 patterns.
 </category>
 
 <category name="logic" priority="critical">
@@ -62,7 +62,7 @@ See: [references/security-checklist.md](references/security-checklist.md)
 - Duplicated code - extract to shared functions
 - Magic numbers/strings - use named constants
 
-See: [references/clean-code-principles.md](references/clean-code-principles.md)
+See [references/clean-code-principles.md](references/clean-code-principles.md) for SOLID principles and code smells.
 </category>
 
 <category name="maintainability" priority="medium">
@@ -99,7 +99,7 @@ Use clear labels to distinguish severity:
 - **[NIT]**: Minor preference (mark clearly or skip entirely)
 </priority_labels>
 
-See: [references/feedback-patterns.md](references/feedback-patterns.md)
+See [references/feedback-patterns.md](references/feedback-patterns.md) for communication strategies.
 </feedback_guidelines>
 
 <code_quality_metrics>
@@ -121,7 +121,7 @@ See: [references/feedback-patterns.md](references/feedback-patterns.md)
 - High complexity = hard to test
 </metric>
 
-See: [references/code-quality-metrics.md](references/code-quality-metrics.md)
+See [references/code-quality-metrics.md](references/code-quality-metrics.md) for detailed calculations.
 </code_quality_metrics>
 
 <anti_patterns>
@@ -150,6 +150,53 @@ See: [references/code-quality-metrics.md](references/code-quality-metrics.md)
 </pattern>
 </anti_patterns>
 
+<react_nextjs_review>
+## React/Next.js Codebase Detection
+
+**When reviewing a React or Next.js project**, launch an additional parallel agent for Vercel React best practices.
+
+<detection>
+**Detect React/Next.js codebase by checking:**
+- `package.json` contains `"next"` or `"react"` dependencies
+- Files with `.tsx`, `.jsx` extensions in changes
+- `next.config.js` or `next.config.ts` exists
+- `app/` or `pages/` directory structure (Next.js)
+</detection>
+
+<parallel_agent>
+**If React/Next.js detected, launch parallel agent:**
+
+```yaml
+agent:
+  type: code-reviewer
+  focus: "vercel-react-best-practices"
+  task: |
+    Review the recent code changes using Vercel React best practices.
+    Focus on:
+    - Eliminating waterfalls (async patterns, Promise.all)
+    - Bundle size optimization (dynamic imports, barrel files)
+    - Server-side performance (caching, serialization)
+    - Re-render optimization (memoization, state management)
+    - Rendering performance patterns
+
+    Use the /vercel-react-best-practices skill as reference.
+    Report findings with [BLOCKING], [SUGGESTION], or [NIT] labels.
+```
+
+**Execution:**
+1. Check for React/Next.js in `package.json`
+2. If detected, use Task tool to launch parallel agent:
+   ```
+   Task tool with subagent_type="code-reviewer":
+   "Review recent changes against Vercel React best practices from /vercel-react-best-practices skill.
+   Focus on: async patterns, bundle optimization, server performance, re-renders.
+   Check changed files for violations of rules like async-parallel, bundle-barrel-imports,
+   server-cache-react, rerender-memo. Report with priority labels."
+   ```
+3. Merge findings into main review output
+</parallel_agent>
+</react_nextjs_review>
+
 <success_criteria>
 A good code review:
 - Identifies security vulnerabilities (if any)
@@ -159,11 +206,14 @@ A good code review:
 - Provides actionable feedback (What + Why + How)
 - Avoids nitpicks on style/formatting
 - Completes in reasonable time (<4 hours for small PRs)
+- **[React/Next.js]** Includes Vercel best practices review when applicable
 </success_criteria>
 
 <reference_guides>
-**Security**: [references/security-checklist.md](references/security-checklist.md) - OWASP Top 10, auth, input validation
-**Clean Code**: [references/clean-code-principles.md](references/clean-code-principles.md) - SOLID, naming, functions, smells
-**Feedback**: [references/feedback-patterns.md](references/feedback-patterns.md) - Valuable vs wasteful patterns
-**Metrics**: [references/code-quality-metrics.md](references/code-quality-metrics.md) - Complexity, maintainability index
+For detailed guidance and patterns:
+
+- **`references/security-checklist.md`** - OWASP Top 10, authentication patterns, input validation, common vulnerabilities
+- **`references/clean-code-principles.md`** - SOLID principles, naming conventions, function design, code smell detection
+- **`references/feedback-patterns.md`** - Valuable vs wasteful feedback patterns, communication strategies, priority labeling
+- **`references/code-quality-metrics.md`** - Complexity calculations, maintainability index, measurement techniques
 </reference_guides>

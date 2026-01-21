@@ -6,7 +6,15 @@ description: Expert guidance for creating Claude Code slash commands. Use when w
 <objective>
 Create effective slash commands for Claude Code that enable users to trigger reusable prompts with `/command-name` syntax. Slash commands expand as prompts in the current conversation, allowing teams to standardize workflows and operations.
 
-Commands can be **global** (available everywhere in `~/.claude/commands/`) or **project-specific** (shared with team in `.claude/commands/`). This skill teaches you to structure commands with XML tags, YAML frontmatter, dynamic context loading, and intelligent argument handling.
+Commands can be **global** (available everywhere in `~/.claude/commands/`) or **project-specific** (shared with team in `.claude/commands/`). This skill teaches you to structure commands with proper formatting (XML or Markdown), YAML frontmatter, dynamic context loading, and intelligent argument handling.
+
+**CRITICAL WORKFLOW**: This skill enforces a mandatory research phase where you MUST:
+1. Read all reference documentation
+2. Examine existing slash commands for patterns
+3. Understand syntax and best practices
+4. Only then create the command
+
+This prevents poorly-structured commands and ensures consistency with established patterns.
 </objective>
 
 <quick_start>
@@ -37,7 +45,14 @@ Claude receives the expanded prompt and analyzes the code in context.
 </quick_start>
 
 <xml_structure>
-All generated slash commands should use XML tags in the body (after YAML frontmatter) for clarity and consistency.
+Slash commands can use either XML tags OR Markdown headings in the body (after YAML frontmatter).
+
+**Format choice depends on**:
+- User preference (ask if not specified)
+- Command complexity (XML better for complex, Markdown fine for simple)
+- Existing project patterns (match what's already in use)
+
+See [references/prompt-examples.md](references/prompt-examples.md) for real examples of both formats in production.
 
 <required_tags>
 
@@ -607,6 +622,67 @@ See [references/patterns.md](references/patterns.md) for more examples.
 
 <generation_protocol>
 
+<step_0_mandatory_research>
+**CRITICAL: Complete this research phase BEFORE proceeding to any other steps.**
+
+You MUST read and understand these materials before creating any slash command:
+
+**1. Read ALL reference files in order:**
+
+Use the Read tool to read these files:
+- `references/prompt-examples.md` - Real-world patterns and examples
+- `references/patterns.md` - Verified command patterns
+- `references/arguments.md` - Argument handling examples
+- `references/tool-restrictions.md` - Tool restriction patterns
+
+**2. Examine existing slash commands:**
+
+Use Bash to find and Read existing commands:
+```bash
+find ~/.claude/commands -name "*.md" -type f | head -10
+```
+
+Then Read 2-3 relevant existing commands to understand:
+- How they structure their YAML frontmatter
+- What format they use (XML vs Markdown)
+- How they handle arguments (#$ARGUMENTS vs positional)
+- What tool restrictions they apply
+- How they structure their workflow sections
+
+**3. Identify the right pattern:**
+
+Based on the user's request, match it to one of these patterns from prompt-examples.md:
+- **Pattern 1**: Numbered workflow (git ops, CI, EPCT) - for multi-step processes
+- **Pattern 2**: Reference/docs (CLI wrappers) - for command documentation
+- **Pattern 3**: Section-based analysis (research, investigation) - for analysis tasks
+- **Subagent patterns**: For commands that launch Task tool agents
+- **Hybrid patterns**: Combining multiple approaches
+
+**4. Check for similar existing commands:**
+
+Before creating a new command, check if a similar command already exists:
+```bash
+grep -l "description.*<similar-concept>" ~/.claude/commands/*.md
+```
+
+If a similar command exists, read it to:
+- Avoid duplication
+- Learn from its structure
+- Understand how to differentiate the new command
+
+**VERIFICATION CHECKLIST:**
+
+Before proceeding to step 1, confirm you have:
+- ✅ Read all 4 reference files
+- ✅ Examined at least 2 existing slash commands
+- ✅ Identified which pattern to use
+- ✅ Checked for similar existing commands
+- ✅ Understand the correct syntax (#$ARGUMENTS, tool restrictions, etc.)
+
+**DO NOT PROCEED** until all items are checked. This research phase is non-negotiable and prevents creating poorly structured commands.
+
+</step_0_mandatory_research>
+
 <step_1_analyze_request>
 **Analyze the user's request** to understand what they want:
 
@@ -678,17 +754,29 @@ Use AskUserQuestion:
   </step_2b_ask_scope>
 
 <step_3_choose_format>
-**Ask for format preference**:
+**Determine format based on existing patterns:**
+
+Before asking the user, check what format existing commands in the target directory use:
+- If creating global command: Check `~/.claude/commands/*.md`
+- If creating project command: Check `.claude/commands/*.md`
+
+Read 2-3 existing commands to see if they use XML or Markdown format.
+
+**Then ask for format preference**:
 
 Use AskUserQuestion:
 
 - header: "Format"
 - question: "What format do you prefer for this slash command?"
 - options:
-  - "XML (recommended)" - description: "Claude-native format with clear structure, best for complex commands"
-  - "Markdown" - description: "Familiar markdown headings, good for simple commands and documentation"
+  - First option based on what you found: If most commands use Markdown, make "Markdown (matches existing)" the first option
+  - Second option: The alternative format
+  - Include note about what existing commands use
 
-**Default to XML** if user selects "recommended" or for complex commands.
+**Recommendation**:
+- Match existing commands format for consistency
+- XML for complex multi-step commands
+- Markdown for simple straightforward commands
 
 See [references/prompt-examples.md](references/prompt-examples.md) for format examples.
 </step_3_choose_format>
@@ -840,8 +928,183 @@ A well-structured slash command meets these criteria:
 
 **Quality**:
 
-- Clear, actionable instructions in `<process>` tag
-- Measurable completion criteria in `<success_criteria>`
+- Clear, actionable instructions in `<process>` tag or `## Workflow` section
+- Measurable completion criteria in `<success_criteria>` tag or `## Success Criteria` section
 - Appropriate level of detail (not over-engineered for simple tasks)
 - Examples provided when beneficial
   </success_criteria>
+
+<common_mistakes>
+
+## Critical Anti-Patterns to Avoid
+
+These are common mistakes that result from skipping the mandatory research phase:
+
+### ❌ MISTAKE 1: Skipping the Research Phase
+
+**Wrong**:
+```
+User asks to create /quick-search command
+→ Immediately ask scope/format questions
+→ Create command without reading references or existing commands
+→ Use wrong syntax, wrong format, miss best practices
+```
+
+**Correct**:
+```
+User asks to create /quick-search command
+→ Read all 4 reference files first
+→ Find and examine existing commands (especially /search if it exists)
+→ Understand patterns and syntax
+→ Then ask questions and create command
+```
+
+### ❌ MISTAKE 2: Using Wrong Argument Syntax
+
+**Wrong**:
+```markdown
+---
+description: Quick search
+---
+Answer the question: #args
+```
+
+**Correct**:
+```markdown
+---
+description: Quick search
+argument-hint: <question>
+---
+User: #$ARGUMENTS
+```
+
+The correct syntax is `#$ARGUMENTS` (not `#args`). This is documented in references/arguments.md.
+
+### ❌ MISTAKE 3: Not Checking for Similar Commands
+
+**Wrong**:
+- Create `/quick-search` without checking if `/search` already exists
+- Result: Duplicate functionality, confusion
+
+**Correct**:
+- Check existing commands first: `find ~/.claude/commands -name "*.md"`
+- If similar command exists, read it to understand how to differentiate
+- Consider if the new command is really needed
+
+### ❌ MISTAKE 4: Wrong Format Choice
+
+**Wrong**:
+- User asks for command
+- Randomly choose XML or Markdown without checking existing commands
+- Result: Inconsistent codebase
+
+**Correct**:
+- Check what format existing commands use
+- Match that format for consistency
+- Only deviate if user explicitly requests different format
+
+### ❌ MISTAKE 5: Missing Tool Restrictions
+
+**Wrong**:
+```yaml
+---
+description: Quick search with Haiku model
+model: haiku
+---
+```
+
+**Correct**:
+```yaml
+---
+description: Quick search with Haiku model
+model: haiku
+allowed-tools: [Grep, Glob, Read]
+---
+```
+
+For speed-optimized commands, restrict tools to prevent using slow agents like Task.
+
+### ❌ MISTAKE 6: Not Matching Existing Patterns
+
+**Wrong**:
+- Create unique structure that doesn't match any existing pattern
+- Result: Hard to maintain, unfamiliar to users
+
+**Correct**:
+- Read prompt-examples.md to see verified patterns
+- Match your command to Pattern 1, 2, 3, or hybrid
+- Follow the established structure
+
+### ❌ MISTAKE 7: Not Including "User: #$ARGUMENTS" at the End
+
+**Wrong**:
+```markdown
+---
+description: Search command
+argument-hint: <question>
+---
+
+You are a search specialist.
+
+## Workflow
+1. Search for the answer
+2. Provide results
+```
+
+**Correct**:
+```markdown
+---
+description: Search command
+argument-hint: <question>
+---
+
+You are a search specialist.
+
+## Workflow
+1. Search for the answer
+2. Provide results
+
+---
+
+User: #$ARGUMENTS
+```
+
+Many commands end with `User: #$ARGUMENTS` to properly pass the user's input to the command.
+
+### ❌ MISTAKE 8: Over-Engineering Simple Commands
+
+**Wrong**:
+```markdown
+<objective>Create comprehensive search system</objective>
+<context>Load all git state</context>
+<verification>Run extensive checks</verification>
+<testing>Test all edge cases</testing>
+```
+
+For a simple search command, this is too much.
+
+**Correct**:
+```markdown
+You are a rapid search specialist.
+
+## Workflow
+1. Search
+2. Answer
+
+User: #$ARGUMENTS
+```
+
+Match complexity to the task.
+
+## How to Avoid These Mistakes
+
+**Follow the Step 0 checklist religiously**:
+1. ✅ Read all 4 reference files
+2. ✅ Examine 2-3 existing commands
+3. ✅ Identify the pattern to use
+4. ✅ Check for similar commands
+5. ✅ Understand correct syntax
+
+**If you skip Step 0, you WILL make these mistakes.**
+
+</common_mistakes>

@@ -34,7 +34,8 @@ Present all identified solutions to the user and let them choose which one to im
 
 ---
 
-<available_state>
+## Available State
+
 From previous steps:
 
 | Variable | Description |
@@ -43,7 +44,6 @@ From previous steps:
 | `{auto_mode}` | Skip confirmations flag |
 | `{error_analysis}` | Analysis with root cause |
 | `{solutions}` | List of solutions with pros/cons |
-</available_state>
 
 ---
 
@@ -52,17 +52,17 @@ From previous steps:
 ### 1. Present Error Summary
 
 **Brief recap:**
-```
-Error: {error_type}
-Root Cause: {root_cause}
-Affected Files: {count} files
-```
+
+> **Error:** {error_type}
+> **Root Cause:** {root_cause}
+> **Affected Files:** {count} files
 
 ### 2. Present Each Solution
 
 **For each solution in `{solutions}`:**
 
-```markdown
+---
+
 ### Solution {N}: {name}
 
 **Approach:** {approach}
@@ -71,70 +71,44 @@ Affected Files: {count} files
 - {file1}
 - {file2}
 
-**Pros:**
-- {pro1}
-- {pro2}
+| Pros | Cons |
+|------|------|
+| {pro1} | {con1} |
+| {pro2} | |
 
-**Cons:**
-- {con1}
+**Effort:** {low|medium|high} · **Risk:** {low|medium|high}
 
-**Effort:** {low|medium|high} | **Risk:** {low|medium|high}
-```
+---
 
 ### 3. Get User Selection
 
 **If `{auto_mode}` = true:**
-→ Select the solution marked `recommended: true`
+→ Select the solution marked as recommended
 → Set `{selected_solution}` = recommended solution
 → Proceed to step-04 automatically
 
 **If `{auto_mode}` = false:**
-Use AskUserQuestion with solutions as options:
-```yaml
-questions:
-  - header: "Solution"
-    question: "Which solution should we implement?"
-    options:
-      - label: "Solution 1: {name} (Recommended)"
-        description: "{approach} - Effort: {effort}, Risk: {risk}"
-      - label: "Solution 2: {name}"
-        description: "{approach} - Effort: {effort}, Risk: {risk}"
-      - label: "Solution 3: {name}"
-        description: "{approach} - Effort: {effort}, Risk: {risk}"
-    multiSelect: false
-```
 
-### 4. Confirm Selection
+Use **AskUserQuestion** with:
+- **Header:** "Solution"
+- **Question:** "Which solution should we implement?"
+- **Options:**
+  1. "Solution 1: {name} (Recommended)" → {approach} - Effort: {effort}, Risk: {risk}
+  2. "Solution 2: {name}" → {approach} - Effort: {effort}, Risk: {risk}
+  3. "Solution 3: {name}" → {approach} - Effort: {effort}, Risk: {risk}
+
+### 4. Store Selection and Proceed
 
 **Store selection:**
-```yaml
-selected_solution:
-  id: {selected_id}
-  name: "{name}"
-  approach: "{approach}"
-  files_to_modify: [...]
-```
 
-**If `{auto_mode}` = false:**
-Use AskUserQuestion:
-```yaml
-questions:
-  - header: "Confirm"
-    question: "Ready to implement {selected_solution.name}?"
-    options:
-      - label: "Yes, implement it (Recommended)"
-        description: "Proceed with the fix"
-      - label: "Show implementation plan first"
-        description: "I want to see exactly what will change"
-      - label: "Choose different solution"
-        description: "Go back and pick another option"
-    multiSelect: false
-```
+| Field | Value |
+|-------|-------|
+| ID | {selected_id} |
+| Name | {name} |
+| Approach | {approach} |
+| Files to modify | {list} |
 
-**Handle responses:**
-- **"Yes, implement":** Load step-04
-- **"Show plan":** Detail the changes, then re-confirm
-- **"Choose different":** Return to solution selection
+→ Proceed directly to step-04 (no confirmation needed after selection)
 
 ---
 
@@ -142,14 +116,12 @@ questions:
 
 ✅ All solutions presented clearly
 ✅ User selected a solution (or auto-selected recommended)
-✅ Selection confirmed before proceeding
 ✅ `{selected_solution}` state variable populated
 
 ## FAILURE MODES:
 
 ❌ Not presenting all options
 ❌ Implementing without explicit selection
-❌ Missing confirmation step
 ❌ **CRITICAL**: Making code changes in this step
 
 ## PROPOSAL PROTOCOLS:

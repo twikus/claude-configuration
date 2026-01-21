@@ -42,6 +42,10 @@ export function buildPrompt(
 - Start with a verb (action word)
 - Be concise and descriptive
 - Always respond in English
+- CRITICAL: Focus ONLY on the user's ORIGINAL INTENT from their message
+- IGNORE workflow names, tool names, or methodology references (APEX, brainstorm, workflow, etc.)
+- The title should describe WHAT the user wants to accomplish, not HOW (not the method/tool used)
+- If the user's message mentions a workflow/skill, extract the actual goal behind it
 </rules>
 
 <examples>
@@ -69,6 +73,18 @@ export function buildPrompt(
 <user>fix the bug in my code</user>
 <title>Fix Code Bug</title>
 </example>
+<example>
+<user>implement workflow conditions for ralph</user>
+<title>Implement Ralph Conditions</title>
+</example>
+<example>
+<user>/apex add dark mode toggle</user>
+<title>Add Dark Mode Toggle</title>
+</example>
+<example>
+<user>run /apex to refactor the authentication system</user>
+<title>Refactor Auth System</title>
+</example>
 </examples>
 
 <user_message>
@@ -76,6 +92,8 @@ ${userMessage.slice(0, 400)}
 </user_message>
 
 ${assistantResponse ? `<context>\n${assistantResponse.slice(0, 200)}\n</context>` : ""}
+
+IMPORTANT: Extract the user's actual goal from their message. Ignore any workflow or tool names (APEX, brainstorm, etc.) and focus on what they want to accomplish.
 
 Title:`;
 }

@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Expert code reviewer for PR analysis. Use when reviewing code changes for security, logic, clean code, or feature-specific behavior. Accepts focus area and file list. Returns structured findings table.
 tools: Read, Grep, Glob, Skill
-model: sonnet
+model: haiku
 ---
 
 <role>

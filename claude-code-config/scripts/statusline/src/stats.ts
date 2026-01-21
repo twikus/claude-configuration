@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { getDb } from "./lib/database";
+import { getDb } from "./lib/features/spend/database";
 import { colors, formatProgressBar } from "./lib/formatters";
 
 interface DailyStats {

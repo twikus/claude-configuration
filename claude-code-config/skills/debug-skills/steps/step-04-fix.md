@@ -34,7 +34,8 @@ Implement the selected solution precisely as planned, modifying only the necessa
 
 ---
 
-<available_state>
+## Available State
+
 From previous steps:
 
 | Variable | Description |
@@ -43,7 +44,6 @@ From previous steps:
 | `{auto_mode}` | Skip confirmations flag |
 | `{error_analysis}` | Analysis with root cause |
 | `{selected_solution}` | Chosen solution with approach and files |
-</available_state>
 
 ---
 
@@ -52,9 +52,9 @@ From previous steps:
 ### 1. Review Implementation Plan
 
 **From `{selected_solution}`:**
-- Solution: {name}
-- Approach: {approach}
-- Files to modify: {files_to_modify}
+- **Solution:** {name}
+- **Approach:** {approach}
+- **Files to modify:** {files_to_modify}
 
 ### 2. Add Strategic Debug Logging (If Needed)
 
@@ -71,22 +71,17 @@ Remove debug logs before finalizing!
 
 **Strategic logging pattern:**
 ```javascript
-// Use structured logging with context
 console.log('[DEBUG] functionName:', { input, state, output });
-
-// For async flows, log entry and exit
 console.log('[DEBUG] processData: start', { data });
 // ... logic
 console.log('[DEBUG] processData: end', { result });
 ```
 
 **Track debug logs added:**
-```yaml
-debug_logs_added:
-  - file: "{path}"
-    line: {number}
-    purpose: "{what you're checking}"
-```
+
+| File | Line | Purpose |
+|------|------|---------|
+| {path} | {number} | *What you're checking* |
 
 ### 3. Implement Changes
 
@@ -96,77 +91,34 @@ debug_logs_added:
 2. **Identify exact changes needed**
 3. **Apply changes using Edit tool**
 4. **Track modification:**
-   ```yaml
-   files_modified:
-     - file: "{path}"
-       changes: "{what was changed}"
-   ```
+
+| File | Changes Made |
+|------|--------------|
+| {path} | *What was changed* |
 
 ### 4. Handle Unexpected Issues
 
 **If implementation reveals additional required changes:**
-
-**If `{auto_mode}` = true:**
 → Make minimal additional changes needed
 → Document in `{files_modified}`
-
-**If `{auto_mode}` = false:**
-Use AskUserQuestion:
-```yaml
-questions:
-  - header: "Additional"
-    question: "Found additional changes needed. How to proceed?"
-    options:
-      - label: "Make all changes (Recommended)"
-        description: "Include the additional modifications"
-      - label: "Only planned changes"
-        description: "Stick to original plan, may be incomplete"
-      - label: "Stop and review"
-        description: "I want to see what additional changes are needed"
-    multiSelect: false
-```
 
 ### 5. Remove Debug Logs
 
 **Before finalizing, remove any temporary debug logs:**
-- Check `{debug_logs_added}` for logs to remove
+- Check tracked debug logs for logs to remove
 - Search for `[DEBUG]` markers in modified files
 - Verify no console.log/print statements remain (unless intentional)
 
-### 6. Confirm Implementation Complete
+### 6. Complete Implementation
 
-**Update state:**
-```yaml
-files_modified:
-  - file: "{path1}"
-    changes: "{description}"
-  - file: "{path2}"
-    changes: "{description}"
-```
+**Update files_modified state:**
 
-**If `{auto_mode}` = true:**
-→ Proceed to verification automatically
+| File | Changes |
+|------|---------|
+| {path1} | {description} |
+| {path2} | {description} |
 
-**If `{auto_mode}` = false:**
-Present changes summary, then use AskUserQuestion:
-```yaml
-questions:
-  - header: "Complete"
-    question: "Implementation complete. {N} files modified. Ready to verify?"
-    options:
-      - label: "Verify changes (Recommended)"
-        description: "Test that the fix works"
-      - label: "Review changes first"
-        description: "I want to see the diff before verifying"
-      - label: "Undo changes"
-        description: "Revert all modifications"
-    multiSelect: false
-```
-
-**Handle responses:**
-- **"Verify changes":** Load step-05
-- **"Review changes":** Show git diff or file changes, then re-confirm
-- **"Undo changes":** Offer to revert, return to step-03
+→ Proceed directly to step-05 (no confirmation needed)
 
 ---
 

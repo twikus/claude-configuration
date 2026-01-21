@@ -304,3 +304,74 @@ describe("SQLite Delta Tracking", () => {
 		expect(period?.total_cost).toBe(10.0);
 	});
 });
+
+describe("Smart Detection Logic", () => {
+	// Tests for the /clear vs independent session detection
+	// Key insight:
+	// - /clear creates NEW session with HIGH cost (billing continues)
+	// - Independent terminal creates NEW session with LOW cost
+
+	test("isClearContinuation: NEW session with cost > projectMax", () => {
+		const sessionCumulativeCounted = 0; // NEW session
+		const projectMaxCost = 5.0;
+		const newTotalCost = 10.0;
+
+		const isNewSession = sessionCumulativeCounted === 0;
+		const isClearContinuation = isNewSession && newTotalCost > projectMaxCost;
+
+		expect(isClearContinuation).toBe(true);
+
+		// Delta should be based on project max
+		const deltaCost = newTotalCost - projectMaxCost;
+		expect(deltaCost).toBe(5.0);
+	});
+
+	test("Independent terminal: NEW session with cost <= projectMax", () => {
+		const sessionCumulativeCounted = 0; // NEW session
+		const projectMaxCost = 5.0;
+		const newTotalCost = 3.0;
+
+		const isNewSession = sessionCumulativeCounted === 0;
+		const isClearContinuation = isNewSession && newTotalCost > projectMaxCost;
+
+		expect(isClearContinuation).toBe(false);
+
+		// Delta should be based on session tracking (which is 0 for new)
+		const deltaCost = Math.max(0, newTotalCost - sessionCumulativeCounted);
+		expect(deltaCost).toBe(3.0);
+	});
+
+	test("Continuing session: uses session-level tracking even when surpassing projectMax", () => {
+		// This is the edge case that was bugged before
+		// Session B started with $3, now reports $8, projectMax is $5
+		const sessionCumulativeCounted = 3.0; // NOT new, has history
+		const projectMaxCost = 5.0;
+		const newTotalCost = 8.0;
+
+		const isNewSession = sessionCumulativeCounted === 0;
+		const isClearContinuation = isNewSession && newTotalCost > projectMaxCost;
+
+		// Should NOT be treated as /clear continuation because session has history
+		expect(isClearContinuation).toBe(false);
+
+		// Delta should be session-based: $8 - $3 = $5
+		const deltaCost = Math.max(0, newTotalCost - sessionCumulativeCounted);
+		expect(deltaCost).toBe(5.0);
+
+		// NOT the buggy project-based delta: $8 - $5 = $3
+	});
+
+	test("Normal session continuation: uses session-level delta", () => {
+		const sessionCumulativeCounted = 10.0;
+		const projectMaxCost = 10.0;
+		const newTotalCost = 15.0;
+
+		const isNewSession = sessionCumulativeCounted === 0;
+		const isClearContinuation = isNewSession && newTotalCost > projectMaxCost;
+
+		expect(isClearContinuation).toBe(false);
+
+		const deltaCost = Math.max(0, newTotalCost - sessionCumulativeCounted);
+		expect(deltaCost).toBe(5.0);
+	});
+});

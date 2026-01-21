@@ -61,17 +61,11 @@ From previous steps:
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/03-execute.md`:
-```markdown
-# Step 03: Execute
-
-**Task:** {task_description}
-**Started:** {ISO timestamp}
-
----
-
-## Implementation Log
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "03" "execute" "in_progress"
 ```
+
+Append logs to `{output_dir}/03-execute.md` as you work.
 
 ### 2. Create Todos from Plan
 

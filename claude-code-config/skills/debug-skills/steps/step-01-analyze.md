@@ -68,21 +68,11 @@ If you cannot reproduce consistently, you cannot verify a fix. This is non-negot
 
 **List 3-5 possible causes in order of likelihood:**
 
-```markdown
-## Hypotheses (Most → Least Likely)
-
-1. **[Most Likely]** {hypothesis}
-   - Evidence: {what supports this}
-   - Test: {how to verify/disprove}
-
-2. **[Likely]** {hypothesis}
-   - Evidence: {what supports this}
-   - Test: {how to verify/disprove}
-
-3. **[Possible]** {hypothesis}
-   - Evidence: {what supports this}
-   - Test: {how to verify/disprove}
-```
+| Rank | Hypothesis | Evidence | How to Test |
+|------|------------|----------|-------------|
+| Most Likely | *What you think is wrong* | *What supports this* | *How to verify/disprove* |
+| Likely | ... | ... | ... |
+| Possible | ... | ... | ... |
 
 **Test hypotheses systematically** - don't jump to the first idea!
 
@@ -106,50 +96,44 @@ If you cannot reproduce consistently, you cannot verify a fix. This is non-negot
 - What is the immediate cause vs. deeper underlying issue?
 - Are there related problems?
 
-**Document analysis:**
-```yaml
-error_analysis:
-  error_type: "{type of error}"
-  error_message: "{exact error message}"
-  reproducible: {true | false}
-  reproduction_steps: "{minimal steps}"
-  hypotheses_tested:
-    - hypothesis: "{what you thought}"
-      result: "{confirmed | rejected}"
-  root_cause: "{what's actually causing this}"
-  affected_files:
-    - "{file1}"
-    - "{file2}"
-  scope: "{localized | widespread}"
-  complexity: "{simple | moderate | complex}"
-  verification_method: "{how to verify the fix}"
-```
+**Document your analysis with:**
 
-### 6. Confirm Analysis
+| Field | Value |
+|-------|-------|
+| Error Type | *Type of error* |
+| Error Message | *Exact error message* |
+| Reproducible? | Yes / No |
+| Reproduction Steps | *Minimal steps to trigger* |
+| Root Cause | *What's actually causing this* |
+| Affected Files | *List of files involved* |
+| Scope | Localized / Widespread |
+| Complexity | Simple / Moderate / Complex |
+| Verification Method | *How to verify the fix works* |
+
+**Hypotheses tested:**
+
+| Hypothesis | Result |
+|------------|--------|
+| *What you thought* | Confirmed / Rejected |
+| ... | ... |
+
+### 6. Ask for Additional Context
 
 **If `{auto_mode}` = true:**
 → Proceed to step-02 automatically
 
 **If `{auto_mode}` = false:**
-Present analysis summary, then use AskUserQuestion:
-```yaml
-questions:
-  - header: "Analysis"
-    question: "Does this analysis correctly identify the issue?"
-    options:
-      - label: "Yes, find solutions (Recommended)"
-        description: "Analysis is correct, proceed to find fixes"
-      - label: "Partially correct"
-        description: "Some details are wrong, let me clarify"
-      - label: "Not correct"
-        description: "This isn't the right issue, re-analyze"
-    multiSelect: false
-```
+
+Present analysis summary, then use **AskUserQuestion** with:
+- **Header:** "Context"
+- **Question:** "Do you have additional information that could help with the analysis?"
+- **Options:**
+  1. "No, continue (Recommended)" → Analysis is sufficient, proceed to find solutions
+  2. "Yes, I have more info" → Let me provide additional context
 
 **Handle responses:**
-- **"Yes, find solutions":** Update state, load step-02
-- **"Partially correct":** Get clarification, update analysis, re-confirm
-- **"Not correct":** Get more context, re-do analysis
+- **"No, continue":** Load step-02
+- **"Yes, I have more info":** Wait for user input, update `{error_analysis}`, then proceed to step-02
 
 ---
 
@@ -161,7 +145,6 @@ questions:
 ✅ Affected files documented
 ✅ Verification method identified for later
 ✅ `{error_analysis}` state variable populated
-✅ User confirmed analysis (if not auto_mode)
 
 ## FAILURE MODES:
 
@@ -169,7 +152,6 @@ questions:
 ❌ Skipping reproduction attempt
 ❌ Testing only one hypothesis (tunnel vision)
 ❌ Missing key files or dependencies in investigation
-❌ Not confirming analysis with user before proceeding
 ❌ **CRITICAL**: Making code changes in this step
 
 ## ANALYSIS PROTOCOLS:

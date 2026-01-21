@@ -1,5 +1,5 @@
 ---
-name: create-agent-skills
+name: create-agent
 description: Expert guidance for creating, writing, building, and refining Claude Code Skills. Use when working with SKILL.md files, authoring new skills, improving existing skills, or understanding skill structure, progressive disclosure, workflows, validation patterns, and XML formatting.
 ---
 

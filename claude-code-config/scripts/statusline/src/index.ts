@@ -4,7 +4,6 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { defaultConfig, type StatuslineConfig } from "./lib/config";
 import { getContextData } from "./lib/context";
-import { getPeriodCost } from "./lib/database";
 import {
 	colors,
 	formatBranch,
@@ -18,9 +17,46 @@ import {
 	type StatuslineData,
 	type UsageLimit,
 } from "./lib/render-pure";
-import { getTodayCostV2, saveSessionV2 } from "./lib/spend-v2";
 import type { HookInput } from "./lib/types";
-import { getUsageLimits } from "./lib/usage-limits";
+
+// Optional feature imports - just delete the folder to disable!
+let getUsageLimits: any = null;
+let normalizeResetsAt: any = null;
+let getPeriodCost: any = null;
+let getTodayCostV2: any = null;
+let saveSessionV2: any = null;
+
+try {
+	const limitsModule = await import("./lib/features/limits");
+	getUsageLimits = limitsModule.getUsageLimits;
+} catch {
+	// Limits feature not available - that's OK!
+}
+
+try {
+	const utilsModule = await import("./lib/utils");
+	normalizeResetsAt = utilsModule.normalizeResetsAt;
+} catch {
+	// Fallback normalizeResetsAt
+	normalizeResetsAt = (resetsAt: string) => resetsAt;
+}
+
+let getTodayRealCost: (() => number) | null = null;
+try {
+	const spendModule = await import("./lib/features/spend");
+	getPeriodCost = spendModule.getPeriodCost;
+	getTodayCostV2 = spendModule.getTodayCostV2;
+	saveSessionV2 = spendModule.saveSessionV2;
+} catch {
+	// Spend tracking feature not available - that's OK!
+}
+
+try {
+	const loggerModule = await import("./lib/features/spend/payload-logger");
+	getTodayRealCost = loggerModule.getTodayRealCost;
+} catch {
+	// Payload logger not available
+}
 
 // Re-export from render-pure for backwards compatibility
 export {
@@ -36,20 +72,22 @@ const LAST_PAYLOAD_PATH = join(
 	"data",
 	"last_payload.txt",
 );
+const CLAUDE_SETTINGS_PATH = join(
+	process.env.HOME || "",
+	".claude",
+	"settings.json",
+);
 
-function normalizeResetsAt(resetsAt: string): string {
+interface ClaudeSettings {
+	alwaysThinkingEnabled?: boolean;
+}
+
+async function loadClaudeSettings(): Promise<ClaudeSettings> {
 	try {
-		const date = new Date(resetsAt);
-		const minutes = date.getMinutes();
-		const roundedMinutes = Math.round(minutes / 5) * 5;
-
-		date.setMinutes(roundedMinutes);
-		date.setSeconds(0);
-		date.setMilliseconds(0);
-
-		return date.toISOString();
+		const content = await readFile(CLAUDE_SETTINGS_PATH, "utf-8");
+		return JSON.parse(content);
 	} catch {
-		return resetsAt;
+		return {};
 	}
 }
 
@@ -70,15 +108,18 @@ async function main() {
 		await writeFile(LAST_PAYLOAD_PATH, JSON.stringify(input, null, 2));
 
 		const config = await loadConfig();
+		const claudeSettings = await loadClaudeSettings();
 
-		// Get usage limits FIRST to ensure the current period entry exists
-		// and to get the current resets_at for session tracking
-		const usageLimits = await getUsageLimits();
+		// Get usage limits (if feature exists)
+		const usageLimits = getUsageLimits
+			? await getUsageLimits()
+			: { five_hour: null, seven_day: null };
 		const currentResetsAt = usageLimits.five_hour?.resets_at ?? undefined;
 
-		// Now save session with the current period context
-		// This ensures costs are attributed to the correct period (DELTA only!)
-		await saveSessionV2(input, currentResetsAt);
+		// Save session with current period context (if feature exists)
+		if (saveSessionV2) {
+			await saveSessionV2(input, currentResetsAt);
+		}
 
 		const git = await getGitStatus();
 
@@ -119,14 +160,23 @@ async function main() {
 			contextPercentage = contextData.percentage;
 		}
 
-		// Get period cost from SQLite (tracks DELTAS, not full session costs)
-		const normalizedPeriodId = currentResetsAt
-			? normalizeResetsAt(currentResetsAt)
-			: null;
-		const periodCost = normalizedPeriodId
-			? getPeriodCost(normalizedPeriodId)
-			: 0;
-		const todayCost = getTodayCostV2();
+		// Get period cost from SQLite (if feature exists)
+		let periodCost: number | undefined;
+		let todayCost: number | undefined;
+
+		if (getPeriodCost && normalizeResetsAt) {
+			const normalizedPeriodId = currentResetsAt
+				? normalizeResetsAt(currentResetsAt)
+				: null;
+			periodCost = normalizedPeriodId ? getPeriodCost(normalizedPeriodId) : 0;
+		}
+
+		// Get today's cost from payloads (more accurate than DB)
+		if (getTodayRealCost) {
+			todayCost = getTodayRealCost();
+		} else if (getTodayCostV2) {
+			todayCost = getTodayCostV2();
+		}
 
 		const data: StatuslineData = {
 			branch: formatBranch(git, config.git),
@@ -139,22 +189,24 @@ async function main() {
 			sessionDuration: formatDuration(input.cost.total_duration_ms),
 			contextTokens,
 			contextPercentage,
-			usageLimits: {
-				five_hour: usageLimits.five_hour
-					? {
-							utilization: usageLimits.five_hour.utilization,
-							resets_at: usageLimits.five_hour.resets_at,
-						}
-					: null,
-				seven_day: usageLimits.seven_day
-					? {
-							utilization: usageLimits.seven_day.utilization,
-							resets_at: usageLimits.seven_day.resets_at,
-						}
-					: null,
-			},
-			periodCost,
-			todayCost,
+			...(getUsageLimits && {
+				usageLimits: {
+					five_hour: usageLimits.five_hour
+						? {
+								utilization: usageLimits.five_hour.utilization,
+								resets_at: usageLimits.five_hour.resets_at,
+							}
+						: null,
+					seven_day: usageLimits.seven_day
+						? {
+								utilization: usageLimits.seven_day.utilization,
+								resets_at: usageLimits.seven_day.resets_at,
+							}
+						: null,
+				},
+			}),
+			...((getPeriodCost || getTodayCostV2) && { periodCost, todayCost }),
+			thinkingEnabled: claudeSettings.alwaysThinkingEnabled ?? true,
 		};
 
 		const output = renderStatusline(data, config);

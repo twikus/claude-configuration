@@ -22,7 +22,7 @@ const prompt = positionals.join(" ");
 
 if (!prompt) {
 	console.error(
-		"Usage: bun run cli.ts <prompt> [-m opus|sonnet|haiku] [-s system_prompt]"
+		"Usage: bun run cli.ts <prompt> [-m opus|sonnet|haiku] [-s system_prompt]",
 	);
 	process.exit(1);
 }

@@ -94,9 +94,10 @@ async function main() {
 			process.exit(0);
 		}
 
-		const message = result.action === "deny"
-			? `Command blocked!\n\nCommand: ${command}\nReason: ${result.violations.join(", ")}\nSeverity: ${result.severity}`
-			: `⚠️ Potentially dangerous command\n\nCommand: ${command}\nReason: ${result.violations.join(", ")}\nSeverity: ${result.severity}\n\nDo you want to proceed?`;
+		const message =
+			result.action === "deny"
+				? `Command blocked!\n\nCommand: ${command}\nReason: ${result.violations.join(", ")}\nSeverity: ${result.severity}`
+				: `⚠️ Potentially dangerous command\n\nCommand: ${command}\nReason: ${result.violations.join(", ")}\nSeverity: ${result.severity}\n\nDo you want to proceed?`;
 
 		const hookOutput: HookOutput = {
 			hookSpecificOutput: {

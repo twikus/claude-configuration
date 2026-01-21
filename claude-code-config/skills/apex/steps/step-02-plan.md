@@ -62,17 +62,11 @@ From previous steps:
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/02-plan.md`:
-```markdown
-# Step 02: Plan
-
-**Task:** {task_description}
-**Started:** {ISO timestamp}
-
----
-
-## Planning Progress
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "02" "plan" "in_progress"
 ```
+
+Append plan to `{output_dir}/02-plan.md` as you work.
 
 ### 2. ULTRA THINK: Design Complete Strategy
 

@@ -62,17 +62,11 @@ From previous steps:
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/08-run-tests.md`:
-```markdown
-# Step 08: Run Tests
-
-**Task:** {task_description}
-**Started:** {ISO timestamp}
-
----
-
-## Test Run Log
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "08" "run-tests" "in_progress"
 ```
+
+Append logs to `{output_dir}/08-run-tests.md` as you work.
 
 ### 2. Check Requirements
 

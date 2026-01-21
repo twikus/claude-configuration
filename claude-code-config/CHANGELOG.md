@@ -1,5 +1,33 @@
 # Claude Code Config Changelog
 
+## [2026-01-21] - Skills & Statusline Refresh
+
+### New Skills
+- `skills/vercel-react-best-practices/` - React/Next.js performance optimization guidelines from Vercel Engineering
+- `skills/web-design-guidelines/` - Review UI code for Web Interface Guidelines compliance
+
+### Updated Skills
+- `skills/apex/` - Enhanced APEX methodology with setup templates and updated step flows
+- `skills/create-saas/` - Complete SaaS workflow with discovery, brainstorm, validate, PRD, architecture, and task phases
+- `skills/debug-skills/` - Improved error debugging with systematic analysis and verification
+- `skills/review-code/` - Enhanced code review with security, clean code, and best practices
+
+### Scripts - Statusline Complete Refresh
+- **New**: `statusline/src/analyze-daily-usage.ts` - Daily usage analysis tool
+- **New**: `statusline/src/debug-payloads.ts` - Debug payloads tool
+- **New**: `statusline/src/lib/features/spend/payload-logger.ts` - Payload logging functionality
+- **New**: `statusline/statusline.config.free.json` - Free tier configuration
+- **Reorganized**: Commands moved to `src/lib/features/spend/commands/` structure
+- **Removed**: Old renderers (renderer.ts, spend-v2.ts, usage-limits.ts, database.ts)
+- **Removed**: Old commands (spend-today.ts, spend-month.ts, spend-project.ts, weekly-analysis.ts, migrate-to-sqlite.ts)
+
+### Other Changes
+- Updated agents (action, code-reviewer, explore-codebase, explore-docs, fix-grammar, snipper, websearch)
+- New commands: `quick-search.md`, `softcompact.md`
+- New agent: `code-simplifier.md`
+
+---
+
 ## [2026-01-09] - Synced TO ~/.claude
 
 ### New Command

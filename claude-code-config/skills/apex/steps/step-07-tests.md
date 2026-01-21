@@ -61,17 +61,11 @@ From previous steps:
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/07-tests.md`:
-```markdown
-# Step 07: Tests
-
-**Task:** {task_description}
-**Started:** {ISO timestamp}
-
----
-
-## Test Analysis
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "07" "tests" "in_progress"
 ```
+
+Append analysis to `{output_dir}/07-tests.md` as you work.
 
 ### 2. Analyze Test Infrastructure
 

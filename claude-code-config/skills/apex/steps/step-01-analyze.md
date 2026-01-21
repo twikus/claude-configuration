@@ -60,22 +60,11 @@ From step-00-init:
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/01-analyze.md`:
-```markdown
-# Step 01: Analyze
-
-**Task:** {task_description}
-**Started:** {ISO timestamp}
-
----
-
-## Context Discovery
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "01" "analyze" "in_progress"
 ```
 
-Update `00-context.md` progress:
-```markdown
-| 01-analyze | ⏳ In Progress | {timestamp} |
-```
+Append findings to `{output_dir}/01-analyze.md` as you work.
 
 ### 2. Extract Search Keywords
 
@@ -201,45 +190,37 @@ _These will be refined in the planning step._
 
 ### 6. Present Context Summary
 
-**If `{auto_mode}` = true:**
-→ Present summary and proceed automatically
+**Always (regardless of auto_mode):**
 
-**If `{auto_mode}` = false:**
-→ Present summary and use AskUserQuestion:
+Present summary and proceed directly to planning:
 
-```yaml
-questions:
-  - header: "Context"
-    question: "Context gathering complete. Ready to proceed to planning?"
-    options:
-      - label: "Proceed to planning (Recommended)"
-        description: "Context is sufficient, move to step 2"
-      - label: "Explore more"
-        description: "I want you to search for more context"
-      - label: "Add context"
-        description: "I want to provide additional information"
-    multiSelect: false
 ```
+**Context Gathering Complete**
+
+**Files analyzed:** {count}
+**Patterns identified:** {count}
+**Utilities found:** {count}
+
+**Key findings:**
+- {summary of relevant files}
+- {patterns that will guide implementation}
+
+→ Proceeding to planning phase...
+```
+
+<critical>
+Do NOT ask for user confirmation here - always proceed directly to step-02-plan.
+</critical>
 
 ### 7. Complete Save Output (if save_mode)
 
 **If `{save_mode}` = true:**
 
-Append to `{output_dir}/01-analyze.md`:
-```markdown
----
-## Step Complete
-**Status:** ✓ Complete
-**Files found:** {count}
-**Patterns identified:** {count}
-**Next:** step-02-plan.md
-**Timestamp:** {ISO timestamp}
-```
+Append summary to `{output_dir}/01-analyze.md` then:
 
-Update `00-context.md`:
-```markdown
-| 01-analyze | ✓ Complete | {timestamp} |
-| 02-plan | ⏳ In Progress | {timestamp} |
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "01" "analyze" "complete"
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "02" "plan" "in_progress"
 ```
 
 ---
@@ -262,7 +243,7 @@ Update `00-context.md`:
 ❌ Not documenting patterns with file:line references
 ❌ Launching agents sequentially instead of parallel
 ❌ Using subagents when economy_mode is true
-❌ **CRITICAL**: Not using AskUserQuestion for user input
+❌ **CRITICAL**: Blocking workflow with unnecessary confirmation prompts
 
 ## ANALYZE PROTOCOLS:
 
@@ -276,8 +257,9 @@ Update `00-context.md`:
 
 ## NEXT STEP:
 
-After user confirms via AskUserQuestion (or auto-proceed), load `./step-02-plan.md`
+Always proceed directly to `./step-02-plan.md` after presenting context summary.
 
 <critical>
 Remember: Analysis is ONLY about "What exists?" - save all planning for step-02!
+Do NOT ask for confirmation - proceed directly!
 </critical>

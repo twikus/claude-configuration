@@ -61,17 +61,11 @@ From previous steps:
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/05-examine.md`:
-```markdown
-# Step 05: Examine (Adversarial Review)
-
-**Task:** {task_description}
-**Started:** {ISO timestamp}
-
----
-
-## Review Findings
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "05" "examine" "in_progress"
 ```
+
+Append findings to `{output_dir}/05-examine.md` as you work.
 
 ### 2. Gather Changes
 
@@ -175,10 +169,10 @@ For each finding:
 - [ ] F2 [HIGH] Add null check in handler.ts:78
 ```
 
-### 7. Get User Approval
+### 7. Get User Approval (review → resolve/test)
 
-**If `{auto_mode}` = true AND Real findings exist:**
-→ Proceed to step-06-resolve automatically
+**If `{auto_mode}` = true:**
+→ Proceed automatically based on findings
 
 **If `{auto_mode}` = false:**
 
@@ -189,12 +183,21 @@ questions:
     options:
       - label: "Resolve findings (Recommended)"
         description: "Address the identified issues"
+      - label: "Skip to tests"
+        description: "Skip resolution, proceed to test creation"
       - label: "Skip resolution"
         description: "Accept findings, don't make changes"
       - label: "Discuss findings"
         description: "I want to discuss specific findings"
     multiSelect: false
 ```
+
+<critical>
+This is one of the THREE transition points that requires user confirmation:
+1. plan → execute
+2. validate → review
+3. review → resolve/test (THIS ONE)
+</critical>
 
 ### 8. Complete Save Output (if save_mode)
 
@@ -229,7 +232,7 @@ Append to `{output_dir}/05-examine.md`:
 ❌ Auto-dismissing findings
 ❌ Launching agents sequentially
 ❌ Using subagents when economy_mode
-❌ **CRITICAL**: Not using AskUserQuestion for user choices
+❌ **CRITICAL**: Not using AskUserQuestion for review → resolve/test transition
 
 ## REVIEW PROTOCOLS:
 
@@ -243,12 +246,18 @@ Append to `{output_dir}/05-examine.md`:
 
 ## NEXT STEP:
 
-If findings exist, load `./step-06-resolve.md`
+After user confirms via AskUserQuestion (or auto-proceed):
 
-If no findings or user skips:
-- **If pr_mode:** Load `./step-09-finish.md` to create pull request
-- **Otherwise:** Workflow complete - show summary
+**If user chooses "Resolve findings":** → Load `./step-06-resolve.md`
+
+**If user chooses "Skip to tests" (and test_mode):** → Load `./step-07-tests.md`
+
+**If user chooses "Skip resolution":**
+- **If test_mode:** → Load `./step-07-tests.md`
+- **If pr_mode:** → Load `./step-09-finish.md` to create pull request
+- **Otherwise:** → Workflow complete - show summary
 
 <critical>
 Remember: Be SKEPTICAL - your job is to find problems, not approve code!
+This step MUST ask before proceeding (unless auto_mode).
 </critical>

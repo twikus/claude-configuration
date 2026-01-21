@@ -39,6 +39,7 @@ const minimalConfig: StatuslineConfig = {
 	limits: {
 		enabled: true,
 		showTimeLeft: false,
+		showPacingDelta: false,
 		cost: { enabled: false, format: "decimal1" },
 		percentage: {
 			enabled: true,
@@ -55,6 +56,7 @@ const minimalConfig: StatuslineConfig = {
 	weeklyUsage: {
 		enabled: false,
 		showTimeLeft: false,
+		showPacingDelta: false,
 		cost: { enabled: false, format: "decimal1" },
 		percentage: {
 			enabled: true,
@@ -109,6 +111,7 @@ const fullConfig: StatuslineConfig = {
 	limits: {
 		enabled: true,
 		showTimeLeft: true,
+		showPacingDelta: true,
 		cost: { enabled: true, format: "decimal1" },
 		percentage: {
 			enabled: true,
@@ -125,6 +128,7 @@ const fullConfig: StatuslineConfig = {
 	weeklyUsage: {
 		enabled: true,
 		showTimeLeft: true,
+		showPacingDelta: true,
 		cost: { enabled: true, format: "decimal1" },
 		percentage: {
 			enabled: true,

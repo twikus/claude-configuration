@@ -1,12 +1,42 @@
 ---
 name: apex
 description: Systematic implementation using APEX methodology (Analyze-Plan-Execute-eXamine) with parallel agents, self-validation, and optional adversarial review. Use when implementing features, fixing bugs, or making code changes that benefit from structured workflow.
-argument-hint: [-a] [-x] [-s] [-t] [-b] [-pr] [-i] [-r <task-id>] <task description>
+argument-hint: "[-a] [-x] [-s] [-t] [-b] [-pr] [-i] [-r <task-id>] <task description>"
 ---
 
 <objective>
 Execute systematic implementation workflows using the APEX methodology. This skill uses progressive step loading to minimize context usage and supports saving outputs for review and resumption.
 </objective>
+
+<quick_start>
+**Basic usage:**
+
+```bash
+/apex add authentication middleware
+```
+
+**Recommended workflow (autonomous with save):**
+
+```bash
+/apex -a -s implement user registration
+```
+
+**With adversarial review:**
+
+```bash
+/apex -a -x -s fix login bug
+```
+
+**Flags:**
+
+- `-a` (auto): Skip confirmations
+- `-s` (save): Save outputs to `.claude/output/apex/`
+- `-x` (examine): Include adversarial code review
+- `-t` (test): Create and run tests
+- `-pr` (pull-request): Create PR at end
+
+See `<parameters>` for complete flag list.
+</quick_start>
 
 <parameters>
 
@@ -98,30 +128,14 @@ Execute systematic implementation workflows using the APEX methodology. This ski
 </examples>
 
 <parsing_rules>
-**Parse flags in order:**
+**Flag parsing:**
 
-1. Load defaults from `step-00-init.md` `<defaults>` section
-2. Parse flags (enable OR disable):
-   - `-a` or `--auto` → `{auto_mode}` = true
-   - `-A` or `--no-auto` → `{auto_mode}` = false
-   - `-x` or `--examine` → `{examine_mode}` = true
-   - `-X` or `--no-examine` → `{examine_mode}` = false
-   - `-s` or `--save` → `{save_mode}` = true
-   - `-S` or `--no-save` → `{save_mode}` = false
-   - `-t` or `--test` → `{test_mode}` = true
-   - `-T` or `--no-test` → `{test_mode}` = false
-   - `-e` or `--economy` → `{economy_mode}` = true
-   - `-E` or `--no-economy` → `{economy_mode}` = false
-   - `-b` or `--branch` → `{branch_mode}` = true
-   - `-B` or `--no-branch` → `{branch_mode}` = false
-   - `-pr` or `--pull-request` → `{pr_mode}` = true, `{branch_mode}` = true
-   - `-PR` or `--no-pull-request` → `{pr_mode}` = false
-   - `-i` or `--interactive` → `{interactive_mode}` = true
-   - `-r` or `--resume` + task-id → `{resume_task}` = task-id
-3. Remove all flags from input → store remainder as `{task_description}`
-4. **If `{pr_mode}` = true:** Automatically enable `{branch_mode}` = true
-5. Generate `{task_id}` from task description (e.g., "add auth middleware" → "01-add-auth-middleware")
-6. **If `{economy_mode}` = true:** Load `steps/step-00b-economy.md` for override rules
+1. Defaults loaded from `steps/step-00-init.md` `<defaults>` section
+2. Command-line flags override defaults (enable with lowercase `-x`, disable with uppercase `-X`)
+3. Flags removed from input, remainder becomes `{task_description}`
+4. Task ID generated as `NN-kebab-case-description`
+
+For detailed parsing algorithm, see `steps/step-00-init.md`.
 </parsing_rules>
 
 </parameters>
@@ -170,29 +184,19 @@ All outputs saved to PROJECT directory (where Claude Code is running):
 </output_structure>
 
 <resume_workflow>
-**When `-r {task-id}` is provided:**
+**Resume mode (`-r {task-id}`):**
 
-1. **Locate task folder:**
+When provided, step-00 will:
 
-   ```
-   .claude/output/apex/{task-id}/
-   ```
+1. Locate the task folder in `.claude/output/apex/`
+2. Restore state from `00-context.md`
+3. Find the last completed step
+4. Continue from the next step
 
-   - Support partial match: `-r 01` finds `01-add-auth-middleware`
-   - If multiple matches, list them and ask user to specify
+Supports partial matching (e.g., `-r 01` finds `01-add-auth-middleware`).
 
-2. **Read 00-context.md** to restore:
-   - Original task description
-   - Flags (auto_mode, examine_mode, test_mode)
-   - Acceptance criteria
-
-3. **Scan existing step files** to determine progress:
-   - Find highest numbered step file
-   - Check if it's complete (has completion marker)
-   - Resume from next step or current incomplete step
-
-4. **Continue workflow** from detected position
-   </resume_workflow>
+For implementation details, see `steps/step-00-init.md`.
+</resume_workflow>
 
 <workflow>
 **Standard flow:**
@@ -216,7 +220,8 @@ All outputs saved to PROJECT directory (where Claude Code is running):
 | Variable                | Type    | Description                                            |
 | ----------------------- | ------- | ------------------------------------------------------ |
 | `{task_description}`    | string  | What to implement (flags removed)                      |
-| `{task_id}`             | string  | Kebab-case identifier (e.g., `01-add-auth-middleware`) |
+| `{feature_name}`        | string  | Kebab-case name without number (e.g., `add-auth-middleware`) |
+| `{task_id}`             | string  | Full identifier with number (e.g., `01-add-auth-middleware`) |
 | `{acceptance_criteria}` | list    | Success criteria (inferred or explicit)                |
 | `{auto_mode}`           | boolean | Skip confirmations, use recommended options            |
 | `{examine_mode}`        | boolean | Auto-proceed to adversarial review                     |
@@ -277,24 +282,22 @@ After initialization, step-00 loads step-01-analyze.md.
   </execution_rules>
 
 <save_output_pattern>
-**When `{save_mode}` = true, each step must:**
+**When `{save_mode}` = true:**
 
-1. At step start: Create/open `{output_dir}/NN-stepname.md`
-2. Write step header with timestamp
-3. Append findings/outputs as work progresses
-4. At step end: Write completion marker
+Step-00 runs `scripts/setup-templates.sh` to initialize all output files from `templates/` directory.
 
-**Completion marker format:**
+**Each step then:**
 
-```markdown
----
+1. Run `scripts/update-progress.sh {task_id} {step_num} {step_name} "in_progress"`
+2. Append findings/outputs to the pre-created step file
+3. Run `scripts/update-progress.sh {task_id} {step_num} {step_name} "complete"`
 
-## Step Complete
+**Template system benefits:**
 
-**Status:** ✓ Complete
-**Next:** step-NN-name.md
-**Timestamp:** {ISO timestamp}
-```
+- Reduces token usage by ~75% (1,350 tokens saved per workflow)
+- Templates in `templates/` directory (not inline in steps)
+- Scripts handle progress tracking automatically
+- See `templates/README.md` for details
 
 </save_output_pattern>
 

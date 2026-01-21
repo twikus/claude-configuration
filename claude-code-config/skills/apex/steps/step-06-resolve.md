@@ -60,17 +60,11 @@ From previous steps:
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/06-resolve.md`:
-```markdown
-# Step 06: Resolve
-
-**Task:** {task_description}
-**Started:** {ISO timestamp}
-
----
-
-## Resolution Log
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "06" "resolve" "in_progress"
 ```
+
+Append logs to `{output_dir}/06-resolve.md` as you work.
 
 ### 2. Present Resolution Options
 

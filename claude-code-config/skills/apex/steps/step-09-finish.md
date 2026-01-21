@@ -129,35 +129,14 @@ gh pr view --json url -q '.url'
 
 **If `{save_mode}` = true:**
 
-Create `{output_dir}/09-finish.md`:
-```markdown
-# Step 9: Finish & Create PR
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "09" "finish" "in_progress"
+```
 
-**Completed:** {ISO timestamp}
+Append to `{output_dir}/09-finish.md`: branch, PR URL, commits, timestamp.
 
----
-
-## Git Operations
-
-- **Branch:** {branch_name}
-- **Pushed:** ✓
-- **PR Created:** {pr_mode ? "✓" : "✗"}
-
-## Pull Request
-
-{if pr_mode:}
-- **URL:** {pr_url}
-- **Title:** feat({task_id}): {task_description}
-
-## Commits Included
-
-{list of commits}
-
----
-
-## Step Complete
-**Status:** ✓ Complete
-**Timestamp:** {ISO timestamp}
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "09" "finish" "complete"
 ```
 
 ### 7. Final Summary

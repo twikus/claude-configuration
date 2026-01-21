@@ -49,12 +49,13 @@ export interface RawStatuslineData {
 	durationMs: number;
 	contextTokens: number | null;
 	contextPercentage: number | null;
-	usageLimits: {
+	usageLimits?: {
 		five_hour: UsageLimit | null;
 		seven_day: UsageLimit | null;
 	};
-	periodCost: number;
-	todayCost: number;
+	periodCost?: number;
+	todayCost?: number;
+	thinkingEnabled?: boolean;
 }
 
 // Legacy interface for backwards compatibility
@@ -66,12 +67,13 @@ export interface StatuslineData {
 	sessionDuration: string;
 	contextTokens: number | null;
 	contextPercentage: number | null;
-	usageLimits: {
+	usageLimits?: {
 		five_hour: UsageLimit | null;
 		seven_day: UsageLimit | null;
 	};
-	periodCost: number;
-	todayCost: number;
+	periodCost?: number;
+	todayCost?: number;
+	thinkingEnabled?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -275,12 +277,13 @@ function calculateWeeklyDelta(
 }
 
 function formatPacingDelta(delta: number): string {
-	const sign = delta >= 0 ? "+" : "";
-	const value = `${sign}${delta.toFixed(1)}%`;
+	const inverted = -delta;
+	const sign = inverted >= 0 ? "+" : "";
+	const value = `${sign}${inverted.toFixed(1)}%`;
 
-	if (delta > 5) return colors.green(value);
-	if (delta > 0) return colors.lightGray(value);
-	if (delta > -10) return colors.yellow(value);
+	if (inverted > 5) return colors.green(value);
+	if (inverted > 0) return colors.lightGray(value);
+	if (inverted > -10) return colors.yellow(value);
 	return colors.red(value);
 }
 
@@ -361,6 +364,14 @@ function formatDailyPart(
 	return `${colors.gray("D:")} ${colors.gray("$")}${colors.dimWhite(formatCost(todayCost, config.cost.format))}`;
 }
 
+function formatThinkingPart(
+	thinkingEnabled: boolean,
+	config: StatuslineConfig["thinking"],
+): string {
+	if (!config.showDisabledWarning || thinkingEnabled) return "";
+	return colors.red("Thinking: OFF");
+}
+
 // ─────────────────────────────────────────────────────────────
 // MAIN RENDER FUNCTION - Raw data + config = output
 // ─────────────────────────────────────────────────────────────
@@ -401,24 +412,31 @@ export function renderStatuslineRaw(
 
 	// Limits
 	const limitsPart = formatLimitsPart(
-		data.usageLimits.five_hour,
-		data.periodCost,
+		data.usageLimits?.five_hour ?? null,
+		data.periodCost ?? 0,
 		config.limits,
 	);
 	if (limitsPart) sections.push(limitsPart);
 
 	// Weekly
 	const weeklyPart = formatWeeklyPart(
-		data.usageLimits.seven_day,
-		data.usageLimits.five_hour?.utilization ?? null,
-		data.periodCost,
+		data.usageLimits?.seven_day ?? null,
+		data.usageLimits?.five_hour?.utilization ?? null,
+		data.periodCost ?? 0,
 		config.weeklyUsage,
 	);
 	if (weeklyPart) sections.push(weeklyPart);
 
 	// Daily
-	const dailyPart = formatDailyPart(data.todayCost, config.dailySpend);
+	const dailyPart = formatDailyPart(data.todayCost ?? 0, config.dailySpend);
 	if (dailyPart) sections.push(dailyPart);
+
+	// Thinking warning (last position)
+	const thinkingPart = formatThinkingPart(
+		data.thinkingEnabled ?? true,
+		config.thinking,
+	);
+	if (thinkingPart) sections.push(thinkingPart);
 
 	const output = sections.join(` ${sep} `);
 
@@ -451,6 +469,7 @@ export function renderStatusline(
 		usageLimits: data.usageLimits,
 		periodCost: data.periodCost,
 		todayCost: data.todayCost,
+		thinkingEnabled: data.thinkingEnabled,
 	};
 
 	return renderStatuslineRaw(rawData, config);

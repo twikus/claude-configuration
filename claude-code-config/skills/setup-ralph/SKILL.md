@@ -10,6 +10,30 @@ Set up the Ralph autonomous coding loop in any project. Ralph runs AI agents in 
 **This skill ONLY sets up Ralph - you run the commands yourself.**
 </objective>
 
+<quick_start>
+**Setup Ralph interactively (recommended):**
+```bash
+/setup-ralph -i
+```
+
+**Setup for specific feature:**
+```bash
+/setup-ralph -f 01-add-authentication
+```
+
+**What this does:**
+1. Creates `.claude/ralph/` structure in your project
+2. Runs setup script to create all Ralph files
+3. (If -i): Brainstorms PRD with you interactively
+4. Transforms PRD into user stories (prd.json)
+5. Shows you the command to run Ralph (you run it yourself)
+
+**After setup, you run:**
+```bash
+bun run .claude/ralph/ralph.sh -f <feature-name>
+```
+</quick_start>
+
 <critical_rule>
 🛑 NEVER run ralph.sh or any execution commands automatically
 🛑 NEVER execute the loop - only set up files and show instructions

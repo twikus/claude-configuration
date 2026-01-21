@@ -29,9 +29,9 @@ Initialize the debug workflow by parsing flags and extracting the error context 
 
 ## DEFAULTS CONFIGURATION:
 
-```yaml
-auto_mode: false   # -a/--auto: Skip confirmations, use recommended solutions
-```
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `auto_mode` | false | `-a`/`--auto`: Skip confirmations, use recommended solutions |
 
 ---
 
@@ -39,15 +39,12 @@ auto_mode: false   # -a/--auto: Skip confirmations, use recommended solutions
 
 ### 1. Parse Flags and Input
 
-**Step 1: Load defaults from config above**
+**Load defaults from config above, then parse user input:**
 
-**Step 2: Parse user input and override defaults:**
-```
-Enable flags (lowercase):
-  -a, --auto → {auto_mode} = true
-
-Remainder → {error_context}
-```
+| Flag | Action |
+|------|--------|
+| `-a` or `--auto` | Set `{auto_mode}` = true |
+| Everything else | Set as `{error_context}` |
 
 ### 2. Validate Input
 
@@ -56,47 +53,29 @@ Remainder → {error_context}
 
 ### 3. Set Initial State
 
-```yaml
-error_context: "{parsed from input}"
-auto_mode: {parsed from flags}
-error_analysis: null
-solutions: []
-selected_solution: null
-files_modified: []
-verification_result: null
-```
+Initialize all variables for the workflow:
 
-### 4. Confirm Start
+| Variable | Initial Value |
+|----------|---------------|
+| `error_context` | Parsed from input |
+| `auto_mode` | Parsed from flags |
+| `error_analysis` | Empty (filled in step 1) |
+| `solutions` | Empty list (filled in step 2) |
+| `selected_solution` | Empty (filled in step 3) |
+| `files_modified` | Empty list (filled in step 4) |
+| `verification_result` | Empty (filled in step 5) |
 
-**If `{auto_mode}` = true:**
-→ Proceed directly to step-01
+### 4. Proceed to Analysis
 
-**If `{auto_mode}` = false:**
-Use AskUserQuestion:
-```yaml
-questions:
-  - header: "Start"
-    question: "Debug workflow initialized. Ready to analyze the error?"
-    options:
-      - label: "Begin analysis (Recommended)"
-        description: "Start investigating the error"
-      - label: "Add more context"
-        description: "I want to provide more details first"
-    multiSelect: false
-```
-
-**Handle responses:**
-- **"Begin analysis":** Load step-01
-- **"Add more context":** Wait for user input, update `{error_context}`, then proceed
+→ Proceed directly to step-01 (no confirmation needed)
 
 ---
 
 ## SUCCESS METRICS:
 
-✅ Flags correctly parsed (-a/--auto detected)
+✅ Flags correctly parsed (`-a`/`--auto` detected)
 ✅ Error context extracted or placeholder set
 ✅ All state variables initialized
-✅ User confirmed or auto_mode enabled
 
 ## FAILURE MODES:
 

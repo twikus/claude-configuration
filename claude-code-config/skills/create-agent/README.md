@@ -8,11 +8,11 @@ You have a repeatable workflow—PDF processing, API integrations, astrological 
 
 ## The Solution
 
-`/create-agent-skill` asks clarifying questions, researches APIs if needed, and generates properly structured skill files automatically. When things don't work perfectly the first time, `/heal-skill` analyzes what went wrong and updates the skill based on what actually worked.
+`/create-agent` asks clarifying questions, researches APIs if needed, and generates properly structured skill files automatically. When things don't work perfectly the first time, `/heal-skill` analyzes what went wrong and updates the skill based on what actually worked.
 
 ## Commands
 
-### `/create-agent-skill [description]`
+### `/create-agent [description]`
 
 Describe what you want. Claude builds the skill.
 
@@ -27,10 +27,10 @@ Describe what you want. Claude builds the skill.
 
 ```bash
 # Describe what you want
-/create-agent-skill I want to generate natal charts from birth data
+/create-agent I want to generate natal charts from birth data
 
 # Or start with the menu
-/create-agent-skill
+/create-agent
 # Select "Create a new skill" or "Update an existing skill"
 ```
 
@@ -74,7 +74,7 @@ cp -r skills/* ~/.claude/skills/
 **Create a skill:**
 
 ```
-You: /create-agent-skill I want to generate astrological natal charts from birth data
+You: /create-agent I want to generate astrological natal charts from birth data
 
 Claude: [Asks about calculations, output format, visualization style]
 
@@ -132,13 +132,13 @@ Claude: [Generates chart correctly on first try]
 ## File Structure
 
 ```
-create-agent-skills/
+create-agents/
 ├── README.md
 ├── commands/
-│   ├── create-agent-skill.md
+│   ├── create-agent.md
 │   └── heal-skill.md
 └── skills/
-    └── create-agent-skills/
+    └── create-agents/
         ├── SKILL.md
         └── references/
             ├── api-security.md

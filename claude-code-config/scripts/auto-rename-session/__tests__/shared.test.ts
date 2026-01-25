@@ -64,6 +64,31 @@ describe("isRealUserMessage", () => {
 	it("should return true for messages exactly 5 characters", () => {
 		expect(isRealUserMessage("hello")).toBe(true);
 	});
+
+	it("should return false for skill prompt expansions", () => {
+		expect(
+			isRealUserMessage("Base directory for this skill: /path/to/skill"),
+		).toBe(false);
+		expect(
+			isRealUserMessage(
+				"<objective>Execute systematic implementation workflows</objective>",
+			),
+		).toBe(false);
+		expect(
+			isRealUserMessage("Some text with <quick_start> in it"),
+		).toBe(false);
+		expect(
+			isRealUserMessage("<parameters>some params</parameters>"),
+		).toBe(false);
+		expect(
+			isRealUserMessage("Text containing <workflow> tag"),
+		).toBe(false);
+	});
+
+	it("should return true for real user messages that look like but are not skill prompts", () => {
+		expect(isRealUserMessage("Help me set up a workflow")).toBe(true);
+		expect(isRealUserMessage("Add a parameter to my function")).toBe(true);
+	});
 });
 
 describe("parseTitle", () => {
@@ -92,6 +117,33 @@ describe("parseTitle", () => {
 		expect(parseTitle("")).toBeNull();
 		expect(parseTitle("ab")).toBeNull();
 		expect(parseTitle("  ")).toBeNull();
+	});
+
+	it("should return null for None responses", () => {
+		expect(parseTitle("None")).toBeNull();
+		expect(parseTitle("none")).toBeNull();
+		expect(parseTitle("NONE")).toBeNull();
+	});
+
+	it("should return null for ANY title containing workflow/skill keywords", () => {
+		expect(parseTitle("Set Up APEX Skill")).toBeNull();
+		expect(parseTitle("Running Apex Workflow")).toBeNull();
+		expect(parseTitle("Execute Workflow Steps")).toBeNull();
+		expect(parseTitle("Start APEX")).toBeNull();
+		expect(parseTitle("Initialize Skill")).toBeNull();
+		expect(parseTitle("Loading APEX")).toBeNull();
+		expect(parseTitle("Build Approval Workflow")).toBeNull();
+		expect(parseTitle("Debug Skill System")).toBeNull();
+		expect(parseTitle("Add Workflow Feature")).toBeNull();
+		expect(parseTitle("Debug Brainstorm")).toBeNull();
+		expect(parseTitle("Create Subagent")).toBeNull();
+		expect(parseTitle("Setup Hook")).toBeNull();
+	});
+
+	it("should allow valid titles without forbidden keywords", () => {
+		expect(parseTitle("Build React Component")).toBe("Build React Component");
+		expect(parseTitle("Debug API Error")).toBe("Debug API Error");
+		expect(parseTitle("Add Authentication")).toBe("Add Authentication");
 	});
 });
 

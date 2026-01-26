@@ -20,6 +20,8 @@
 		"statusline:config": "bun statusline/src/commands/interactive-config.ts",
 		"statusline:migrate": "bun statusline/src/lib/features/spend/commands/migrate-to-sqlite.ts",
 		"statusline:weekly": "bun statusline/src/lib/features/limits/commands/weekly-analysis.ts",
+		"statusline:debug": "bun statusline/src/debug-payloads.ts",
+		"statusline:usage": "bun statusline/src/analyze-daily-usage.ts",
 		"statusline:lint": "biome check --write statusline",
 		"lint": "biome check --write .",
 		"format": "biome format --write ."

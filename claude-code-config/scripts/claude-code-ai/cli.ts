@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { parseArgs } from "util";
-import { type Model, generateTextCC } from "./claude";
+import { generateTextCC, type Model } from "./claude";
 
 const { values, positionals } = parseArgs({
 	args: Bun.argv.slice(2),

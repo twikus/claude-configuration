@@ -28,6 +28,16 @@ export function isRealUserMessage(content: string): boolean {
 	if (content.startsWith("<command-")) return false;
 	if (content.startsWith("<local-command")) return false;
 	if (content.trim().length < 5) return false;
+
+	// Detect skill/workflow prompt expansions - these are NOT real user messages
+	if (content.startsWith("Base directory for this skill:")) return false;
+	if (content.includes("<objective>")) return false;
+	if (content.includes("<quick_start>")) return false;
+	if (content.includes("<parameters>")) return false;
+	if (content.includes("<workflow>")) return false;
+	if (content.includes("<step_files>")) return false;
+	if (content.includes("<execution_rules>")) return false;
+
 	return true;
 }
 
@@ -38,14 +48,14 @@ export function buildPrompt(
 	return `Generate a short title (2-5 words) for this Claude Code session.
 
 <rules>
-- ALWAYS generate a title, never refuse
 - Start with a verb (action word)
 - Be concise and descriptive
 - Always respond in English
 - CRITICAL: Focus ONLY on the user's ORIGINAL INTENT from their message
-- IGNORE workflow names, tool names, or methodology references (APEX, brainstorm, workflow, etc.)
+- NEVER include workflow names, tool names, skill names, or methodology references in the title
 - The title should describe WHAT the user wants to accomplish, not HOW (not the method/tool used)
 - If the user's message mentions a workflow/skill, extract the actual goal behind it
+- If the user intent is UNCLEAR or you can only see workflow/skill instructions, respond with exactly: None
 </rules>
 
 <examples>
@@ -85,6 +95,14 @@ export function buildPrompt(
 <user>run /apex to refactor the authentication system</user>
 <title>Refactor Auth System</title>
 </example>
+<example>
+<user>Base directory for this skill: /path/to/skill... [skill prompt]</user>
+<title>None</title>
+</example>
+<example>
+<user><objective>Execute systematic implementation workflows...</objective></user>
+<title>None</title>
+</example>
 </examples>
 
 <user_message>
@@ -93,7 +111,7 @@ ${userMessage.slice(0, 400)}
 
 ${assistantResponse ? `<context>\n${assistantResponse.slice(0, 200)}\n</context>` : ""}
 
-IMPORTANT: Extract the user's actual goal from their message. Ignore any workflow or tool names (APEX, brainstorm, etc.) and focus on what they want to accomplish.
+IMPORTANT: Extract the user's actual goal from their message. If the message is a workflow/skill prompt or system instruction (not a real user request), respond with exactly "None".
 
 Title:`;
 }
@@ -103,7 +121,28 @@ export function parseTitle(text: string): string | null {
 		.trim()
 		.replace(/["'\n*_`#]/g, "")
 		.slice(0, 60);
-	return title && title.length > 2 ? title : null;
+
+	if (!title || title.length <= 2) return null;
+
+	// Return null for "None" responses (intent unclear)
+	if (title.toLowerCase() === "none") return null;
+
+	// Filter out ANY title containing workflow/skill keywords - these are NOT user intent
+	const forbiddenKeywords = [
+		"apex",
+		"workflow",
+		"skill",
+		"brainstorm",
+		"subagent",
+		"hook",
+	];
+
+	const lowerTitle = title.toLowerCase();
+	for (const keyword of forbiddenKeywords) {
+		if (lowerTitle.includes(keyword)) return null;
+	}
+
+	return title;
 }
 
 export function createCustomTitleLine(

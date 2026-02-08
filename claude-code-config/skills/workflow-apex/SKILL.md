@@ -53,6 +53,7 @@ See `<parameters>` for complete flag list.
 | `-b` | `--branch` | Branch mode: verify not on main, create branch if needed |
 | `-pr` | `--pull-request` | PR mode: create pull request at end (enables -b) |
 | `-i` | `--interactive` | Interactive mode: configure flags via AskUserQuestion |
+| `-k` | `--tasks` | Tasks mode: generate task breakdown with dependencies after plan |
 
 **Disable flags (turn OFF):**
 | Short | Long | Description |
@@ -64,6 +65,7 @@ See `<parameters>` for complete flag list.
 | `-E` | `--no-economy` | Disable economy mode |
 | `-B` | `--no-branch` | Disable branch mode |
 | `-PR` | `--no-pull-request` | Disable PR mode |
+| `-K` | `--no-tasks` | Disable tasks mode |
 </flags>
 
 <examples>
@@ -79,6 +81,9 @@ See `<parameters>` for complete flag list.
 
 # Full workflow with tests
 /apex -a -x -s -t add auth middleware
+
+# Generate task breakdown with dependencies
+/apex -a -s -k add auth middleware
 
 # With PR creation
 /apex -a -pr add auth middleware
@@ -123,6 +128,11 @@ All outputs saved to PROJECT directory (where Claude Code is running):
 ├── 02-plan.md # Implementation plan
 ├── 03-execute.md # Execution log
 ├── 04-validate.md # Validation results
+├── 02b-tasks/ # Task breakdown (if -k)
+│   ├── README.md # Task overview and dependencies
+│   ├── task-01-*.md # Individual task file
+│   ├── task-02-*.md # Individual task file
+│   └── ...
 ├── 05-examine.md # Review findings (if -x)
 ├── 06-resolve.md # Resolution log (if -x)
 ├── 07-tests.md # Test analysis and creation (if --test)
@@ -176,13 +186,14 @@ For implementation details, see `steps/step-00-init.md`.
 3. If `-s`: Create output folder and 00-context.md
 4. Load step-01-analyze.md → gather context
 5. Load step-02-plan.md → create strategy
-6. Load step-03-execute.md → implement
-7. Load step-04-validate.md → verify
-8. If `--test`: Load step-07-tests.md → analyze and create tests
-9. If `--test`: Load step-08-run-tests.md → run until green
-10. If `-x` or user requests: Load step-05-examine.md → adversarial review
-11. If findings: Load step-06-resolve.md → fix findings
-12. If `-pr`: Load step-09-finish.md → create pull request
+6. If `--tasks`: Load step-02b-tasks.md → generate task breakdown
+7. Load step-03-execute.md → implement
+8. Load step-04-validate.md → verify
+9. If `--test`: Load step-07-tests.md → analyze and create tests
+10. If `--test`: Load step-08-run-tests.md → run until green
+11. If `-x` or user requests: Load step-05-examine.md → adversarial review
+12. If findings: Load step-06-resolve.md → fix findings
+13. If `-pr`: Load step-09-finish.md → create pull request
 </workflow>
 
 <state_variables>
@@ -202,6 +213,7 @@ For implementation details, see `steps/step-00-init.md`.
 | `{branch_mode}`         | boolean | Verify not on main, create branch if needed            |
 | `{pr_mode}`             | boolean | Create pull request at end                             |
 | `{interactive_mode}`    | boolean | Configure flags interactively                          |
+| `{tasks_mode}`          | boolean | Generate task breakdown with dependencies after plan   |
 | `{resume_task}`         | string  | Task ID to resume (if -r provided)                     |
 | `{output_dir}`          | string  | Full path to output directory                          |
 | `{branch_name}`         | string  | Created branch name (if branch_mode)                   |
@@ -232,6 +244,7 @@ After initialization, step-00 loads step-01-analyze.md.
 | 00   | `steps/step-00-init.md`      | Parse flags, create output folder, initialize state  |
 | 01   | `steps/step-01-analyze.md`   | Smart context gathering with 1-10 parallel agents based on complexity |
 | 02   | `steps/step-02-plan.md`      | File-by-file implementation strategy                 |
+| 02b  | `steps/step-02b-tasks.md`    | Task breakdown with dependencies (if --tasks)        |
 | 03   | `steps/step-03-execute.md`   | Todo-driven implementation                           |
 | 04   | `steps/step-04-validate.md`  | Self-check and validation                            |
 | 05   | `steps/step-05-examine.md`   | Adversarial code review (optional)                   |

@@ -1,5 +1,5 @@
 ---
-name: brainstorm-skills
+name: brainstorm
 description: Deep iterative research using progressive flow psychology (diverge-analyze-converge-execute) with parallel agents, skeptical analysis, and multi-perspective synthesis. Use for thorough topic exploration, decision-making research, or when you need battle-tested conclusions.
 ---
 

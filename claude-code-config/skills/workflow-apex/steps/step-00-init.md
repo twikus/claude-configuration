@@ -56,6 +56,7 @@ economy_mode: false # -e: No subagents, save tokens (for limited plans)
 branch_mode: false # -b: Verify not on main, create branch if needed
 pr_mode: false # -pr: Create pull request at end (enables -b)
 interactive_mode: false # -i: Configure flags interactively
+tasks_mode: false # -k: Generate task breakdown after plan
 
 # Presets:
 # Budget-friendly:  economy_mode: true
@@ -84,6 +85,7 @@ interactive_mode: false # -i: Configure flags interactively
 {branch_mode}  = <default>
 {pr_mode}      = <default>
 {interactive_mode} = <default>
+{tasks_mode}   = <default>
 ```
 
 **Step 2: Parse user input and override defaults:**
@@ -104,6 +106,10 @@ Disable flags (UPPERCASE - turn OFF):
   -E or --no-economy      → {economy_mode} = false
   -B or --no-branch       → {branch_mode} = false
   -PR or --no-pull-request → {pr_mode} = false
+  -K or --no-tasks        → {tasks_mode} = false
+
+Tasks mode:
+  -k or --tasks           → {tasks_mode} = true
 
 Branch/PR flags:
   -b or --branch        → {branch_mode} = true
@@ -198,6 +204,7 @@ bash {skill_dir}/scripts/setup-templates.sh \
   "{branch_mode}" \
   "{pr_mode}" \
   "{interactive_mode}" \
+  "{tasks_mode}" \
   "{branch_name}" \
   "{original_input}"
 ```
@@ -233,6 +240,7 @@ Show COMPACT initialization summary (one table, then proceed immediately):
 | `{economy_mode}` | true/false |
 | `{branch_mode}` | true/false |
 | `{pr_mode}` | true/false |
+| `{tasks_mode}` | true/false |
 
 → Analyzing...
 ```

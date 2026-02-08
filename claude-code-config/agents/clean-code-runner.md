@@ -37,16 +37,20 @@ After the skill completes, return:
 **Technologies Detected:** {React, Next.js, Zustand, TanStack Query}
 
 ### Issues Fixed
-| Type | Location | Action |
-|------|----------|--------|
+
+| Type   | Location    | Action          |
+| ------ | ----------- | --------------- |
 | {type} | `file:line` | {what was done} |
 
 ### Build Status
+
 {✓ Passed / ✗ Failed with reason}
 
 ### Summary
+
 {1-2 sentence summary of changes}
 ```
+
 </output_format>
 
 <constraints>

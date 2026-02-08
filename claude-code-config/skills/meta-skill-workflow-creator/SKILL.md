@@ -1,5 +1,5 @@
 ---
-name: create-skills-workflow
+name: skill-workflow-creator
 description: Create multi-step workflow skills with progressive step loading, state management, and interactive decisions. Use when building complex skills like APEX that need structured phases.
 argument-hint: <workflow name> [description]
 ---
@@ -10,6 +10,7 @@ Guide the creation of professional multi-step workflow skills. These skills use 
 
 <when_to_use>
 **Use this skill when building:**
+
 - Multi-phase workflows (3+ distinct steps)
 - Skills that need state persistence across steps
 - Interactive workflows with user decision points
@@ -17,10 +18,11 @@ Guide the creation of professional multi-step workflow skills. These skills use 
 - Workflows that save outputs for review
 
 **Don't use for:**
+
 - Simple single-action skills
 - Skills that complete in one step
 - Pure research/exploration skills
-</when_to_use>
+  </when_to_use>
 
 <workflow_creation_process>
 
@@ -30,6 +32,7 @@ Guide the creation of professional multi-step workflow skills. These skills use 
 **1.1 Identify Workflow Steps**
 
 Ask yourself:
+
 - What are the distinct phases of this workflow?
 - What must complete before the next step can start?
 - Which steps are optional or conditional?
@@ -45,13 +48,15 @@ Step 1 ──► Step 2 ──► Step 3 ──┬──► Step 4a (if conditio
 **1.3 Define State Variables**
 
 What data needs to persist across steps?
+
 ```yaml
 state_variables:
-  - task_description: string   # What to do
-  - task_id: string            # Unique identifier
-  - auto_mode: boolean         # Skip confirmations
-  - results: object            # Accumulated results
+  - task_description: string # What to do
+  - task_id: string # Unique identifier
+  - auto_mode: boolean # Skip confirmations
+  - results: object # Accumulated results
 ```
+
 </step_1_define_structure>
 
 <step_2_create_structure>
@@ -75,7 +80,7 @@ skills/{skill-name}/
 - NN = two-digit number (00, 01, 02...)
 - Use kebab-case for names
 - Keep names short but descriptive
-</step_2_create_structure>
+  </step_2_create_structure>
 
 </workflow_creation_process>
 
@@ -87,7 +92,7 @@ skills/{skill-name}/
 - [State Management](references/state-management.md) - Persisting data across steps
 - [Workflow Patterns](references/workflow-patterns.md) - Common workflow designs
 - [Prompt Engineering](references/prompt-engineering.md) - Best practices for prompts
-</templates>
+  </templates>
 
 <execution_flow>
 
@@ -96,11 +101,12 @@ skills/{skill-name}/
 **Step 1: Create SKILL.md**
 
 Use this structure:
+
 ```markdown
 ---
-name: {skill-name}
-description: {what it does}
-argument-hint: {flags and args}
+name: { skill-name }
+description: { what it does }
+argument-hint: { flags and args }
 ---
 
 <objective>
@@ -127,6 +133,7 @@ Load `steps/step-00-init.md`
 **Step 2: Create step-00-init.md**
 
 Always start with an init step that:
+
 - Parses flags and arguments
 - Sets up state variables
 - Creates output folders (if needed)
@@ -139,6 +146,7 @@ Use the step template from [references/step-template.md](references/step-templat
 **Step 4: Test the Workflow**
 
 Run through the workflow to ensure:
+
 - State persists correctly
 - Transitions work
 - Conditional steps trigger properly
@@ -151,6 +159,7 @@ Run through the workflow to ensure:
 ## Critical Patterns to Follow (BMAD-Inspired)
 
 ### 1. Micro-File Architecture
+
 ```
 ALWAYS: Each step is a self-contained file with embedded rules
 ALWAYS: Load one step at a time (progressive loading)
@@ -161,7 +170,9 @@ Why: Saves context, disciplined execution, clear boundaries
 ```
 
 ### 2. Mandatory Execution Rules Section
+
 Every step MUST start with this:
+
 ```markdown
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -173,6 +184,7 @@ Every step MUST start with this:
 ```
 
 ### 3. Execution Protocols Section
+
 ```markdown
 ## EXECUTION PROTOCOLS:
 
@@ -183,6 +195,7 @@ Every step MUST start with this:
 ```
 
 ### 4. Context Boundaries Section
+
 ```markdown
 ## CONTEXT BOUNDARIES:
 
@@ -193,7 +206,9 @@ Every step MUST start with this:
 ```
 
 ### 5. Your Task Statement
+
 One clear sentence describing the step's purpose:
+
 ```markdown
 ## YOUR TASK:
 
@@ -201,14 +216,16 @@ Initialize the workflow by parsing flags and setting up state.
 ```
 
 ### 6. User Decisions with AskUserQuestion
+
 **CRITICAL: NEVER use plain text "[C] Continue" prompts. ALWAYS use AskUserQuestion.**
 
-```markdown
+````markdown
 **If `{auto_mode}` = true:**
 → Use recommended option automatically
 
 **If `{auto_mode}` = false:**
 Use AskUserQuestion:
+
 ```yaml
 questions:
   - header: "Continue"
@@ -222,7 +239,9 @@ questions:
         description: "Return to previous step"
     multiSelect: false
 ```
-```
+````
+
+````
 
 ### 7. Success Metrics & Failure Modes
 ```markdown
@@ -237,10 +256,12 @@ questions:
 ❌ {Failure 1}
 ❌ {Failure 2}
 ❌ **CRITICAL**: Not using AskUserQuestion for user input
-```
+````
 
 ### 8. Frontmatter State Tracking
+
 Track progress in document frontmatter:
+
 ```yaml
 ---
 stepsCompleted: [1, 2, 3]
@@ -250,7 +271,9 @@ selected_approach: "jwt"
 ```
 
 ### 9. Critical Tags
+
 Use `<critical>` tags for essential reminders:
+
 ```markdown
 <critical>
 Remember: This step is ONLY about analysis - don't plan or implement!
@@ -258,6 +281,7 @@ Remember: This step is ONLY about analysis - don't plan or implement!
 ```
 
 ### 10. Next Step Routing
+
 ```markdown
 ## NEXT STEP:
 
@@ -313,11 +337,13 @@ Remember: {Important boundary reminder}
 **A well-designed workflow skill (BMAD-style):**
 
 **Structure:**
+
 - [ ] Micro-file architecture - each step self-contained
 - [ ] Clear step progression with dependencies
 - [ ] State variables documented and persisted in frontmatter
 
 **Each Step Has:**
+
 - [ ] MANDATORY EXECUTION RULES section with emojis
 - [ ] EXECUTION PROTOCOLS section
 - [ ] CONTEXT BOUNDARIES section
@@ -329,17 +355,20 @@ Remember: {Important boundary reminder}
 - [ ] `<critical>` reminder at the end
 
 **User Interaction:**
+
 - [ ] ALL user decisions use AskUserQuestion (never plain text)
 - [ ] Auto mode skips AskUserQuestion calls
 - [ ] Save mode outputs to files with frontmatter
 
 **State Management:**
+
 - [ ] `stepsCompleted` array tracked in frontmatter
 - [ ] Resume detection checks existing documents
 - [ ] State variables passed between steps
-</success_criteria>
+      </success_criteria>
 
 <quick_start>
+
 ## Quick Start
 
 **To create a new workflow skill:**
@@ -352,9 +381,10 @@ Remember: {Important boundary reminder}
 6. Test the workflow end-to-end
 
 **Reference files to consult:**
+
 - `references/step-template.md` - Step file structure
 - `references/ask-patterns.md` - User interaction patterns
 - `references/state-management.md` - State persistence
 - `references/workflow-patterns.md` - Common workflows
 - `references/prompt-engineering.md` - Prompt best practices
-</quick_start>
+  </quick_start>

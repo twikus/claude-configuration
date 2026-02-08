@@ -287,7 +287,13 @@ questions:
 
 ## NEXT STEP:
 
-After user confirms via AskUserQuestion (or auto-proceed), load `./step-03-execute.md`
+After user confirms via AskUserQuestion (or auto-proceed):
+
+**If `{teams_mode}` = true:**
+→ Load `./step-03-execute-teams.md` for Agent Team parallel execution
+
+**Otherwise:**
+→ Load `./step-03-execute.md` to start implementation
 
 <critical>
 Remember: This step ONLY creates task documentation - save all implementation for step-03!

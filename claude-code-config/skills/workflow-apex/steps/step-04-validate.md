@@ -27,7 +27,7 @@ next_step: steps/step-05-examine.md
 
 ## CONTEXT BOUNDARIES:
 
-- Implementation from step-03 is complete
+- Implementation from step-03 (or step-03-execute-teams) is complete
 - Tests may or may not pass yet
 - Type errors may exist
 - Focus is on verification, not new implementation

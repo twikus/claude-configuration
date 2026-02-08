@@ -14,6 +14,7 @@ next_step: steps/step-03-execute.md
 - ✅ ALWAYS structure plan by FILE, not by feature
 - ✅ ALWAYS include specific line numbers from analysis
 - ✅ ALWAYS map acceptance criteria to file changes
+- ✅ ALWAYS create a TaskList using TaskCreate tool to track all planned file changes
 - 📋 YOU ARE A PLANNER, not an implementer
 - 💬 FOCUS on "What changes need to be made where?"
 - 🚫 FORBIDDEN to use Edit, Write, or Bash tools
@@ -41,18 +42,17 @@ Transform analysis findings into a comprehensive, executable, file-by-file imple
 <available_state>
 From previous steps:
 
-| Variable                | Description                       |
-| ----------------------- | --------------------------------- |
-| `{task_description}`    | What to implement                 |
-| `{task_id}`             | Kebab-case identifier             |
-| `{acceptance_criteria}` | Success criteria from step-01     |
-| `{auto_mode}`           | Skip confirmations                |
-| `{save_mode}`           | Save outputs to files             |
-| `{output_dir}`          | Path to output (if save_mode)     |
-| Files found             | From step-01 codebase exploration |
-| Patterns                | From step-01 pattern analysis     |
-| Utilities               | From step-01 utility discovery    |
-
+| Variable | Description |
+|----------|-------------|
+| `{task_description}` | What to implement |
+| `{task_id}` | Kebab-case identifier |
+| `{acceptance_criteria}` | Success criteria from step-01 |
+| `{auto_mode}` | Skip confirmations |
+| `{save_mode}` | Save outputs to files |
+| `{output_dir}` | Path to output (if save_mode) |
+| Files found | From step-01 codebase exploration |
+| Patterns | From step-01 pattern analysis |
+| Utilities | From step-01 utility discovery |
 </available_state>
 
 ---
@@ -74,7 +74,6 @@ Append plan to `{output_dir}/02-plan.md` as you work.
 **CRITICAL: Think through ENTIRE implementation before writing any plan.**
 
 Mental simulation:
-
 - Walk through the implementation step by step
 - Identify all files that need changes
 - Determine logical order (dependencies first)
@@ -110,11 +109,9 @@ questions:
 ## Implementation Plan: {task_description}
 
 ### Overview
-
 [1-2 sentences: High-level strategy and approach]
 
 ### Prerequisites
-
 - [ ] Prerequisite 1 (if any)
 - [ ] Prerequisite 2 (if any)
 
@@ -123,20 +120,17 @@ questions:
 ### File Changes
 
 #### `src/path/file1.ts`
-
 - Add `functionName` that handles X
 - Extract logic from Y (follow pattern in `example.ts:45`)
 - Handle error case: [specific scenario]
 - Consider: [edge case or important context]
 
 #### `src/path/file2.ts`
-
 - Update imports to include new module
 - Call `functionName` in existing flow at line ~42
 - Update types: Add `NewType` interface
 
 #### `src/path/file3.ts` (NEW FILE)
-
 - Create utility for Z
 - Export: `utilityFunction`, `HelperType`
 - Pattern: Follow `similar-util.ts` structure
@@ -146,44 +140,71 @@ questions:
 ### Testing Strategy
 
 **New tests:**
-
 - `src/path/file1.test.ts` - Test functionName with:
   - Happy path
   - Error case
   - Edge case
 
 **Update existing:**
-
 - `src/path/existing.test.ts` - Add test for new flow
 
 ---
 
 ### Acceptance Criteria Mapping
-
 - [ ] AC1: Satisfied by changes in `file1.ts`
 - [ ] AC2: Satisfied by changes in `file2.ts`
 
 ---
 
 ### Risks & Considerations
-
 - Risk 1: [potential issue and mitigation]
 ```
 
 **If `{save_mode}` = true:** Append full plan to 02-plan.md
 
-### 5. Verify Plan Completeness
+### 5. Create Task List (MANDATORY)
+
+<critical>
+You MUST create a TaskList using TaskCreate for every planned change.
+This is NOT optional - the task list tracks progress through execution.
+</critical>
+
+**Create one task per file change from the plan:**
+
+For each file in the plan, call `TaskCreate` with:
+- **subject**: `{action} {filepath}` (e.g., "Add validateToken to src/auth/handler.ts")
+- **description**: The full details of what changes are needed for this file, including specific functions, patterns to follow, and line references
+- **activeForm**: Present continuous form (e.g., "Adding validateToken to handler.ts")
+
+**Then set up dependencies using `TaskUpdate`:**
+- If file B depends on file A (e.g., B imports from A), use `addBlockedBy` to mark the dependency
+- This ensures execution follows the correct order
+
+**Example:**
+```
+TaskCreate: "Create auth types in src/types/auth.ts"
+  → description: "Create AuthToken interface, ValidateResult type. Follow pattern from src/types/user.ts"
+  → activeForm: "Creating auth types"
+
+TaskCreate: "Add validateToken to src/auth/handler.ts"
+  → description: "Add validateToken function that returns ValidateResult. Handle expired token error case."
+  → activeForm: "Adding validateToken to handler"
+  → Then: TaskUpdate with addBlockedBy: [auth-types-task-id]
+```
+
+### 6. Verify Plan Completeness
 
 Checklist:
-
 - [ ] All files identified - nothing missing
 - [ ] Logical order - dependencies handled first
 - [ ] Clear actions - every step specific and actionable
 - [ ] Test coverage - all paths have test strategy
 - [ ] In scope - no scope creep
 - [ ] AC mapped - every criterion has implementation
+- [ ] **TaskList created with all file changes**
+- [ ] **Task dependencies set correctly**
 
-### 6. Brainstorm Uncertainty Points
+### 7. Brainstorm Uncertainty Points
 
 <critical>
 Before proceeding, THINK about what you're NOT 100% certain about.
@@ -198,13 +219,13 @@ For each aspect of the plan, rate your confidence (High/Medium/Low):
 ```markdown
 ## Uncertainty Analysis
 
-| Aspect                    | Confidence      | Uncertainty      |
-| ------------------------- | --------------- | ---------------- |
-| File locations correct?   | High/Medium/Low | [What's unclear] |
-| Patterns match codebase?  | High/Medium/Low | [What's unclear] |
-| Dependencies complete?    | High/Medium/Low | [What's unclear] |
-| Error handling approach?  | High/Medium/Low | [What's unclear] |
-| User expectations for X?  | High/Medium/Low | [What's unclear] |
+| Aspect | Confidence | Uncertainty |
+|--------|------------|-------------|
+| File locations correct? | High/Medium/Low | [What's unclear] |
+| Patterns match codebase? | High/Medium/Low | [What's unclear] |
+| Dependencies complete? | High/Medium/Low | [What's unclear] |
+| Error handling approach? | High/Medium/Low | [What's unclear] |
+| User expectations for X? | High/Medium/Low | [What's unclear] |
 | Technical approach for Y? | High/Medium/Low | [What's unclear] |
 ```
 
@@ -214,7 +235,7 @@ These are the ONLY things worth asking about.
 
 ---
 
-### 7. Ask Smart Questions (if not auto_mode)
+### 8. Ask Smart Questions (if not auto_mode)
 
 **If `{auto_mode}` = true:**
 → Skip questions, use your best judgment, proceed directly
@@ -228,17 +249,15 @@ ONLY ask questions about things where:
 3. A wrong assumption could cause significant rework
 
 DO NOT ask about:
-
 - Implementation details you can decide yourself
 - Things you're "slightly unsure" about (just decide)
 - Generic plan approval (never ask "is this plan good?")
-  </critical>
+</critical>
 
 **Question Types to Use:**
 
 **Type 1: Behavior Clarification**
 When user intent is genuinely unclear:
-
 ```yaml
 questions:
   - header: "Behavior"
@@ -253,7 +272,6 @@ questions:
 
 **Type 2: Scope Clarification**
 When scope boundaries are unclear:
-
 ```yaml
 questions:
   - header: "Scope"
@@ -268,7 +286,6 @@ questions:
 
 **Type 3: Technical Choice**
 When multiple valid technical approaches exist:
-
 ```yaml
 questions:
   - header: "Approach"
@@ -283,7 +300,6 @@ questions:
 
 **Type 4: Edge Case Handling**
 When edge case behavior is unclear:
-
 ```yaml
 questions:
   - header: "Edge case"
@@ -300,13 +316,11 @@ questions:
 → Proceed directly to execution without asking anything
 
 **Example of GOOD questions:**
-
 - "When a user submits invalid email format, should we show inline validation or only validate on submit?"
 - "Should the loading state show a spinner on the button or a full-page skeleton?"
 - "For rate limiting, should we limit per user or per IP address?"
 
 **Example of BAD questions (NEVER ask these):**
-
 - ❌ "Does this plan look good to you?"
 - ❌ "Ready to proceed with implementation?"
 - ❌ "Should I use async/await or promises?" (just decide)
@@ -314,7 +328,7 @@ questions:
 
 ---
 
-### 8. Present Plan Summary
+### 9. Present Plan Summary
 
 ```
 **Implementation Plan Ready**
@@ -337,17 +351,14 @@ questions:
 → Proceeding to implementation...
 ```
 
-### 9. Complete Save Output (if save_mode)
+### 10. Complete Save Output (if save_mode)
 
 **If `{save_mode}` = true:**
 
 Append to `{output_dir}/02-plan.md`:
-
 ```markdown
 ---
-
 ## Step Complete
-
 **Status:** ✓ Complete
 **Files planned:** {count}
 **Tests planned:** {count}
@@ -364,6 +375,8 @@ Append to `{output_dir}/02-plan.md`:
 ✅ Logical dependency order established
 ✅ All acceptance criteria mapped to changes
 ✅ Test strategy defined
+✅ **TaskList created with TaskCreate for every file change**
+✅ **Task dependencies set with TaskUpdate (addBlockedBy)**
 ✅ Uncertainty points identified and addressed
 ✅ Smart, targeted questions asked (if not auto_mode and uncertainties exist)
 ✅ NO code written or modified
@@ -376,6 +389,7 @@ Append to `{output_dir}/02-plan.md`:
 ❌ Missing test strategy
 ❌ Not mapping to acceptance criteria
 ❌ Starting to write code (that's step 3!)
+❌ **CRITICAL**: Not creating a TaskList with TaskCreate
 ❌ **CRITICAL**: Asking generic "is this plan good?" questions
 ❌ **CRITICAL**: Asking about implementation details you can decide yourself
 ❌ **CRITICAL**: Not brainstorming uncertainties before asking questions
@@ -394,8 +408,11 @@ Append to `{output_dir}/02-plan.md`:
 
 After user approves via AskUserQuestion (or auto-proceed):
 
-**If `{tasks_mode}` = true:**
+**If `{tasks_mode}` = true OR `{teams_mode}` = true:**
 → Load `./step-02b-tasks.md` to generate task breakdown with dependencies
+
+**If `{teams_mode}` = true (after task breakdown):**
+→ Flow continues to `./step-03-execute-teams.md` for Agent Team parallel execution
 
 **Otherwise:**
 → Load `./step-03-execute.md` to start implementation

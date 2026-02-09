@@ -17,6 +17,7 @@
 | Branch mode (`-b`) | {{branch_mode}} |
 | PR mode (`-pr`) | {{pr_mode}} |
 | Interactive mode (`-i`) | {{interactive_mode}} |
+| Tasks mode (`-k`) | {{tasks_mode}} |
 | Branch name | {{branch_name}} |
 
 ---
@@ -42,6 +43,7 @@ _To be defined in step-01-analyze.md_
 | 00-init | ⏸ Pending | |
 | 01-analyze | ⏸ Pending | |
 | 02-plan | ⏸ Pending | |
+| 02b-tasks | {{tasks_status}} | |
 | 03-execute | ⏸ Pending | |
 | 04-validate | ⏸ Pending | |
 | 05-examine | {{examine_status}} | |

@@ -56,6 +56,8 @@ economy_mode: false # -e: No subagents, save tokens (for limited plans)
 branch_mode: false # -b: Verify not on main, create branch if needed
 pr_mode: false # -pr: Create pull request at end (enables -b)
 interactive_mode: false # -i: Configure flags interactively
+tasks_mode: false # -k: Generate task breakdown after plan
+teams_mode: false # -m: Use Claude Code Agent Teams for parallel execution
 
 # Presets:
 # Budget-friendly:  economy_mode: true
@@ -84,6 +86,8 @@ interactive_mode: false # -i: Configure flags interactively
 {branch_mode}  = <default>
 {pr_mode}      = <default>
 {interactive_mode} = <default>
+{tasks_mode}   = <default>
+{teams_mode}   = <default>
 ```
 
 **Step 2: Parse user input and override defaults:**
@@ -104,6 +108,14 @@ Disable flags (UPPERCASE - turn OFF):
   -E or --no-economy      → {economy_mode} = false
   -B or --no-branch       → {branch_mode} = false
   -PR or --no-pull-request → {pr_mode} = false
+  -K or --no-tasks        → {tasks_mode} = false
+  -M or --no-teams        → {teams_mode} = false
+
+Tasks mode:
+  -k or --tasks           → {tasks_mode} = true
+
+Teams mode:
+  -m or --teams           → {teams_mode} = true, {tasks_mode} = true
 
 Branch/PR flags:
   -b or --branch        → {branch_mode} = true
@@ -178,43 +190,14 @@ IF {branch_mode} = true:
 IF {economy_mode} = true:
   → Load steps/step-00b-economy.md
   → Apply economy overrides
+
+IF {save_mode} = true:
+  → Load steps/step-00b-save.md
+  → Create output structure, generate {task_id} and {output_dir}
+  → Return here with {task_id} and {output_dir} set
 ```
 
-### 4. Create Output Structure (if save_mode)
-
-**If `{save_mode}` = true:**
-
-Run the template setup script to initialize all output files:
-
-```bash
-bash {skill_dir}/scripts/setup-templates.sh \
-  "{feature_name}" \
-  "{task_description}" \
-  "{auto_mode}" \
-  "{examine_mode}" \
-  "{save_mode}" \
-  "{test_mode}" \
-  "{economy_mode}" \
-  "{branch_mode}" \
-  "{pr_mode}" \
-  "{interactive_mode}" \
-  "{branch_name}" \
-  "{original_input}"
-```
-
-**Note:** Pass `{feature_name}` (without number prefix), NOT `{task_id}`.
-The script auto-detects the next available number from existing folders.
-
-This script:
-
-- Auto-generates `{task_id}` = `NN-{feature_name}` (next available number)
-- Creates `.claude/output/apex/{task_id}/` directory
-- Initializes `00-context.md` with configuration and progress table
-- Pre-creates all step files from templates (01-analyze.md, 02-plan.md, etc.)
-- Only creates files for enabled steps (examine, tests, PR)
-- Outputs the generated `{task_id}` for use in subsequent steps
-
-### 5. Initialize and Proceed
+### 4. Initialize and Proceed
 
 **Always (regardless of auto_mode):**
 
@@ -233,6 +216,8 @@ Show COMPACT initialization summary (one table, then proceed immediately):
 | `{economy_mode}` | true/false |
 | `{branch_mode}` | true/false |
 | `{pr_mode}` | true/false |
+| `{tasks_mode}` | true/false |
+| `{teams_mode}` | true/false |
 
 → Analyzing...
 ```

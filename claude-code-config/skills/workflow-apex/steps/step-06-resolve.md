@@ -31,6 +31,7 @@ next_step: COMPLETE
 - Some are Real, some Noise, some Uncertain
 - User may want different resolution strategies
 - Must validate after any changes
+- **If `{teams_mode}` = true:** Agent team is still alive. Do NOT shutdown teammates — that happens in step-09-finish only.
 
 ## YOUR TASK:
 

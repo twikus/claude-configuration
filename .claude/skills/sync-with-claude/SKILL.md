@@ -48,13 +48,15 @@ Read both exclusion lists before syncing:
 Run rsync with `--dry-run` to list ALL changes without applying them:
 
 ```bash
-# Preview commands sync
-rsync -avn --delete --exclude 'melvyn' ~/.claude/commands/ $CWD/claude-code-config/commands/
+# Preview commands sync (preserve setup-tmux in target)
+rsync -avn --delete --exclude 'melvyn' --exclude 'prompts/setup-tmux.md' ~/.claude/commands/ $CWD/claude-code-config/commands/
 
 # Preview skills sync
 rsync -avn --delete \
   --exclude 'melvyn-dub-cli' \
   --exclude 'melvyn-softcompact' \
+  --exclude 'variations-generator' \
+  --exclude '__disabled__' \
   ~/.claude/skills/ $CWD/claude-code-config/skills/
 
 # Preview agents sync
@@ -84,8 +86,8 @@ Present a clear summary of what will be:
 ### Step 4: Execute Sync (only after approval)
 
 ```bash
-# Sync commands (exclude melvyn/ folder)
-rsync -av --delete --exclude 'melvyn' ~/.claude/commands/ $CWD/claude-code-config/commands/
+# Sync commands (exclude melvyn/ folder, preserve setup-tmux in target)
+rsync -av --delete --exclude 'melvyn' --exclude 'prompts/setup-tmux.md' ~/.claude/commands/ $CWD/claude-code-config/commands/
 
 # Sync skills (exclude paths from do-not-copy.md)
 rsync -av --delete \

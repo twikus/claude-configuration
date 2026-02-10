@@ -7,6 +7,7 @@ These paths must NEVER be copied when syncing from ~/.claude to the repository.
 ```
 skills/melvyn-dub-cli
 skills/melvyn-softcompact
+skills/variations-generator
 skills/__disabled__/**
 ```
 

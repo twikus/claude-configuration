@@ -8,6 +8,7 @@ They are specific to the repository and should be preserved as-is.
 ```
 claude-code-config/scripts/.claude/skills/fix-on-my-computer
 claude-code-config/commands/prompts/setup-tmux.md
+claude-code-config/.claude/commands/debug-ccli.md
 ```
 
 These paths exist only in the repository (not in ~/.claude) and must be preserved.

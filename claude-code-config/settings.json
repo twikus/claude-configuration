@@ -6,40 +6,16 @@
   },
   "includeCoAuthoredBy": false,
   "permissions": {
-    "allow": [
-      "Bash(npm run :*)",
-      "Bash(git :*)",
-      "Bash(pnpm :*)",
-      "Bash(gh :*)",
-      "Bash(cd :*)",
-      "Bash(ls :*)",
-      "Bash(node :*)",
-      "Bash(pnpm:*)",
-      "Bash(gh:*)",
-      "Edit",
-      "Bash(ls:*)",
-      "Bash(git:*)",
-      "mcp__context7",
-      "mcp__exa",
-      "Bash(claude mcp add:*)",
-      "Bash(pnpm ts:*)",
-      "Bash(mkdir:*)",
-      "WebFetch(domain:upstash.com)",
-      "Bash(npx prisma migrate dev:*)",
-      "Bash(pnpm run:*)",
-      "Bash(pnpm test:*)",
-      "Bash(rm:*)",
-      "Bash(claude mcp:*)",
-      "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs",
-      "Bash(pnpm lint:*)",
-      "Bash(find:*)",
-      "Bash(grep:*)",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_take_screenshot",
-      "mcp__exa__get_code_context_exa"
+    "allow": ["Edit", "Bash(git *)", "Bash(gh *)", "mcp__context7", "mcp__exa"],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(mkfs *)",
+      "Bash(dd *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(*prisma reset*)"
     ],
-    "deny": [],
     "defaultMode": "bypassPermissions"
   },
   "model": "opus",
@@ -50,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun /Users/melvynx/.claude/scripts/command-validator/src/cli.ts"
+            "command": "bun {CLAUDE_PATH}/scripts/command-validator/src/cli.ts"
           }
         ]
       }
@@ -61,11 +37,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay -v 0.1 /Users/melvynx/.claude/song/finish.mp3"
+            "command": "afplay -v 0.1 {CLAUDE_PATH}/song/finish.mp3"
           },
           {
             "type": "command",
-            "command": "bun /Users/melvynx/.claude/scripts/auto-rename-session/src/index.ts"
+            "command": "bun {CLAUDE_PATH}/scripts/auto-rename-session/src/index.ts"
           }
         ]
       }
@@ -76,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay -v 0.1 /Users/melvynx/.claude/song/need-human.mp3"
+            "command": "afplay -v 0.1 {CLAUDE_PATH}/song/need-human.mp3"
           }
         ]
       }
@@ -84,7 +60,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bun run /Users/melvynx/.claude/scripts/statusline/src/index.ts",
+    "command": "bun run {CLAUDE_PATH}/scripts/statusline/src/index.ts",
     "padding": 0
   },
   "spinnerTipsEnabled": false,

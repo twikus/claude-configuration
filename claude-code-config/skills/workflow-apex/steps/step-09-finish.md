@@ -25,7 +25,7 @@ previous_step: step-08-run-tests.md (or step-04-validate.md if no tests)
 
 ## CONTEXT BOUNDARIES:
 
-- Variables available: `{task_id}`, `{task_description}`, `{branch_name}`, `{pr_mode}`, `{auto_mode}`, `{save_mode}`, `{output_dir}`
+- Variables available: `{task_id}`, `{task_description}`, `{branch_name}`, `{pr_mode}`, `{auto_mode}`, `{save_mode}`, `{teams_mode}`, `{output_dir}`
 - Previous steps completed: analyze, plan, execute, validate (+ optional: tests, examine)
 - All implementation should be done at this point
 
@@ -36,6 +36,32 @@ Finalize the APEX workflow by committing remaining changes, pushing to remote, a
 ---
 
 ## EXECUTION SEQUENCE:
+
+### 0. Shutdown Agent Team (if teams_mode)
+
+<critical>
+This is the ONLY step where team shutdown should happen.
+All previous steps (validate, examine, resolve) keep the team alive.
+</critical>
+
+**If `{teams_mode}` = true:**
+
+1. Send shutdown_request to each teammate:
+```
+SendMessage:
+  type: "shutdown_request"
+  recipient: "impl-{name}"
+  content: "APEX workflow complete. Shutting down team."
+```
+
+2. Wait for all teammates to confirm shutdown.
+
+3. Delete the team:
+```
+TeamDelete
+```
+
+→ This cleans up team files and task directories.
 
 ### 1. Verify Git Status
 
@@ -167,6 +193,8 @@ Display workflow completion summary:
 
 ## SUCCESS METRICS:
 
+✅ Agent team shut down gracefully via SendMessage shutdown_request (if teams_mode)
+✅ TeamDelete called to clean up team resources (if teams_mode)
 ✅ All changes committed
 ✅ Branch pushed to remote
 ✅ PR created with proper title and description (if pr_mode)
@@ -189,5 +217,7 @@ Display workflow completion summary:
 This is the final step of the APEX workflow. No next step to load.
 
 <critical>
-Remember: This step ONLY handles git operations and PR creation. All code changes should have been completed in earlier steps.
+Remember: This step handles git operations, PR creation, AND team shutdown (if teams_mode).
+All code changes should have been completed in earlier steps.
+Team shutdown MUST happen here — step 0 of execution sequence — before git operations.
 </critical>

@@ -96,20 +96,15 @@ For each task, check if a matching skill should be suggested:
 
 Add `skill_hint` to task assignments when relevant.
 
-### 4. Create Agent Team
+### 4. Use Existing Team (created in step-02-plan)
 
 <critical>
 IMPORTANT: Claude Code Agent Teams is an EXPERIMENTAL feature.
 Ensure CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 is set in settings.json.
+
+The team "apex-{feature_name}" was ALREADY created in step-02-plan BEFORE the TaskList.
+Do NOT call TeamCreate again — it would reset the task list and lose all tasks.
 </critical>
-
-**Create the team using TeamCreate:**
-
-```
-TeamCreate:
-  team_name: "apex-{feature_name}"
-  description: "APEX: {task_description}"
-```
 
 **Spawn teammates using the Task tool with `subagent_type: "implementer"`:**
 
@@ -198,8 +193,9 @@ Messages from teammates arrive AUTOMATICALLY — no need to poll or check period
 **When ALL tasks are complete:**
 
 <critical>
-NEVER clean up or dismiss the team.
-Keep the team alive for potential follow-up work.
+NEVER clean up or dismiss the team here.
+The team MUST stay alive through validation (step-04), examine (step-05), resolve (step-06), and finish (step-09).
+Team shutdown happens ONLY in step-09-finish.md — the very last step of the APEX workflow.
 </critical>
 
 **If `{auto_mode}` = true:**
@@ -269,6 +265,7 @@ bash {skill_dir}/scripts/update-progress.sh "{task_id}" "03" "execute-teams" "co
 
 ❌ Team lead writing implementation code
 ❌ Cleaning up or dismissing the team
+❌ **CRITICAL**: Calling TeamCreate again (team already exists from step-02-plan — re-creating resets TaskList!)
 ❌ Using any agent type other than `implementer` for teammates
 ❌ Not providing enough context to teammates
 ❌ Assigning tasks with unmet dependencies
@@ -291,7 +288,8 @@ After all tasks complete, load `./step-04-validate.md`
 Remember:
 - You are the TEAM LEAD — NEVER implement code yourself
 - ALWAYS use `subagent_type: "implementer"` when spawning teammates
-- Keep the team ALIVE after completion
+- Keep the team ALIVE — shutdown happens ONLY in step-09-finish.md
+- NEVER send shutdown_request to teammates in this step
 - Each teammate needs FULL context (plan, patterns, file references)
 - The `implementer` agent handles TaskList claiming, SendMessage reporting, and file boundaries automatically
 </critical>

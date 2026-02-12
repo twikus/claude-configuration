@@ -32,6 +32,7 @@ next_step: steps/step-06-resolve.md
 - All tests pass
 - Now looking for issues that tests miss
 - Adversarial mindset - assume bugs exist
+- **If `{teams_mode}` = true:** Agent team is still alive. Do NOT shutdown teammates — that happens in step-09-finish only.
 
 ## YOUR TASK:
 

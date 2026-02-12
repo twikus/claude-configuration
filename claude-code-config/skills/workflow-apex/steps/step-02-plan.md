@@ -162,11 +162,32 @@ questions:
 
 **If `{save_mode}` = true:** Append full plan to 02-plan.md
 
-### 5. Create Task List (MANDATORY)
+### 5. Create Team (if teams_mode — BEFORE TaskList)
+
+<critical>
+If `{teams_mode}` = true, you MUST create the team BEFORE creating any tasks.
+TeamCreate resets the task list — so the team must exist first, then tasks are added to it.
+Do NOT spawn any agents yet — that happens in step-03-execute-teams.
+</critical>
+
+**If `{teams_mode}` = true:**
+
+```
+TeamCreate:
+  team_name: "apex-{feature_name}"
+  description: "APEX: {task_description}"
+```
+
+→ This creates the team and its empty task list.
+→ All subsequent TaskCreate calls will use this team's task list.
+→ Agents are spawned later in step-03-execute-teams.
+
+### 6. Create Task List (MANDATORY)
 
 <critical>
 You MUST create a TaskList using TaskCreate for every planned change.
 This is NOT optional - the task list tracks progress through execution.
+If teams_mode is enabled, the team was already created in step 5 — tasks go into the team's task list.
 </critical>
 
 **Create one task per file change from the plan:**
@@ -192,7 +213,7 @@ TaskCreate: "Add validateToken to src/auth/handler.ts"
   → Then: TaskUpdate with addBlockedBy: [auth-types-task-id]
 ```
 
-### 6. Verify Plan Completeness
+### 7. Verify Plan Completeness
 
 Checklist:
 - [ ] All files identified - nothing missing
@@ -204,7 +225,7 @@ Checklist:
 - [ ] **TaskList created with all file changes**
 - [ ] **Task dependencies set correctly**
 
-### 7. Brainstorm Uncertainty Points
+### 8. Brainstorm Uncertainty Points
 
 <critical>
 Before proceeding, THINK about what you're NOT 100% certain about.
@@ -235,7 +256,7 @@ These are the ONLY things worth asking about.
 
 ---
 
-### 8. Ask Smart Questions (if not auto_mode)
+### 9. Ask Smart Questions (if not auto_mode)
 
 **If `{auto_mode}` = true:**
 → Skip questions, use your best judgment, proceed directly
@@ -328,7 +349,7 @@ questions:
 
 ---
 
-### 9. Present Plan Summary
+### 10. Present Plan Summary
 
 ```
 **Implementation Plan Ready**
@@ -351,7 +372,7 @@ questions:
 → Proceeding to implementation...
 ```
 
-### 10. Complete Save Output (if save_mode)
+### 11. Complete Save Output (if save_mode)
 
 **If `{save_mode}` = true:**
 
@@ -375,6 +396,7 @@ Append to `{output_dir}/02-plan.md`:
 ✅ Logical dependency order established
 ✅ All acceptance criteria mapped to changes
 ✅ Test strategy defined
+✅ **Team created with TeamCreate BEFORE TaskList (if teams_mode)**
 ✅ **TaskList created with TaskCreate for every file change**
 ✅ **Task dependencies set with TaskUpdate (addBlockedBy)**
 ✅ Uncertainty points identified and addressed

@@ -1,7 +1,7 @@
 ---
 name: sync-with-claude
 description: Sync files from ~/.claude to claude-code-config repository
-allowed-tools: Bash(cp :*), Bash(diff :*), Bash(ls :*), Bash(cat :*), Bash(mkdir :*), Bash(git status*), Bash(find :*), Bash(date :*), Bash(rsync :*), Bash(rm :*), Read, Write, Edit
+allowed-tools: Bash(cp :*), Bash(diff :*), Bash(ls :*), Bash(cat :*), Bash(mkdir :*), Bash(git status*), Bash(find :*), Bash(date :*), Bash(rsync :*), Bash(rm :*), Bash(bash :*), Bash(chmod :*), Bash(sed :*), Read, Write, Edit
 ---
 
 # Sync ~/.claude to Repository
@@ -19,6 +19,7 @@ Sync configuration files from ~/.claude to claude-code-config folder in this rep
 2. **skills/** - Skills (subdirectories with SKILL.md)
 3. **agents/** - Agent definitions (.md files)
 4. **scripts/** - All script projects (statusline, command-validator, auto-rename-session, claude-code-ai, etc.)
+5. **settings.json** - Claude Code settings (hooks, permissions, env)
 
 ## Exclusions
 
@@ -48,13 +49,15 @@ Read both exclusion lists before syncing:
 Run rsync with `--dry-run` to list ALL changes without applying them:
 
 ```bash
-# Preview commands sync
-rsync -avn --delete --exclude 'melvyn' ~/.claude/commands/ $CWD/claude-code-config/commands/
+# Preview commands sync (preserve setup-tmux in target)
+rsync -avn --delete --exclude 'melvyn' --exclude 'prompts/setup-tmux.md' ~/.claude/commands/ $CWD/claude-code-config/commands/
 
 # Preview skills sync
 rsync -avn --delete \
   --exclude 'melvyn-dub-cli' \
   --exclude 'melvyn-softcompact' \
+  --exclude 'variations-generator' \
+  --exclude '__disabled__' \
   ~/.claude/skills/ $CWD/claude-code-config/skills/
 
 # Preview agents sync
@@ -70,6 +73,9 @@ rsync -avn --delete \
   --exclude '.DS_Store' \
   --exclude '.claude' \
   ~/.claude/scripts/ $CWD/claude-code-config/scripts/
+
+# Preview settings.json diff
+diff ~/.claude/settings.json $CWD/claude-code-config/settings.json || true
 ```
 
 ### Step 3: Show Summary & Ask for Confirmation
@@ -84,8 +90,8 @@ Present a clear summary of what will be:
 ### Step 4: Execute Sync (only after approval)
 
 ```bash
-# Sync commands (exclude melvyn/ folder)
-rsync -av --delete --exclude 'melvyn' ~/.claude/commands/ $CWD/claude-code-config/commands/
+# Sync commands (exclude melvyn/ folder, preserve setup-tmux in target)
+rsync -av --delete --exclude 'melvyn' --exclude 'prompts/setup-tmux.md' ~/.claude/commands/ $CWD/claude-code-config/commands/
 
 # Sync skills (exclude paths from do-not-copy.md)
 rsync -av --delete \
@@ -106,6 +112,17 @@ rsync -av --delete \
   --exclude '.DS_Store' \
   --exclude '.claude' \
   ~/.claude/scripts/ $CWD/claude-code-config/scripts/
+
+# Sync settings.json
+cp ~/.claude/settings.json $CWD/claude-code-config/settings.json
+```
+
+### Step 4.5: Fix hooks paths in settings.json
+
+**ALWAYS** run the after-sync script to replace hardcoded absolute paths (e.g. `/Users/melvynx/.claude/`) with the portable `{CLAUDE_PATH}/` placeholder:
+
+```bash
+bash $CWD/.claude/skills/sync-with-claude/scripts/after-sync.sh $CWD/claude-code-config/settings.json
 ```
 
 ### Step 5: Review & Finish

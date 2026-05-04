@@ -1,7 +1,7 @@
 ---
 name: apex
 description: Systematic implementation using APEX methodology (Analyze-Plan-Execute-eXamine) with parallel agents, self-validation, and optional adversarial review. Use when implementing features, fixing bugs, or making code changes that benefit from structured workflow.
-argument-hint: "[-a] [-x] [-s] [-t] [-b] [-pr] [-i] [-m] [-r <task-id>] <task description>"
+argument-hint: "[-a] [-x] [-s] [-t] [-v] [-b] [-pr] [-i] [-m] [-r <task-id>] <task description>"
 ---
 
 <objective>
@@ -14,8 +14,9 @@ Execute systematic implementation workflows using the APEX methodology with prog
 /apex add authentication middleware           # Basic
 /apex -a -s implement user registration       # Autonomous + save
 /apex -a -x -s fix login bug                  # With adversarial review
+/apex -a -v implement user dashboard          # With feature verification
 /apex -a -m implement full auth system        # Agent Teams (parallel)
-/apex -a -x -s -t add auth middleware         # Full workflow with tests
+/apex -a -x -s -t -v add auth middleware      # Full workflow with tests + verify
 /apex -a -pr add auth middleware              # With PR creation
 /apex -r 01-auth-middleware                   # Resume previous task
 /apex -e add auth middleware                  # Economy mode (save tokens)
@@ -33,6 +34,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 | `-x` | `-X` | `--examine` | Adversarial code review |
 | `-s` | `-S` | `--save` | Save outputs to `.claude/output/apex/` |
 | `-t` | `-T` | `--test` | Include test creation + runner |
+| `-v` | `-V` | `--verify` | Launch app and verify feature works |
 | `-e` | `-E` | `--economy` | No subagents, save tokens |
 | `-b` | `-B` | `--branch` | Verify not on main, create branch |
 | `-pr` | `-PR` | `--pull-request` | Create PR at end (enables -b) |
@@ -54,7 +56,8 @@ Execute systematic implementation workflows using the APEX methodology with prog
 7. **Tests** → Create + run tests (if -t)
 8. **Examine** → Adversarial review (if -x)
 9. **Resolve** → Fix findings (if examine found issues)
-10. **Finish** → Create PR (if -pr)
+10. **Verify** → Launch app, test feature (if -v)
+11. **Finish** → Create PR (if -pr)
 </workflow>
 
 <step_files>
@@ -77,6 +80,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 | 07 | `steps/step-07-tests.md` | Test analysis and creation |
 | 08 | `steps/step-08-run-tests.md` | Test runner loop |
 | 09 | `steps/step-09-finish.md` | Create pull request |
+| 10 | `steps/step-10-verify.md` | Launch & verify feature |
 
 </step_files>
 
@@ -92,6 +96,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 | `{examine_mode}` | boolean | step-00 |
 | `{save_mode}` | boolean | step-00 |
 | `{test_mode}` | boolean | step-00 |
+| `{verify_mode}` | boolean | step-00 |
 | `{economy_mode}` | boolean | step-00 |
 | `{branch_mode}` | boolean | step-00 |
 | `{pr_mode}` | boolean | step-00 |

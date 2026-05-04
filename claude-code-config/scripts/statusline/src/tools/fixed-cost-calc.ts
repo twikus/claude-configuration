@@ -7,7 +7,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { getLocalDateString } from "../lib/utils";
 
 // Pricing per million tokens
 const PRICING: Record<
@@ -85,7 +84,7 @@ function findJsonlFiles(dir: string, targetDate: string): string[] {
 						walk(fullPath);
 					} else if (entry.endsWith(".jsonl")) {
 						// Check if file was modified on target date
-						const mtime = getLocalDateString(stat.mtime);
+						const mtime = stat.mtime.toISOString().split("T")[0];
 						if (mtime === targetDate) {
 							files.push(fullPath);
 						}
@@ -137,7 +136,7 @@ interface TokenTotals {
 }
 
 function main() {
-	const targetDate = process.argv[2] || getLocalDateString();
+	const targetDate = process.argv[2] || new Date().toISOString().split("T")[0];
 	const projectFilter = process.argv[3]; // Optional: filter to specific project
 	const claudeDir = join(homedir(), ".claude", "projects");
 

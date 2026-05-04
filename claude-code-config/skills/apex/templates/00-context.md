@@ -18,6 +18,7 @@
 | PR mode (`-pr`) | {{pr_mode}} |
 | Interactive mode (`-i`) | {{interactive_mode}} |
 | Tasks mode (`-k`) | {{tasks_mode}} |
+| Verify mode (`-v`) | {{verify_mode}} |
 | Branch name | {{branch_name}} |
 
 ---
@@ -50,4 +51,5 @@ _To be defined in step-01-analyze.md_
 | 06-resolve | {{examine_status}} | |
 | 07-tests | {{test_status}} | |
 | 08-run-tests | {{test_status}} | |
+| 10-verify | {{verify_status}} | |
 | 09-finish | {{pr_status}} | |

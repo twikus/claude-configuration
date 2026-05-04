@@ -44,6 +44,7 @@ When save_mode is enabled, all outputs go to the PROJECT directory:
 ├── 06-resolve.md        # Resolution log (if -x)
 ├── 07-tests.md          # Test analysis (if -t)
 ├── 08-run-tests.md      # Test runner log (if -t)
+├── 10-verify.md         # Feature verification (if -v)
 └── 09-finish.md         # PR creation (if -pr)
 ```
 
@@ -64,6 +65,7 @@ bash {skill_dir}/scripts/setup-templates.sh \
   "{pr_mode}" \
   "{interactive_mode}" \
   "{tasks_mode}" \
+  "{verify_mode}" \
   "{branch_name}" \
   "{original_input}"
 ```

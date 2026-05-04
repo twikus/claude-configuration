@@ -7,7 +7,6 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import type { HookInput } from "../../types";
-import { getLocalDateString } from "../../utils";
 
 const DATA_DIR = join(import.meta.dir, "..", "..", "..", "..", "data");
 const PAYLOADS_FILE = join(DATA_DIR, "payloads.jsonl");
@@ -130,12 +129,10 @@ export function getPayloadsGroupedBySession(): Map<string, PayloadLogEntry[]> {
 }
 
 export function getTodayPayloads(): PayloadLogEntry[] {
-	const today = getLocalDateString();
+	const today = new Date().toISOString().split("T")[0];
 	const entries = readPayloadLogs();
 
-	return entries.filter(
-		(e) => getLocalDateString(new Date(e.timestamp)) === today,
-	);
+	return entries.filter((e) => e.timestamp.startsWith(today));
 }
 
 export function getTodayRealCost(): number {

@@ -80,6 +80,7 @@ const CLAUDE_SETTINGS_PATH = join(
 
 interface ClaudeSettings {
 	alwaysThinkingEnabled?: boolean;
+	effortLevel?: string;
 }
 
 async function loadClaudeSettings(): Promise<ClaudeSettings> {
@@ -181,7 +182,15 @@ async function main() {
 		const data: StatuslineData = {
 			branch: formatBranch(git, config.git),
 			dirPath: formatPath(input.workspace.current_dir, config.pathDisplayMode),
-			modelName: input.model.display_name,
+			modelName: (() => {
+				const shortName = input.model.display_name.replace(
+					/\s*\((\d+[KM])\s+context\)/i,
+					" $1",
+				);
+				return claudeSettings.effortLevel
+					? `${shortName} [${claudeSettings.effortLevel}]`
+					: shortName;
+			})(),
 			sessionCost: formatCost(
 				input.cost.total_cost_usd,
 				config.session.cost.format,

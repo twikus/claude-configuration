@@ -16,6 +16,8 @@ skills/react-doctor
 skills/__disabled__/**
 scripts/hooks
 commands/feature-dev.md
+skills/melvyn-dub-cli
+skills/melvyn-softcompact
 ```
 
 These are personal/private skills that should not be included in the public repository.

@@ -230,6 +230,7 @@ Append to `{output_dir}/06-resolve.md`:
 ## NEXT STEP:
 
 Based on flags:
+- **If verify_mode:** Load `./step-10-verify.md` to verify feature
 - **If pr_mode:** Load `./step-09-finish.md` to create pull request
 - **Otherwise:** Workflow complete - show summary
 

@@ -2,7 +2,6 @@
 
 import { table } from "table";
 import { formatCost, formatDuration } from "../../../formatters";
-import { getLocalDateString } from "../../../utils";
 import { getAllSessions } from "../database";
 import { getMonthStart } from "../index";
 import type { SessionRow } from "../types";
@@ -10,7 +9,7 @@ import type { SessionRow } from "../types";
 async function main() {
 	const allSessions = getAllSessions();
 	const monthStart = getMonthStart();
-	const monthStartStr = getLocalDateString(monthStart);
+	const monthStartStr = monthStart.toISOString().split("T")[0];
 
 	const monthSessions = allSessions.filter((s) => s.date >= monthStartStr);
 

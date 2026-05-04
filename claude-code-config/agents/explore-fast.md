@@ -1,7 +1,7 @@
 ---
 name: explore-fast
 description: Rapid exploration agent for codebase, documentation, and web research. Use when gathering context quickly for any query.
-model: haiku
+model: sonnet
 tools: Skill
 ---
 

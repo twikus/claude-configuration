@@ -183,6 +183,9 @@ IF {test_mode} = true:
 ELSE IF {examine_mode} = true:
     → Load step-05-examine.md (adversarial review)
 
+ELSE IF {verify_mode} = true:
+    → Load step-10-verify.md (feature verification)
+
 ELSE IF {auto_mode} = false:
     → Ask user:
 ```
@@ -194,6 +197,8 @@ questions:
     options:
       - label: "Run adversarial review"
         description: "Deep review for security, logic, and quality"
+      - label: "Verify feature"
+        description: "Launch app and test feature works"
       - label: "Complete workflow"
         description: "Skip review and finalize"
       - label: "Add tests"
@@ -257,6 +262,7 @@ Append to `{output_dir}/04-validate.md`:
 Based on flags (check in order):
 - **If test_mode:** Load `./step-07-tests.md`
 - **If examine_mode OR user requests:** Load `./step-05-examine.md`
+- **If verify_mode:** Load `./step-10-verify.md` to verify feature
 - **If pr_mode:** Load `./step-09-finish.md` to create pull request
 - **Otherwise:** Workflow complete - show summary
 

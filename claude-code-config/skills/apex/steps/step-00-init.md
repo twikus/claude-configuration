@@ -52,6 +52,7 @@ auto_mode: false # -a: Skip confirmations, use recommended options
 examine_mode: false # -x: Auto-proceed to adversarial review
 save_mode: false # -s: Save outputs to .claude/output/apex/
 test_mode: false # -t: Include test creation and runner steps
+verify_mode: false # -v: Launch app and verify feature works via real user surface
 economy_mode: false # -e: No subagents, save tokens (for limited plans)
 branch_mode: false # -b: Verify not on main, create branch if needed
 pr_mode: false # -pr: Create pull request at end (enables -b)
@@ -82,6 +83,7 @@ teams_mode: false # -m: Use Claude Code Agent Teams for parallel execution
 {examine_mode} = <default>
 {save_mode}    = <default>
 {test_mode}    = <default>
+{verify_mode}  = <default>
 {economy_mode} = <default>
 {branch_mode}  = <default>
 {pr_mode}      = <default>
@@ -98,6 +100,7 @@ Enable flags (lowercase - turn ON):
   -x or --examine  → {examine_mode} = true
   -s or --save     → {save_mode} = true
   -t or --test     → {test_mode} = true
+  -v or --verify   → {verify_mode} = true
   -e or --economy  → {economy_mode} = true
 
 Disable flags (UPPERCASE - turn OFF):
@@ -105,6 +108,7 @@ Disable flags (UPPERCASE - turn OFF):
   -X or --no-examine      → {examine_mode} = false
   -S or --no-save         → {save_mode} = false
   -T or --no-test         → {test_mode} = false
+  -V or --no-verify       → {verify_mode} = false
   -E or --no-economy      → {economy_mode} = false
   -B or --no-branch       → {branch_mode} = false
   -PR or --no-pull-request → {pr_mode} = false
@@ -213,6 +217,7 @@ Show COMPACT initialization summary (one table, then proceed immediately):
 | `{examine_mode}` | true/false |
 | `{save_mode}` | true/false |
 | `{test_mode}` | true/false |
+| `{verify_mode}` | true/false |
 | `{economy_mode}` | true/false |
 | `{branch_mode}` | true/false |
 | `{pr_mode}` | true/false |

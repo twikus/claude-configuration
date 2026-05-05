@@ -1,7 +1,6 @@
 import { Database } from "bun:sqlite";
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { getLocalDateString } from "../../utils";
 import type { PeriodRow, SessionRow, TrackingRow } from "./types";
 
 function getDbPath(): string {
@@ -294,7 +293,7 @@ export function upsertPeriod(period: PeriodRow): void {
 
 export function addToPeriodCost(periodId: string, delta: number): void {
 	const database = getDb();
-	const today = getLocalDateString();
+	const today = new Date().toISOString().split("T")[0];
 
 	database.run(
 		`
@@ -332,7 +331,7 @@ export function getSessionsByDate(date: string): SessionRow[] {
 
 export function getTodaySessionsTotal(): number {
 	const database = getDb();
-	const today = getLocalDateString();
+	const today = new Date().toISOString().split("T")[0];
 	const result = database
 		.query<{ total: number }, [string]>(
 			"SELECT COALESCE(SUM(total_cost), 0) as total FROM sessions WHERE date = ?",

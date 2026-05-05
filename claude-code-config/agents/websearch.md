@@ -2,7 +2,7 @@
 name: websearch
 description: Use this agent when you need to make a quick web search.
 tools: WebSearch, WebFetch
-model: haiku
+model: sonnet
 ---
 
 <role>

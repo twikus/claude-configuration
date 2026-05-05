@@ -5,17 +5,18 @@ import {
 	readPayloadLogs,
 	type PayloadLogEntry,
 } from "./lib/features/spend/payload-logger";
-import { getLocalDateString } from "./lib/utils";
 
 function formatCost(cost: number): string {
 	return `$${cost.toFixed(2)}`;
 }
 
+function getToday(): string {
+	return new Date().toISOString().split("T")[0];
+}
+
 function getTodayPayloads(): PayloadLogEntry[] {
-	const today = getLocalDateString();
-	return readPayloadLogs().filter(
-		(e) => getLocalDateString(new Date(e.timestamp)) === today,
-	);
+	const today = getToday();
+	return readPayloadLogs().filter((e) => e.timestamp.startsWith(today));
 }
 
 interface SessionAnalysis {
@@ -63,7 +64,7 @@ function analyzePayloads(entries: PayloadLogEntry[]): SessionAnalysis[] {
 }
 
 function showTodayUsage(): void {
-	const today = getLocalDateString();
+	const today = getToday();
 	const entries = getTodayPayloads();
 
 	console.log(`\n${colors.lightGray(`Today's Usage (${today})`)}\n`);

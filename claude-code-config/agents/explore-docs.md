@@ -1,7 +1,7 @@
 ---
 name: explore-docs
 description: Use this agent to research library documentation and gather implementation context using Context7 MCP
-model: haiku
+model: sonnet
 ---
 
 <role>

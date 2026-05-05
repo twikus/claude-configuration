@@ -19,8 +19,9 @@ BRANCH_MODE="${8:-false}"
 PR_MODE="${9:-false}"
 INTERACTIVE_MODE="${10:-false}"
 TASKS_MODE="${11:-false}"
-BRANCH_NAME="${12:-}"
-ORIGINAL_INPUT="${13:-}"
+VERIFY_MODE="${12:-false}"
+BRANCH_NAME="${13:-}"
+ORIGINAL_INPUT="${14:-}"
 
 # Validate required arguments
 if [[ -z "$FEATURE_NAME" ]]; then
@@ -84,6 +85,9 @@ render_template() {
     local pr_status="⏭ Skip"
     [[ "$PR_MODE" == "true" ]] && pr_status="⏸ Pending"
 
+    local verify_status="⏭ Skip"
+    [[ "$VERIFY_MODE" == "true" ]] && verify_status="⏸ Pending"
+
     local tasks_status="⏭ Skip"
     [[ "$TASKS_MODE" == "true" ]] && tasks_status="⏸ Pending"
 
@@ -100,11 +104,13 @@ render_template() {
         -e "s|{{pr_mode}}|${PR_MODE}|g" \
         -e "s|{{interactive_mode}}|${INTERACTIVE_MODE}|g" \
         -e "s|{{tasks_mode}}|${TASKS_MODE}|g" \
+        -e "s|{{verify_mode}}|${VERIFY_MODE}|g" \
         -e "s|{{branch_name}}|${BRANCH_NAME}|g" \
         -e "s|{{original_input}}|${ORIGINAL_INPUT}|g" \
         -e "s|{{examine_status}}|${examine_status}|g" \
         -e "s|{{test_status}}|${test_status}|g" \
         -e "s|{{tasks_status}}|${tasks_status}|g" \
+        -e "s|{{verify_status}}|${verify_status}|g" \
         -e "s|{{pr_status}}|${pr_status}|g" \
         "$template_file" > "$output_file"
 }
@@ -127,6 +133,10 @@ fi
 if [[ "$TEST_MODE" == "true" ]]; then
     render_template "${TEMPLATE_DIR}/07-tests.md" "${OUTPUT_DIR}/07-tests.md"
     render_template "${TEMPLATE_DIR}/08-run-tests.md" "${OUTPUT_DIR}/08-run-tests.md"
+fi
+
+if [[ "$VERIFY_MODE" == "true" ]]; then
+    render_template "${TEMPLATE_DIR}/10-verify.md" "${OUTPUT_DIR}/10-verify.md"
 fi
 
 if [[ "$TASKS_MODE" == "true" ]]; then

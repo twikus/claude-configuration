@@ -2,7 +2,7 @@
 name: fast-websearch
 description: Ultra-fast web search using Exa MCP. Use when you need to quickly find information, research a topic, or get answers from the web. Faster than websearch agent - stops immediately when answer is found.
 tools: mcp__exa__web_search_exa, mcp__exa__get_code_context_exa
-model: haiku
+model: sonnet
 ---
 
 <role>

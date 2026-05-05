@@ -1,19 +1,29 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6[1m]",
     "CLAUDE_CODE_ENABLE_TASKS": "1",
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "100000"
   },
+  "includeCoAuthoredBy": false,
   "permissions": {
+    "allow": [
+      "Edit",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "mcp__context7",
+      "mcp__exa"
+    ],
     "deny": [
       "Bash(rm -rf *)",
       "Bash(sudo *)",
       "Bash(mkfs *)",
       "Bash(dd *)",
       "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
       "Bash(*prisma reset*)"
     ],
-    "ask": ["Bash(*pr merge*)", "Bash(*prisma reset*)"],
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
@@ -61,12 +71,23 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "frontend-design@claude-code-plugins": true
+    "frontend-design@claude-code-plugins": true,
+    "codex@openai-codex": true
+  },
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
   },
   "spinnerTipsEnabled": false,
+  "effortLevel": "xhigh",
   "autoUpdatesChannel": "latest",
   "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "high",
-  "includeCoAuthoredBy": false,
-  "model": "sonnet"
+  "preferredNotifChannel": "ghostty",
+  "teammateMode": "in-process",
+  "remoteControlAtStartup": false,
+  "voiceEnabled": true
 }

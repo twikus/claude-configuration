@@ -42,6 +42,7 @@ Show current flag values:
 | Examine (`-x`) | {examine_mode ? "✓ ON" : "✗ OFF"} | Adversarial review |
 | Save (`-s`) | {save_mode ? "✓ ON" : "✗ OFF"} | Save outputs to files |
 | Test (`-t`) | {test_mode ? "✓ ON" : "✗ OFF"} | Include test steps |
+| Verify (`-v`) | {verify_mode ? "✓ ON" : "✗ OFF"} | Launch & verify feature |
 | Economy (`-e`) | {economy_mode ? "✓ ON" : "✗ OFF"} | No subagents |
 | Branch (`-b`) | {branch_mode ? "✓ ON" : "✗ OFF"} | Verify/create branch |
 | PR (`-pr`) | {pr_mode ? "✓ ON" : "✗ OFF"} | Create pull request |
@@ -64,6 +65,8 @@ questions:
         description: "{save_mode ? 'Disable' : 'Enable'} - save outputs to .claude/output/"
       - label: "Test mode"
         description: "{test_mode ? 'Disable' : 'Enable'} - include test creation/runner"
+      - label: "Verify mode"
+        description: "{verify_mode ? 'Disable' : 'Enable'} - launch app and verify feature works"
     multiSelect: true
 ```
 
@@ -96,6 +99,7 @@ IF "Auto mode" selected → {auto_mode} = !{auto_mode}
 IF "Examine mode" selected → {examine_mode} = !{examine_mode}
 IF "Save mode" selected → {save_mode} = !{save_mode}
 IF "Test mode" selected → {test_mode} = !{test_mode}
+IF "Verify mode" selected → {verify_mode} = !{verify_mode}
 IF "Economy mode" selected → {economy_mode} = !{economy_mode}
 IF "Branch mode" selected → {branch_mode} = !{branch_mode}
 IF "PR mode" selected → {pr_mode} = !{pr_mode}
@@ -126,6 +130,7 @@ Display updated configuration:
 | Examine | {examine_mode ? "✓ ON" : "✗ OFF"} |
 | Save | {save_mode ? "✓ ON" : "✗ OFF"} |
 | Test | {test_mode ? "✓ ON" : "✗ OFF"} |
+| Verify | {verify_mode ? "✓ ON" : "✗ OFF"} |
 | Economy | {economy_mode ? "✓ ON" : "✗ OFF"} |
 | Branch | {branch_mode ? "✓ ON" : "✗ OFF"} |
 | PR | {pr_mode ? "✓ ON" : "✗ OFF"} |

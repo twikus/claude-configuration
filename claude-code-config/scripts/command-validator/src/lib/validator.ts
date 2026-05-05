@@ -8,8 +8,6 @@ const DANGEROUS_COMMANDS = [
 	"dd",
 	"mkfs",
 	"fdisk",
-	"kill",
-	"killall",
 ];
 
 export class CommandValidator {

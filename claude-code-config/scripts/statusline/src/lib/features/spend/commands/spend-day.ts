@@ -2,12 +2,11 @@
 
 import { table } from "table";
 import { formatCost, formatDuration } from "../../../formatters";
-import { getLocalDateString } from "../../../utils";
 import { getSessionsByDate } from "../database";
 
 function parseDate(input?: string): string {
 	if (!input) {
-		return getLocalDateString();
+		return new Date().toISOString().split("T")[0];
 	}
 
 	// Try parsing as YYYY-MM-DD
@@ -24,15 +23,15 @@ function parseDate(input?: string): string {
 	// Try parsing as natural date
 	const parsed = new Date(input);
 	if (!Number.isNaN(parsed.getTime())) {
-		return getLocalDateString(parsed);
+		return parsed.toISOString().split("T")[0];
 	}
 
 	console.log(`⚠️  Invalid date format: "${input}". Using today.`);
-	return getLocalDateString();
+	return new Date().toISOString().split("T")[0];
 }
 
 function isToday(date: string): boolean {
-	return date === getLocalDateString();
+	return date === new Date().toISOString().split("T")[0];
 }
 
 async function main() {

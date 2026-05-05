@@ -250,6 +250,9 @@ Append to `{output_dir}/08-run-tests.md`:
 **If `{examine_mode}` = true:**
 → Load step-05-examine.md
 
+**If `{verify_mode}` = true:**
+→ Load step-10-verify.md
+
 **If `{auto_mode}` = false:**
 
 ```yaml
@@ -259,6 +262,8 @@ questions:
     options:
       - label: "Run adversarial review"
         description: "Deep review for security/logic"
+      - label: "Verify feature"
+        description: "Launch app and test feature works"
       - label: "Complete workflow"
         description: "Finalize and show summary"
     multiSelect: false
@@ -300,6 +305,7 @@ questions:
 
 Based on flags (check in order):
 - **If examine_mode:** Load `./step-05-examine.md`
+- **If verify_mode:** Load `./step-10-verify.md` to verify feature
 - **If pr_mode:** Load `./step-09-finish.md` to create pull request
 - **Otherwise:** Workflow complete - show summary
 

@@ -26,45 +26,6 @@
     ],
     "defaultMode": "bypassPermissions"
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun {CLAUDE_PATH}/scripts/command-validator/src/cli.ts"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "afplay -v 0.1 {CLAUDE_PATH}/song/finish.mp3"
-          },
-          {
-            "type": "command",
-            "command": "bun {CLAUDE_PATH}/scripts/auto-rename-session/src/index.ts"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "afplay -v 0.1 {CLAUDE_PATH}/song/need-human.mp3"
-          }
-        ]
-      }
-    ]
-  },
   "statusLine": {
     "type": "command",
     "command": "STATUSLINE_DEBUG=1 bun run {CLAUDE_PATH}/scripts/statusline/src/index.ts",

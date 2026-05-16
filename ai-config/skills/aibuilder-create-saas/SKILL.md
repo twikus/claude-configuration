@@ -2,6 +2,8 @@
 name: aibuilder-create-saas
 description: Complete SaaS ideation to implementation workflow - from idea discovery to task breakdown
 argument-hint: "[project-name]"
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 <objective>

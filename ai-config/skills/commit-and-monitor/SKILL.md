@@ -3,6 +3,8 @@ name: commit-and-monitor
 description: Commit, push, then monitor Vercel deployment and GitHub Actions until green. Auto-fixes failures and retries. Use when committing code that needs deployment verification, or when you want to ship and verify in one command.
 argument-hint: "[commit message]"
 allowed-tools: Bash(git :*), Bash(gh :*), Bash(vercel :*), Bash(npm :*), Bash(pnpm :*), Bash(bun :*), Bash(npx :*), Bash(sleep :*)
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Commit and Monitor

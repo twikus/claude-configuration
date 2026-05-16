@@ -2,6 +2,8 @@
 name: claude-memory
 description: Create and optimize CLAUDE.md memory files or .claude/rules/ modular rules for Claude Code projects. Comprehensive guidance on file hierarchy, content structure, path-scoped rules, best practices, and anti-patterns. Use when working with CLAUDE.md files, .claude/rules directories, setting up new projects, or improving Claude Code's context awareness.
 argument-hint: [init | optimize | task description]
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 <core_principle>

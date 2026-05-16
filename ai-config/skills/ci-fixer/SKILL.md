@@ -3,6 +3,8 @@ name: ci-fixer
 description: Automated CI/CD pipeline fixer - watches CI, fixes errors locally, commits, and loops until green. Use when CI is failing and you want to automatically fix and verify changes.
 argument-hint: "[--auto] [--max-attempts=N]"
 color: yellow
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 <objective>

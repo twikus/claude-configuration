@@ -2,6 +2,8 @@
 name: fix-errors
 description: Fix all ESLint and TypeScript errors with parallel processing using snipper agents
 allowed-tools: Bash(pnpm :*), Bash(tsc :*), Bash(npm :*), Read, Task, Grep
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Fix Errors

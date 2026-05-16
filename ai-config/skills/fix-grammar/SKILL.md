@@ -3,6 +3,8 @@ name: fix-grammar
 description: Fix grammar and spelling errors in one or multiple files while preserving formatting
 allowed-tools: Read, Edit, Write, MultiEdit, Task
 argument-hint: <file-path> [additional-files...]
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Fix Grammar

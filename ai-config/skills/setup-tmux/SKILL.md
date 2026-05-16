@@ -5,6 +5,8 @@ allowed-tools:
   - Bash
   - Read
   - Write
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Setup Tmux

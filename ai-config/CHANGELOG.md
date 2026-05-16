@@ -1,5 +1,47 @@
 # Claude Code Config Changelog
 
+## [2026-05-16] - Skills sync with ~/.agents
+
+### New Skills (synced from `~/.agents/skills/`)
+- `skills/caveman/` - Ultra-compressed communication mode
+- `skills/dev-browser/` - Browser automation via dev-browser CLI
+- `skills/exa-search/` - Web search via Exa CLI
+- `skills/grill-me/` - Stress-test plans through relentless interview
+- `skills/to-issues/` - Break a plan into independently grabbable issues
+
+### Updated Skills (overwritten from global, source of truth = `~/.agents/skills/`)
+- `skills/aibuilder-create-saas/SKILL.md`
+- `skills/ci-fixer/SKILL.md`
+- `skills/claude-memory/SKILL.md`
+- `skills/codex-environment/SKILL.md`
+- `skills/commit/SKILL.md`
+- `skills/commit-and-monitor/SKILL.md`
+- `skills/crab-review/SKILL.md`
+- `skills/create-pr/SKILL.md`
+- `skills/merge/SKILL.md`
+- `skills/frontend-design/` - added `reference/` directory
+
+### Removed Skills
+- `skills/delight/` - obsolete
+- `skills/save-docs/` - obsolete
+- `skills/ralph-tasks/` - obsolete
+
+### Discoverability (auto-invocation disabled)
+Added `disable-model-invocation: true` and `allow_implicit_invocation: false` to frontmatter for context optimization on:
+- `skills/aibuilder-create-saas/`
+- `skills/codex-environment/`
+- `skills/crab-review/`
+- `skills/fix-errors/`
+- `skills/fix-grammar/`
+- `skills/fix-pr-comments/`
+- `skills/setup-tmux/`
+- `skills/ultrathink/`
+
+### Scripts cleanup
+- Removed `scripts/claude-code-ai/` (CLI + helpers + tests)
+
+---
+
 ## [2026-01-21] - Skills & Statusline Refresh
 
 ### New Skills

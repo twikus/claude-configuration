@@ -10,6 +10,8 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Crab Review - Consensus Code Review

@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-${CLAUDE_PROJECT_DIR:-$(pwd)}}}"
+WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-$(pwd)}}"
 cd "$WORKTREE_PATH"
 
 if [[ ! -f .env ]]; then

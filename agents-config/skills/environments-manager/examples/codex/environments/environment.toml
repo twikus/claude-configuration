@@ -3,15 +3,15 @@ version = 1
 name = "Project Worktree"
 
 [setup]
-script = "cd \"$CODEX_WORKTREE_PATH\"\nscripts/worktree-up"
+script = "cd \"$CODEX_WORKTREE_PATH\"\nscripts/worktree-up.sh"
 
 [cleanup]
-script = "cd \"$CODEX_WORKTREE_PATH\"\nscripts/worktree-down"
+script = "cd \"$CODEX_WORKTREE_PATH\"\nscripts/worktree-down.sh"
 
 [[actions]]
 name = "Dev"
 icon = "tool"
-command = "scripts/dev"
+command = "scripts/dev.sh"
 
 [[actions]]
 name = "Typecheck"

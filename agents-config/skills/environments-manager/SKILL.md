@@ -11,7 +11,7 @@ Set up per-worktree environments so a fresh worktree is instantly ready to run: 
 
 ## Interactive Flow
 
-This skill is interactive. Ask the user the two questions below before writing anything - the right setup depends on the project. Use whichever interactive question tool the host harness provides (in Claude Code: `AskUserQuestion`; in Codex/Cursor: a plain prompt). Do not assume answers.
+This skill is interactive. Ask the user the two questions below before writing anything - the right setup depends on the project. Use whichever interactive question mechanism the host harness provides. Do not assume answers.
 
 ### Step 1: What should happen in a fresh worktree?
 
@@ -54,20 +54,22 @@ Plus one or more IDE config files (see references). The IDE config is thin; all 
 
 ## Environment Variable Cascade
 
-Each IDE exposes a different variable for the worktree path. The shared scripts must accept all three, in this priority:
+Each IDE exposes different variables. The shared scripts accept all of them, in this priority:
 
 ```bash
-WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-${CLAUDE_PROJECT_DIR:-$(pwd)}}}"
+WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-$(pwd)}}"
 SOURCE_PATH="${CODEX_SOURCE_TREE_PATH:-${ROOT_WORKTREE_PATH:-}}"
 ```
 
-| Platform | Worktree path | Source checkout path |
-| :------- | :----------------------- | :------------------------ |
-| Codex    | `$CODEX_WORKTREE_PATH`   | `$CODEX_SOURCE_TREE_PATH` |
-| Cursor   | `pwd` inside worktree    | `$ROOT_WORKTREE_PATH`     |
-| Claude   | `$CLAUDE_PROJECT_DIR`    | (not provided - fall back to a project-specific path) |
+| Platform | Worktree path | Source checkout path | Setup trigger |
+| :------- | :----------------------- | :------------------------ | :--- |
+| Codex    | `$CODEX_WORKTREE_PATH`   | `$CODEX_SOURCE_TREE_PATH` | `[setup] script` in TOML, runs once per worktree |
+| Cursor   | `pwd` inside worktree    | `$ROOT_WORKTREE_PATH`     | `setup-worktree-unix` in JSON, runs once per worktree |
+| Claude   | `pwd` inside worktree (the hook wrapper cd's in) | `$CLAUDE_PROJECT_DIR` (source repo, exposed inside the hook); the wrapper re-exports it as `ROOT_WORKTREE_PATH` | `WorktreeCreate` hook, runs once per worktree |
 
-If neither yields a source checkout, fall back to a project-specific absolute path the user provides, for example `$HOME/Developer/saas/<repo>`. Ask the user for it during Step 1 if you cannot infer it.
+**Important about Claude Code**: do NOT use `SessionStart` for setup - it fires every session. Use the `WorktreeCreate` hook, which fires once when `claude --worktree` creates the worktree. The Claude wrapper script (`scripts/claude-worktree-create`) is responsible for calling `git worktree add` itself, then handing off to `scripts/worktree-up` inside the new worktree with `ROOT_WORKTREE_PATH` set. See [references/claude.md](references/claude.md).
+
+If no env var yields a source checkout, fall back to a project-specific absolute path (e.g. `$HOME/Developer/saas/<repo>`). Ask the user during Step 1 if you cannot infer it.
 
 ## `scripts/worktree-up`
 
@@ -88,12 +90,14 @@ Reference template (adjust based on selections):
 #!/usr/bin/env bash
 set -euo pipefail
 
-WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-${CLAUDE_PROJECT_DIR:-$(pwd)}}}"
+WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-$(pwd)}}"
 SOURCE_PATH="${CODEX_SOURCE_TREE_PATH:-${ROOT_WORKTREE_PATH:-$HOME/Developer/saas/<repo>}}"
 
 cd "$WORKTREE_PATH"
 
-# Copy ignored env files
+# Copy ignored env files.
+# NOTE for Claude Code users: .worktreeinclude handles this natively. Prefer it
+# over the cp loop when the project uses Claude's --worktree.
 for f in .env .env.local .env.development.local; do
   if [[ -f "$SOURCE_PATH/$f" && ! -f "$WORKTREE_PATH/$f" ]]; then
     cp "$SOURCE_PATH/$f" "$WORKTREE_PATH/$f"
@@ -126,7 +130,7 @@ Cleanup runs before the IDE destroys the worktree.
 #!/usr/bin/env bash
 set -euo pipefail
 
-WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-${CLAUDE_PROJECT_DIR:-$(pwd)}}}"
+WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-$(pwd)}}"
 cd "$WORKTREE_PATH"
 
 if [[ ! -f .env ]]; then
@@ -150,7 +154,7 @@ Pick a free port so multiple worktrees can run in parallel.
 #!/usr/bin/env bash
 set -euo pipefail
 
-WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-${CLAUDE_PROJECT_DIR:-$(pwd)}}}"
+WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-$(pwd)}}"
 cd "$WORKTREE_PATH"
 
 port="${DEV_PORT_START:-3910}"
@@ -228,22 +232,24 @@ Working copies of every file this skill generates live under [examples/](example
 ```text
 examples/
 ├── scripts/
-│   ├── worktree-up         # pnpm + Postgres + Prisma reference
-│   ├── worktree-down       # pnpm + Postgres reference
-│   └── dev                 # free-port dev server reference
+│   ├── worktree-up                # pnpm + Postgres + Prisma reference
+│   ├── worktree-down              # pnpm + Postgres reference
+│   ├── dev                        # free-port dev server reference
+│   ├── claude-worktree-create     # Claude WorktreeCreate hook wrapper
+│   └── claude-worktree-remove     # Claude WorktreeRemove hook wrapper
 ├── claude/
-│   ├── settings.json       # SessionStart hook reference
-│   └── commands/
+│   ├── .worktreeinclude           # native env-file copy list
+│   ├── settings.json              # WorktreeCreate + WorktreeRemove hooks
+│   └── commands/                  # optional slash-command actions
 │       ├── dev.md
 │       ├── typecheck.md
 │       ├── test.md
-│       ├── lint.md
-│       └── worktree-down.md
+│       └── lint.md
 ├── cursor/
-│   └── worktrees.json      # setup-worktree-unix -> scripts/worktree-up
+│   └── worktrees.json             # setup-worktree-unix -> scripts/worktree-up
 └── codex/
     └── environments/
-        └── environment.toml # setup, cleanup, four actions
+        └── environment.toml       # setup, cleanup, four actions
 ```
 
 Read the relevant example before writing the file into the target project. Do not copy verbatim - the user's Step 1 selections determine which sections of `worktree-up` survive.

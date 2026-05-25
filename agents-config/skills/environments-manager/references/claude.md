@@ -1,6 +1,6 @@
 # Claude Code Linking
 
-Wire the shared `scripts/worktree-up` and `scripts/worktree-down` into Claude Code's native worktree system.
+Wire the shared `scripts/worktree-up.sh` and `scripts/worktree-down.sh` into Claude Code's native worktree system.
 
 ## What Claude Code Actually Provides
 
@@ -32,9 +32,9 @@ There is no separate `PostWorktreeCreate` hook (feature request #27744 is open).
     ├── test.md
     └── lint.md
 scripts/
-├── claude-worktree-create        # WorktreeCreate hook wrapper
-├── claude-worktree-remove        # WorktreeRemove hook wrapper
-└── (shared worktree-up / worktree-down / dev)
+├── claude-worktree-create.sh     # WorktreeCreate hook wrapper
+├── claude-worktree-remove.sh     # WorktreeRemove hook wrapper
+└── (shared worktree-up.sh / worktree-down.sh / dev.sh)
 ```
 
 `.gitignore` must also include `**/.claude/worktrees/`.
@@ -61,7 +61,7 @@ Only files matching a pattern **and** gitignored are copied. Tracked files are n
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/scripts/claude-worktree-create"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/scripts/claude-worktree-create.sh"
           }
         ]
       }
@@ -71,7 +71,7 @@ Only files matching a pattern **and** gitignored are copied. Tracked files are n
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/scripts/claude-worktree-remove"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/scripts/claude-worktree-remove.sh"
           }
         ]
       }
@@ -82,70 +82,46 @@ Only files matching a pattern **and** gitignored are copied. Tracked files are n
 
 If the project already has a `settings.json`, **merge** the `hooks` block. Do not overwrite.
 
-## `scripts/claude-worktree-create`
+## `scripts/claude-worktree-create.sh` & `claude-worktree-remove.sh`
 
-This wrapper exists because Claude's `WorktreeCreate` hook has three Claude-specific responsibilities the shared `scripts/worktree-up` cannot handle:
+These wrappers exist because Claude's `WorktreeCreate` hook has Claude-specific responsibilities the shared `scripts/worktree-up.sh` cannot handle:
 
 1. Call `git worktree add` itself (Claude does not do it).
 2. Print the worktree path - and **only** the path - to stdout.
-3. Send all progress output to `/dev/tty`, not stdout.
+3. Send progress output to a log file (and to `/dev/tty` only when available).
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
+**Do not inline the wrapper code into this doc.** The full, battle-tested wrappers live in `examples/scripts/claude-worktree-create.sh` and `claude-worktree-remove.sh`. Always start from those — they encode every gotcha listed in "Hook Robustness" below. The wrappers do these things in order:
 
-INPUT=$(cat)
-NAME=$(echo "$INPUT" | jq -r '.name')
-REPO="$CLAUDE_PROJECT_DIR"
-WORKTREE="${REPO}/.claude/worktrees/${NAME}"
-BRANCH="worktree-${NAME}"
+1. Read `name` from stdin JSON, compute `WORKTREE` and `BRANCH`.
+2. Create the worktree (reusing a matching branch if it exists).
+3. Open a log file at `<worktree>/.worktree-setup.log`.
+4. Source `nvm` or `fnm` and activate the worktree's `.nvmrc` (so child CLIs see the right Node).
+5. Run `scripts/worktree-up.sh` with `ROOT_WORKTREE_PATH`, `CLAUDE_WORKTREE_NAME`, and `CI=1` set, under a watchdog that hard-kills after `CLAUDE_WORKTREE_SETUP_TIMEOUT` (default 900s).
+6. Echo the worktree path on stdout — and absolutely nothing else.
 
-log() { echo "$*" > /dev/tty 2>/dev/null || true; }
+The remove wrapper mirrors steps 3–5 for cleanup, then runs `git worktree remove --force` + `git branch -D`.
 
-log "Creating worktree (branch: $BRANCH)..."
+`ROOT_WORKTREE_PATH` is set so the shared `scripts/worktree-up.sh` can locate the source checkout via the existing cascade (`CODEX_SOURCE_TREE_PATH` → `ROOT_WORKTREE_PATH`).
 
-mkdir -p "${REPO}/.claude/worktrees"
-if git rev-parse --verify "$BRANCH" >/dev/null 2>&1; then
-  git worktree add "$WORKTREE" "$BRANCH" >/dev/null 2>&1
-else
-  git worktree add -b "$BRANCH" "$WORKTREE" HEAD >/dev/null 2>&1
-fi
+## Hook Robustness (lessons from a real project)
 
-# Run shared setup inside the worktree. Source path is the original repo.
-# All output routed to /dev/tty so stdout stays clean.
-if [[ -x "${REPO}/scripts/worktree-up" ]]; then
-  (cd "$WORKTREE" && ROOT_WORKTREE_PATH="$REPO" bash "${REPO}/scripts/worktree-up") > /dev/tty 2>&1 || \
-    log "worktree-up exited non-zero - check $WORKTREE/.worktree-setup.log"
-fi
+These five fixes turn a wrapper that "works on my machine" into one that survives Claude's actual hook execution context. Every one of these came from a real bug.
 
-log "Worktree ready."
+1. **`set -e` + `> /dev/tty` will abort the hook.** When Claude runs the hook as a child process, `/dev/tty` may exist but be non-writable, and the redirect failure under `set -e` kills the whole script before setup ever runs. Always wrap the redirect: `{ echo "$*" > /dev/tty; } 2>/dev/null || true`. Testing with `[[ -w /dev/tty ]]` is NOT enough — the perm test can pass while the open call still fails.
 
-# THE ONLY THING ON STDOUT - Claude parses this as the cwd.
-echo "$WORKTREE"
-```
+2. **Hooks inherit the shell default Node, not the worktree's `.nvmrc`.** If the project's CLI tools require a newer Node (Convex needs 24+; older Node crashes on regex `v` flag), the hook will instantly die. Source `~/.nvm/nvm.sh` or run `fnm env` at the top of the wrapper, then `nvm use` inside the worktree.
 
-Note: `ROOT_WORKTREE_PATH` is set so the shared `scripts/worktree-up` can locate the source checkout via the existing cascade (`CODEX_SOURCE_TREE_PATH` → `ROOT_WORKTREE_PATH`).
+3. **Always log to a file.** A hook that crashes silently is impossible to debug from the UI. Open `<worktree>/.worktree-setup.log` early, append every step. The user can `tail -f` it during the next attempt.
 
-## `scripts/claude-worktree-remove`
+4. **Add a watchdog timeout — macOS has no `timeout` command.** Background the setup, background a sleep+kill, `wait` on the setup. Without a watchdog, a single interactive CLI prompt (convex, prisma, vercel) can hang the hook forever — which is what users see as "the script is infinite."
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
+5. **Set `CI=1` before calling the setup script.** Many CLIs read `CI` and switch to non-interactive mode (skip prompts, suppress spinners). It's the cheapest insurance against interactive hangs.
 
-INPUT=$(cat)
-WORKTREE=$(echo "$INPUT" | jq -r '.worktree_path')
+## Common Misconception: Agent Worktrees
 
-[[ ! -d "$WORKTREE" ]] && exit 0
+The `WorktreeCreate` hook **only fires for `claude --worktree` from the CLI**. The Agent tool's `isolation: "worktree"` feature, and parallel-session worktrees created via the desktop app, create worktrees at `~/Developer/worktrees/<repo>/<name>/` on branch `claude/<name>` — those do **not** trigger this hook. If you need setup there, the user must run `scripts/worktree-up.sh` inside the agent worktree manually (or wire a different mechanism).
 
-# Run shared cleanup before removing the git worktree.
-if [[ -x "$(dirname "$0")/worktree-down" ]]; then
-  (cd "$WORKTREE" && bash "$(dirname "$0")/worktree-down") > /dev/tty 2>&1 || true
-fi
-
-BRANCH=$(git -C "$WORKTREE" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
-git worktree remove "$WORKTREE" --force 2>/dev/null || true
-[[ -n "$BRANCH" ]] && git branch -D "$BRANCH" 2>/dev/null || true
-```
+Also: **`.claude/settings.json` changes only take effect after restarting Claude.** A running session keeps the old hook config. Tell the user to restart before testing.
 
 ## Custom Slash Commands as Actions (optional)
 
@@ -167,8 +143,8 @@ See `examples/claude/commands/` for the four standard ones (`dev.md`, `typecheck
 
 ```bash
 python3 -c "import json; json.load(open('.claude/settings.json'))"
-bash -n scripts/claude-worktree-create scripts/claude-worktree-remove
-test -x scripts/claude-worktree-create scripts/claude-worktree-remove
+bash -n scripts/claude-worktree-create.sh scripts/claude-worktree-remove.sh
+test -x scripts/claude-worktree-create.sh scripts/claude-worktree-remove.sh
 grep -q '.claude/worktrees' .gitignore || echo "ADD: **/.claude/worktrees/ to .gitignore"
 ```
 

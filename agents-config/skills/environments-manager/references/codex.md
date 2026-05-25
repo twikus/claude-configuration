@@ -1,6 +1,6 @@
 # Codex Linking
 
-Wire the shared `scripts/worktree-up`, `scripts/worktree-down`, and `scripts/dev` into Codex App Local Environments.
+Wire the shared `scripts/worktree-up.sh`, `scripts/worktree-down.sh`, and `scripts/dev.sh` into Codex App Local Environments.
 
 ## What Codex Provides
 
@@ -38,15 +38,15 @@ version = 1
 name = "Project Worktree"
 
 [setup]
-script = "cd \"$CODEX_WORKTREE_PATH\"\nscripts/worktree-up"
+script = "cd \"$CODEX_WORKTREE_PATH\"\nscripts/worktree-up.sh"
 
 [cleanup]
-script = "cd \"$CODEX_WORKTREE_PATH\"\nscripts/worktree-down"
+script = "cd \"$CODEX_WORKTREE_PATH\"\nscripts/worktree-down.sh"
 
 [[actions]]
 name = "Dev"
 icon = "tool"
-command = "scripts/dev"
+command = "scripts/dev.sh"
 
 [[actions]]
 name = "Typecheck"
@@ -71,7 +71,7 @@ Adjust the action commands for the project's package manager (e.g. `bun run type
 - Do not put large fragile shell programs directly in the TOML string. The TOML keeps two lines max - `cd` then call the script.
 - Do not read or write `.conductor` directories.
 - Do not create duplicate environments when the user already has one. Update the existing `.codex/environments/environment.toml`.
-- Do not hardcode a dev port in the Dev action - call `scripts/dev`, which finds a free port.
+- Do not hardcode a dev port in the Dev action - call `scripts/dev.sh`, which finds a free port.
 - Do not commit `.codex` only on a worktree - it must live on the source checkout / main branch so future worktrees pick it up.
 
 ## Verification

@@ -1,6 +1,6 @@
 # Cursor Linking
 
-Wire the shared `scripts/worktree-up`, `scripts/worktree-down`, and `scripts/dev` into Cursor.
+Wire the shared `scripts/worktree-up.sh`, `scripts/worktree-down.sh`, and `scripts/dev.sh` into Cursor.
 
 ## What Cursor Provides
 
@@ -12,7 +12,7 @@ Three setup keys are supported (Cursor picks the first one that matches the host
 - `setup-worktree-windows` - Windows (string filepath or array of commands)
 - `setup-worktree` - generic fallback
 
-Cursor does **not** support a cleanup script. Cleanup is timer-based via global settings (`cursor.worktreeCleanupIntervalHours`, `cursor.worktreeMaxCount`). To get a real cleanup hook, expose `scripts/worktree-down` as a project command the user runs manually before `/delete-worktree`.
+Cursor does **not** support a cleanup script. Cleanup is timer-based via global settings (`cursor.worktreeCleanupIntervalHours`, `cursor.worktreeMaxCount`). To get a real cleanup hook, expose `scripts/worktree-down.sh` as a project command the user runs manually before `/delete-worktree`.
 
 Built-in worktree slash commands the user already has: `/worktree`, `/best-of-n`, `/apply-worktree`, `/delete-worktree`.
 
@@ -40,17 +40,17 @@ Preferred shape: point Cursor at the script files. Keep arrays only as a last re
 
 ```json
 {
-  "setup-worktree-unix": "../scripts/worktree-up"
+  "setup-worktree-unix": "../scripts/worktree-up.sh"
 }
 ```
 
-The path is relative to the location of `.cursor/worktrees.json`. From `.cursor/worktrees.json` at the project root, `scripts/worktree-up` is at `../scripts/worktree-up`.
+The path is relative to the location of `.cursor/worktrees.json`. From `.cursor/worktrees.json` at the project root, `scripts/worktree-up.sh` is at `../scripts/worktree-up.sh`.
 
 If the project also needs Windows support, add the second key:
 
 ```json
 {
-  "setup-worktree-unix": "../scripts/worktree-up",
+  "setup-worktree-unix": "../scripts/worktree-up.sh",
   "setup-worktree-windows": "../scripts/worktree-up.ps1"
 }
 ```
@@ -66,20 +66,20 @@ If the user does not want a separate script and prefers inline commands:
 }
 ```
 
-Inline is fine for two-line setups. For anything more, use a script - the worktree-up logic from the parent skill belongs in `scripts/worktree-up`, not in JSON.
+Inline is fine for two-line setups. For anything more, use a script - the worktree-up logic from the parent skill belongs in `scripts/worktree-up.sh`, not in JSON.
 
 ## Guardrails
 
 - Do not put fragile multi-line setup inline. If it does not fit in two clean array entries, call the script.
 - Do not put `.cursor/worktrees.json` only in a worktree - it must be on the source checkout / main branch so future worktrees pick it up.
-- Do not rely on a cleanup hook - Cursor does not have one. Tell the user to run `scripts/worktree-down` before `/delete-worktree`, or document it in the project README.
+- Do not rely on a cleanup hook - Cursor does not have one. Tell the user to run `scripts/worktree-down.sh` before `/delete-worktree`, or document it in the project README.
 - Do not use `$CURSOR_WORKTREE_PATH` - that variable is not documented and not guaranteed. Use `pwd` inside the worktree.
 
 ## Verification
 
 ```bash
 python3 -c "import json; json.load(open('.cursor/worktrees.json'))"
-test -x scripts/worktree-up
+test -x scripts/worktree-up.sh
 ```
 
 ## Online References

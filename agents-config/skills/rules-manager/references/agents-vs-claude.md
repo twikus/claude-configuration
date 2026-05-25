@@ -53,7 +53,7 @@ ln -s AGENTS.md CLAUDE.md
 ln -s .agents/rules .claude/rules
 ```
 
-**Option C** - Duplicate both files, accept drift risk. Run `/rules-creator optimize` periodically to catch divergence.
+**Option C** - Duplicate both files, accept drift risk. Run `/rules-manager optimize` periodically to catch divergence.
 
 ## Migration
 

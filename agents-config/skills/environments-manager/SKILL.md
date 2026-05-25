@@ -1,6 +1,6 @@
 ---
 name: environments-manager
-description: Set up a per-worktree environment for one or more IDEs (Claude Code, Cursor, Codex) in a single pass. Generates shared scripts/worktree-up, scripts/worktree-down, and scripts/dev, then wires them into each selected IDE's config. Use whenever the user asks to "set up a worktree environment", "configure worktrees", "make this repo worktree-ready", or mentions any of .codex/environments/environment.toml, .cursor/worktrees.json, .claude/settings.json SessionStart, $CODEX_WORKTREE_PATH, $ROOT_WORKTREE_PATH, or $CLAUDE_PROJECT_DIR.
+description: Set up a per-worktree environment for one or more IDEs (Claude Code, Cursor, Codex) in a single pass. Generates shared scripts/worktree-up.sh, scripts/worktree-down.sh, and scripts/dev.sh, then wires them into each selected IDE's config. Use whenever the user asks to "set up a worktree environment", "configure worktrees", "make this repo worktree-ready", or mentions any of .codex/environments/environment.toml, .cursor/worktrees.json, .claude/settings.json SessionStart, $CODEX_WORKTREE_PATH, $ROOT_WORKTREE_PATH, or $CLAUDE_PROJECT_DIR.
 disable-model-invocation: false
 allow_implicit_invocation: true
 ---
@@ -17,7 +17,7 @@ This skill is interactive. Ask the user the two questions below before writing a
 
 Ask the user what the setup script should do, as a multi-select. The first option is the default-on baseline; the rest are additive opt-ins:
 
-| Option | What it adds to `scripts/worktree-up` |
+| Option | What it adds to `scripts/worktree-up.sh` |
 | :--- | :--- |
 | Copy ignored env files from the source checkout | `cp` of `.env`, `.env.local`, `.env.development.local` (default - almost always wanted) |
 | Install dependencies | `pnpm install` / `bun install` / `npm install` based on lockfile |
@@ -32,7 +32,7 @@ Ask a multi-select with options: Claude Code, Cursor, Codex. The user can pick a
 
 ### Step 3: Apply each selected IDE
 
-For each selected IDE, read the matching reference file and apply only its linking config. Do not duplicate the script logic - the IDE config just points at `scripts/worktree-up`, `scripts/worktree-down`, and `scripts/dev`.
+For each selected IDE, read the matching reference file and apply only its linking config. Do not duplicate the script logic - the IDE config just points at `scripts/worktree-up.sh`, `scripts/worktree-down.sh`, and `scripts/dev.sh`.
 
 - Claude Code → load `references/claude.md`
 - Cursor → load `references/cursor.md`
@@ -44,13 +44,15 @@ Every project that uses this skill ends up with:
 
 ```text
 scripts/
-├── worktree-up           # idempotent setup
-├── worktree-down         # cleanup before worktree teardown
-├── dev                   # start dev server on a free port
-└── (project-specific helpers)
+├── worktree-up.sh        # idempotent setup
+├── worktree-down.sh      # cleanup before worktree teardown
+├── dev.sh                # start dev server on a free port
+└── (project-specific helpers, all *.sh)
 ```
 
 Plus one or more IDE config files (see references). The IDE config is thin; all logic lives in `scripts/`.
+
+**Naming convention**: every generated script MUST end in `.sh`. No bare `worktree-up`, no `dev`. IDE configs reference scripts by full filename (`scripts/worktree-up.sh`, not `scripts/worktree-up`). This is enforced in every reference file and example.
 
 ## Environment Variable Cascade
 
@@ -67,11 +69,11 @@ SOURCE_PATH="${CODEX_SOURCE_TREE_PATH:-${ROOT_WORKTREE_PATH:-}}"
 | Cursor   | `pwd` inside worktree    | `$ROOT_WORKTREE_PATH`     | `setup-worktree-unix` in JSON, runs once per worktree |
 | Claude   | `pwd` inside worktree (the hook wrapper cd's in) | `$CLAUDE_PROJECT_DIR` (source repo, exposed inside the hook); the wrapper re-exports it as `ROOT_WORKTREE_PATH` | `WorktreeCreate` hook, runs once per worktree |
 
-**Important about Claude Code**: do NOT use `SessionStart` for setup - it fires every session. Use the `WorktreeCreate` hook, which fires once when `claude --worktree` creates the worktree. The Claude wrapper script (`scripts/claude-worktree-create`) is responsible for calling `git worktree add` itself, then handing off to `scripts/worktree-up` inside the new worktree with `ROOT_WORKTREE_PATH` set. See [references/claude.md](references/claude.md).
+**Important about Claude Code**: do NOT use `SessionStart` for setup - it fires every session. Use the `WorktreeCreate` hook, which fires once when `claude --worktree` creates the worktree. The Claude wrapper script (`scripts/claude-worktree-create.sh`) is responsible for calling `git worktree add` itself, then handing off to `scripts/worktree-up.sh` inside the new worktree with `ROOT_WORKTREE_PATH` set. See [references/claude.md](references/claude.md).
 
 If no env var yields a source checkout, fall back to a project-specific absolute path (e.g. `$HOME/Developer/saas/<repo>`). Ask the user during Step 1 if you cannot infer it.
 
-## `scripts/worktree-up`
+## `scripts/worktree-up.sh`
 
 Setup must be **idempotent** - reruns are safe. Built from the user's Step 1 selections. Required behavior in order:
 
@@ -115,7 +117,7 @@ fi
 # Project-specific DB isolation and codegen go here.
 ```
 
-## `scripts/worktree-down`
+## `scripts/worktree-down.sh`
 
 Cleanup runs before the IDE destroys the worktree.
 
@@ -146,7 +148,7 @@ fi
 rm -f .env .env.local .env.development.local
 ```
 
-## `scripts/dev`
+## `scripts/dev.sh`
 
 Pick a free port so multiple worktrees can run in parallel.
 
@@ -172,7 +174,7 @@ Every project should expose these four actions through the IDE's own mechanism (
 
 | Action     | Command (typical)                |
 | :--------- | :------------------------------- |
-| Dev        | `scripts/dev`                    |
+| Dev        | `scripts/dev.sh`                    |
 | Typecheck  | `pnpm ts` / `bun run typecheck`  |
 | Unit tests | `pnpm test:ci` / `bun test`      |
 | Lint       | `pnpm lint:ci` / `bun run lint`  |
@@ -188,13 +190,27 @@ Add `E2E` as an action only if the suite is cheap enough to run interactively.
 - Setup must be idempotent. Provide a reset escape hatch via env var (`<PROJECT>_RESET_DB=1`).
 - Print DB names and redacted hosts only.
 - The scripts and IDE config must live on the source checkout / main branch, not only the current worktree, or future worktrees will have nothing to copy.
+- **Never import data from a production source.** Any setup step that exports a database/deployment and replays it into the new worktree MUST reject any source ref containing `prod`/`production` and require an explicit override env var (`<PROJECT>_ALLOW_PROD_SOURCE=1`). Even a single mistaken `--replace-all` against the wrong source can nuke a teammate's dev environment or, worse, leak prod data into a feature branch. Default the source to `dev` and validate before each export.
+
+```bash
+assert_dev_source() {
+  case "$1" in
+    prod|prod:*|prod/*|production|production:*|production/*)
+      echo "refusing prod source: $1" >&2; exit 1 ;;
+    *prod*|*production*)
+      [ "${ALLOW_PROD_SOURCE:-0}" = "1" ] || { echo "looks like prod: $1" >&2; exit 1; } ;;
+  esac
+}
+```
+
+- **Hook wrappers must survive a missing `/dev/tty`, a wrong default Node version, and CLI prompts.** See `references/claude.md` → "Hook Robustness" for the five concrete fixes.
 
 ## Verification
 
 After generating files:
 
 ```bash
-bash -n scripts/worktree-up scripts/worktree-down scripts/dev
+bash -n scripts/worktree-up.sh scripts/worktree-down.sh scripts/dev.sh
 git status --short
 ```
 
@@ -232,11 +248,11 @@ Working copies of every file this skill generates live under [examples/](example
 ```text
 examples/
 ├── scripts/
-│   ├── worktree-up                # pnpm + Postgres + Prisma reference
-│   ├── worktree-down              # pnpm + Postgres reference
-│   ├── dev                        # free-port dev server reference
-│   ├── claude-worktree-create     # Claude WorktreeCreate hook wrapper
-│   └── claude-worktree-remove     # Claude WorktreeRemove hook wrapper
+│   ├── worktree-up.sh             # pnpm + Postgres + Prisma reference
+│   ├── worktree-down.sh           # pnpm + Postgres reference
+│   ├── dev.sh                     # free-port dev server reference
+│   ├── claude-worktree-create.sh  # Claude WorktreeCreate hook wrapper
+│   └── claude-worktree-remove.sh  # Claude WorktreeRemove hook wrapper
 ├── claude/
 │   ├── .worktreeinclude           # native env-file copy list
 │   ├── settings.json              # WorktreeCreate + WorktreeRemove hooks
@@ -246,10 +262,10 @@ examples/
 │       ├── test.md
 │       └── lint.md
 ├── cursor/
-│   └── worktrees.json             # setup-worktree-unix -> scripts/worktree-up
+│   └── worktrees.json             # setup-worktree-unix -> scripts/worktree-up.sh
 └── codex/
     └── environments/
         └── environment.toml       # setup, cleanup, four actions
 ```
 
-Read the relevant example before writing the file into the target project. Do not copy verbatim - the user's Step 1 selections determine which sections of `worktree-up` survive.
+Read the relevant example before writing the file into the target project. Do not copy verbatim - the user's Step 1 selections determine which sections of `worktree-up.sh` survive.

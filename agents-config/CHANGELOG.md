@@ -12,7 +12,6 @@
 ### Updated Skills (overwritten from global, source of truth = `~/.agents/skills/`)
 - `skills/aibuilder-create-saas/SKILL.md`
 - `skills/ci-fixer/SKILL.md`
-- `skills/claude-memory/SKILL.md`
 - `skills/codex-environment/SKILL.md`
 - `skills/commit/SKILL.md`
 - `skills/commit-and-monitor/SKILL.md`
@@ -24,7 +23,6 @@
 ### Removed Skills
 - `skills/delight/` - obsolete
 - `skills/save-docs/` - obsolete
-- `skills/ralph-tasks/` - obsolete
 
 ### Discoverability (auto-invocation disabled)
 Added `disable-model-invocation: true` and `allow_implicit_invocation: false` to frontmatter for context optimization on:
@@ -79,12 +77,11 @@ Added `disable-model-invocation: true` and `allow_implicit_invocation: false` to
 - `skills/apex-skills/` - APEX methodology skill
 - `skills/brainstorm-skills/` - Deep iterative research skill
 - `skills/ci-experts-skills/` - CI/CD debugging skill
-- `skills/claude-memory-skills/` - CLAUDE.md creation skill
 - `skills/create-hooks-skills/` - Hook configuration skill
 - `skills/create-meta-prompts-skills/` - Meta-prompt creation skill
 - `skills/create-prompt-skills/` - Prompt engineering skill
 - `skills/create-slash-commands-skills/` - Slash command creation skill
-- `skills/create-subagents-skills/` - Subagent creation skill
+- `skills/agents-managers/` - Agent management skill
 - `skills/review-code-skills/` - Code review skill
 
 ---
@@ -177,17 +174,12 @@ Added `disable-model-invocation: true` and `allow_implicit_invocation: false` to
 - **New**: `deploy` - Run build, lint, tests then commit and push
 - **New**: `refactor` - Refactor code with parallel Snipper agents
 - **New**: `ultrathink` - Deep thinking mode for elegant solutions
-- **New**: `skills/claude-memory` - Create CLAUDE.md memory files
 - **New**: `skills/create-skills` - Create Claude Code skills
-- **New**: `skills/review-claude-memory` - Review CLAUDE.md quality
 - **New**: `prompts/saas-create-headline` - Generate SaaS headlines
 - **New**: `prompts/saas-create-logos` - Create minimalist SVG logos
 
 ### Deleted
 - **Removed**: `melvyn/*` commands (moved to personal config)
-
-### Skills
-- **New**: `claude-memory` - CLAUDE.md file structure and best practices
 
 ### Statusline
 - Add SQLite database support for spend tracking
@@ -228,7 +220,7 @@ Added `disable-model-invocation: true` and `allow_implicit_invocation: false` to
 - **New**: `skills/create-meta-prompt` - Create prompts for Claude-to-Claude pipelines
 - **New**: `skills/create-prompt` - Expert prompt engineering
 - **New**: `skills/create-slash-command` - Create slash commands
-- **New**: `skills/create-subagent` - Create specialized subagents
+- **New**: `skills/agents-managers` - Manage specialized agents
 
 ### Skills
 - **New**: `create-agent-skills` - Skill authoring guidance
@@ -236,7 +228,7 @@ Added `disable-model-invocation: true` and `allow_implicit_invocation: false` to
 - **New**: `create-meta-prompts` - Multi-stage workflow prompts
 - **New**: `create-prompt` - Anthropic/OpenAI best practices
 - **New**: `create-slash-commands` - Command patterns and examples
-- **New**: `create-subagents` - Agent orchestration patterns
+- **New**: `agents-managers` - Agent management and orchestration patterns
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: rules-manager
-description: Create and maintain agent rules in AGENTS.md and .agents/rules/. Use when adding project rules, conventions, or constraints for AI agents. AGENTS.md acts as the index - it must reference every rule file living in .agents/rules/. Triggers - "create a rule", "add a rule", "agents rule", "AGENTS.md", ".agents/rules", "new rule for", "rules-creator".
+description: Create and maintain agent rules in AGENTS.md and .agents/rules/. Use when adding project rules, conventions, or constraints for AI agents. AGENTS.md acts as the index - it must reference every rule file living in .agents/rules/. Triggers - "create a rule", "add a rule", "agents rule", "AGENTS.md", ".agents/rules", "new rule for", "rules-manager".
 argument-hint: [init | add <rule-name> | optimize | task description]
 ---
 
@@ -119,7 +119,7 @@ YES: "NEVER merge without a passing test for the changed behavior"
 
 <workflows>
 
-## `/rules-creator init` - Bootstrap AGENTS.md + .agents/rules/
+## `/rules-manager init` - Bootstrap AGENTS.md + .agents/rules/
 
 When the argument contains `init`:
 
@@ -130,7 +130,7 @@ When the argument contains `init`:
 
 Target AGENTS.md size at init: under 40 lines.
 
-## `/rules-creator add <name>` - Add a new rule
+## `/rules-manager add <name>` - Add a new rule
 
 When the argument starts with `add`:
 
@@ -146,7 +146,7 @@ When the argument starts with `add`:
 
 **CRITICAL:** Step 5 is non-negotiable. A rule file without an index entry is invisible.
 
-## `/rules-creator optimize` - Audit and clean up
+## `/rules-manager optimize` - Audit and clean up
 
 When the argument contains `optimize`:
 

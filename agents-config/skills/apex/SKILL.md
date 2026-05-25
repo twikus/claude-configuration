@@ -54,7 +54,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 5. **Execute** → Implementation (standard or Agent Teams if -m)
 6. **Validate** → Typecheck, lint, tests
 7. **Tests** → Create + run tests (if -t)
-8. **Examine** → Adversarial review (if -x)
+8. **Examine** → Adversarial review (if -x) - Security + Logic + Clean Code + Thermo-Nuclear maintainability audit in parallel
 9. **Resolve** → Fix findings (if examine found issues)
 10. **Verify** → Launch app, test feature (if -v)
 11. **Finish** → Create PR (if -pr)

@@ -2,20 +2,7 @@
 name: lumail
 version: "0.2.0"
 tags: ["email", "marketing", "newsletter", "mcp", "api", "cli"]
-description: >-
-  Manage Lumail email marketing platform via CLI - subscribers, campaigns, tags,
-  workflows, segments, transactional emails, and 64 V2 tools for AI agents.
-  Use whenever working with email marketing, subscriber management, campaign
-  creation/editing, automation workflows, segments, transactional emails, or
-  any Lumail API interaction. Common scenarios: adding/tagging/segmenting/
-  unsubscribing subscribers; creating, editing (TipTap content), scheduling, or
-  sending campaigns; building automations (EMAIL/WAIT/ACTION/TRIGGER/WEBHOOK);
-  creating reusable segments and recipient filters; sending transactional
-  emails; verifying emails and tracking events; reading analytics (org stats,
-  campaign performance, subscriber growth). Triggers: "lumail", "email
-  campaign", "subscribers", "newsletter", "email marketing", "lumail cli",
-  "send email", "transactional email", "workflow automation", "segment",
-  "tags", "edit campaign content", "tiptap email".
+description: Manage Lumail email marketing via CLI. Use for subscribers, campaigns, tags, workflows, segments, transactional emails, analytics, TipTap campaign content, or Lumail API tools.
 ---
 
 # Lumail - Email Marketing CLI

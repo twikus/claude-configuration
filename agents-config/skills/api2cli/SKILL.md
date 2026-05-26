@@ -1,6 +1,6 @@
 ---
 name: api2cli
-description: "Generate a CLI + AgentSkill from any REST API. Use when: user says 'create a CLI for X', 'wrap this API', 'make a skill for X', 'publish my CLI', 'publish to npm', 'push to github'. Handles discovery, scaffolding, resource implementation, building, linking, skill generation, npm publishing, and GitHub publishing."
+description: "Generate a CLI and AgentSkill from a REST API. Use when the user asks to wrap an API, create a CLI, make a skill, publish to npm, or push generated tooling to GitHub."
 ---
 
 # api2cli

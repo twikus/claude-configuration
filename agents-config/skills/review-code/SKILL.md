@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: This skill should be used when the user asks to "review code", "review this PR", "code review", "audit this code", or mentions reviewing pull requests, security checks, or code quality. Multi-agent deep review - dynamically scopes code, launches parallel specialized Opus agents (security, clean-code, UX/UI, backend), each loading domain-specific references. Focuses on high-impact issues, not nitpicks.
+description: Run deep multi-agent code or PR review. Use when the user asks to review code, audit a PR, check security or quality, or find high-impact issues beyond nitpicks.
 model: opus
 argument-hint: "[PR number or file paths]"
 ---

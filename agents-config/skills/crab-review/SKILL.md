@@ -1,6 +1,6 @@
 ---
 name: crab-review
-description: "Consensus-based code review using the Crab Method. Asks what to review (clean-code, security, logic, performance, accessibility, or all), then launches 3 parallel Sonnet agents per area with different analytical lenses. Only fixes issues where 2+ agents agree. Use when reviewing code, auditing quality, or wanting high-confidence fixes."
+description: "Run consensus code review with parallel specialist agents. Use when the user wants Crab Method review, high-confidence fixes, or audits for clean code, security, logic, performance, or accessibility."
 argument-hint: "[review-type] [PR number, file paths, or empty]"
 allowed-tools:
   - Agent

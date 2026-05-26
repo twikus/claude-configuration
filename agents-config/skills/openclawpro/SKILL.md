@@ -1,6 +1,6 @@
 ---
 name: openclawpro
-description: All-in-one reference for setting up and managing an OpenClaw VPS. Covers initial setup, Gmail notifications, Cloudflare tunnel/dashboard, api2cli tool creation, Claude Code skills/settings, and service management. Use when the user asks to setup OpenClaw, configure a VPS, add Gmail, setup Cloudflare, install CLIs, create skills, or manage their OpenClaw infrastructure.
+description: Set up and manage OpenClaw VPS infrastructure. Use for OpenClaw setup, Gmail notifications, Cloudflare tunnels, dashboard access, api2cli tools, skills, settings, or services.
 ---
 
 # OpenClaw Pro

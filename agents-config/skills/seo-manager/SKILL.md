@@ -1,6 +1,6 @@
 ---
 name: seo-manager
-description: Comprehensive SEO management for web applications. Use when implementing meta tags, structured data, sitemaps, robots.txt, Open Graph, Core Web Vitals optimization, canonical URLs, hreflang, or when the user mentions SEO, search engine optimization, rich snippets, schema markup, or wants to audit/improve search rankings.
+description: Implement and audit web SEO. Use for meta tags, structured data, sitemaps, robots.txt, Open Graph, canonical URLs, hreflang, Core Web Vitals, schema markup, or search rankings.
 ---
 
 # SEO Manager

@@ -1,6 +1,6 @@
 ---
 name: tella
-description: "Manage Tella via CLI - videos, clips, playlists, webhooks. Use when user mentions 'tella', 'tella.tv', 'tella video', 'screen recording', 'video transcript', 'clip thumbnail', 'video export', 'remove filler words', 'add zoom to video', 'blur video', 'highlight video', 'playlist of videos', or wants to interact with the Tella video recording/editing API."
+description: "Manage Tella videos via CLI. Use for Tella videos, clips, transcripts, thumbnails, exports, filler-word removal, zooms, blur, highlights, playlists, webhooks, or video edits."
 category: video
 ---
 

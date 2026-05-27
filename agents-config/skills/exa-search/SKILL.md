@@ -1,16 +1,6 @@
 ---
 name: exa-search
-description: >-
-  Search the web, retrieve page contents, get cited answers, and gather
-  research or code context using the local Exa CLI. Use this skill whenever
-  the user wants Exa-powered web research, semantic search, recent source
-  discovery, domain-filtered search, similar-page discovery, URL content
-  extraction, or web-grounded answers with citations. Common scenarios include
-  finding current sources before summarizing a topic, searching with domain or
-  date filters, pulling page text from known URLs, finding pages similar to a
-  reference URL, and gathering compact web context for technical questions.
-  Prefer this skill when the user explicitly mentions Exa or when Exa CLI is
-  the intended search tool.
+description: Search the web with the local Exa CLI. Use for Exa-powered research, recent sources, domain-filtered search, similar-page discovery, URL content extraction, or cited web answers.
 ---
 
 # Exa Search

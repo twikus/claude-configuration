@@ -1,6 +1,6 @@
 ---
 name: codeline
-description: "Manage Codeline (school/course platform) via CLI - products, orders, users, coupons, tools. Use when user mentions 'codeline', 'codeline-cli', 'codeline order', 'codeline product', 'student access', 'grant section access', 'revoke section access', 'grant full access', 'create coupon', 'school platform order', 'course platform user', or wants to list/get products/orders/users, manage coupons (percentage/fixed/expiring/product-specific), grant/revoke section or full course access, or run arbitrary Codeline API tools."
+description: "Manage Codeline products, orders, users, coupons, tools, and course access via CLI. Use when the user mentions codeline, student access, products, orders, or coupons."
 category: e-commerce
 ---
 

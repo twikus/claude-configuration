@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 
-import { colors } from "./lib/formatters";
 import {
-	readPayloadLogs,
 	type PayloadLogEntry,
+	readPayloadLogs,
 } from "./lib/features/spend/payload-logger";
+import { colors } from "./lib/formatters";
 
 function formatCost(cost: number): string {
 	return `$${cost.toFixed(2)}`;
@@ -41,7 +41,8 @@ function analyzePayloads(entries: PayloadLogEntry[]): SessionAnalysis[] {
 
 	for (const [sessionId, sessionEntries] of sessions) {
 		const sorted = sessionEntries.sort(
-			(a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+			(a, b) =>
+				new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
 		);
 
 		const first = sorted[0];
@@ -98,10 +99,15 @@ function showTodayUsage(): void {
 		const projectTotal = sessions.reduce((s, x) => s + x.real_delta, 0);
 		totalRealDelta += projectTotal;
 
-		console.log(`\n${colors.lightGray(project)} ${colors.gray(`(${formatCost(projectTotal)})`)}`);
+		console.log(
+			`\n${colors.lightGray(project)} ${colors.gray(`(${formatCost(projectTotal)})`)}`,
+		);
 
 		for (const s of sessions) {
-			const startInfo = s.first_cost > 0 ? colors.gray(` (started@${formatCost(s.first_cost)})`) : "";
+			const startInfo =
+				s.first_cost > 0
+					? colors.gray(` (started@${formatCost(s.first_cost)})`)
+					: "";
 
 			console.log(
 				`  ${s.session_id.slice(0, 8)} | ${formatCost(s.real_delta).padStart(7)} | ${formatCost(s.first_cost)} → ${formatCost(s.last_cost)} | ${s.entries} events${startInfo}`,
@@ -113,7 +119,9 @@ function showTodayUsage(): void {
 	console.log(
 		`${colors.lightGray("Total spent today:")} ${colors.green(formatCost(totalRealDelta))}`,
 	);
-	console.log(`${colors.gray(`Sessions: ${analyses.length} | Events: ${entries.length}`)}`);
+	console.log(
+		`${colors.gray(`Sessions: ${analyses.length} | Events: ${entries.length}`)}`,
+	);
 }
 
 function showHelp(): void {

@@ -151,9 +151,11 @@ export function getTodayRealCost(): number {
 	let totalRealCost = 0;
 	for (const [, entries] of sessions) {
 		const sorted = entries.sort(
-			(a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+			(a, b) =>
+				new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
 		);
-		const realDelta = sorted[sorted.length - 1].total_cost_usd - sorted[0].total_cost_usd;
+		const realDelta =
+			sorted[sorted.length - 1].total_cost_usd - sorted[0].total_cost_usd;
 		totalRealCost += Math.max(0, realDelta);
 	}
 

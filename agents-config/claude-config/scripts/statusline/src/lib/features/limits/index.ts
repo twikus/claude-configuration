@@ -1,10 +1,13 @@
+import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import { join } from "node:path";
-import { getClaudeCodeTokenSafe } from "../../../../../claude-code-ai/helper/credentials";
+import { promisify } from "node:util";
 import type { CachedUsageLimits, UsageLimits } from "./types";
 
 const CACHE_DURATION_MS = 60 * 1000; // 1 minute
+const execFileAsync = promisify(execFile);
 
 function getCacheFilePath(): string {
 	const projectRoot = join(import.meta.dir, "..", "..", "..", "..");
@@ -12,7 +15,57 @@ function getCacheFilePath(): string {
 }
 
 export async function getCredentials(): Promise<string | null> {
-	return getClaudeCodeTokenSafe();
+	return (
+		(await getClaudeCodeTokenFromKeychain()) ?? getClaudeCodeTokenFromFile()
+	);
+}
+
+async function getClaudeCodeTokenFromKeychain(): Promise<string | null> {
+	if (process.platform !== "darwin") {
+		return null;
+	}
+
+	try {
+		const { stdout } = await execFileAsync("security", [
+			"find-generic-password",
+			"-s",
+			"Claude Code-credentials",
+			"-w",
+		]);
+
+		return parseClaudeCodeToken(stdout.trim());
+	} catch {
+		return null;
+	}
+}
+
+async function getClaudeCodeTokenFromFile(): Promise<string | null> {
+	try {
+		const credentialsPath = join(homedir(), ".claude", ".credentials.json");
+		if (!existsSync(credentialsPath)) {
+			return null;
+		}
+
+		const content = await readFile(credentialsPath, "utf-8");
+		return parseClaudeCodeToken(content);
+	} catch {
+		return null;
+	}
+}
+
+function parseClaudeCodeToken(content: string): string | null {
+	if (!content) {
+		return null;
+	}
+
+	try {
+		const credentials = JSON.parse(content);
+		return (
+			credentials.claudeAiOauth?.accessToken ?? credentials.accessToken ?? null
+		);
+	} catch {
+		return content.startsWith("sk-") ? content : null;
+	}
 }
 
 export async function fetchUsageLimits(

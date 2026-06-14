@@ -1,16 +1,18 @@
 ---
 name: use-style
-description: Apply named visual style guides to landing pages and UI. Use when the user invokes $use-style, names a style like grid, vercel-simple, stripe, linear, new-york-times, anthropic, gumroad, or raycast, or builds themed pages such as /aiblueprint, /agents, Vercel-style dark tool UIs, Linear-style app shells, editorial newspaper layouts, warm Anthropic/Claude AI-lab pages, loud neo-brutalist commerce, or glossy dark product marketing.
+description: Apply named visual style guides to landing pages and UI. Use for $use-style, /usestyle, list styles, or styles like grid, vercel-simple, stripe, linear, raycast, gumroad, dusk, or split-auth.
 ---
 
 Load and apply a named style before designing or implementing any UI.
 
 ## Invocation
 
-- Explicit: `$use-style grid` or "use the grid style"
-- Implicit: user references `/aiblueprint`, `/agents`, `/aibuilder`, "grid theme", Vercel, Geist, a minimalist dark tool UI, Stripe / fintech / checkout / dashboard UI, Linear / issue tracker / app-shell sidebar UI, NYT / newspaper / editorial / broadsheet / magazine layouts, Anthropic / Claude / warm cream AI-lab pages, Gumroad / neo-brutalist / loud commerce / bold yellow-pink pages, or Raycast / glossy dark / glow gradients / floating glass nav / premium product marketing
+- Explicit: `$use-style grid`, `/usestyle split-auth`, `/usestyle list`, or "use the grid style"
+- Implicit: user references `/aiblueprint`, `/agents`, `/aibuilder`, "grid theme", Vercel, Geist, a minimalist dark tool UI, Stripe / fintech / checkout / dashboard UI, Linear / issue tracker / app-shell sidebar UI, NYT / newspaper / editorial / broadsheet / magazine layouts, Anthropic / Claude / warm cream AI-lab pages, Gumroad / neo-brutalist / loud commerce / bold yellow-pink pages, Raycast / glossy dark / glow gradients / floating glass nav / premium product marketing, or Dusk / Attio / dark CRM dashboard floating on a twilight backdrop / blue data viz / colorful category pills
 
-Parse the style name from `$ARGUMENTS` or the message. Default to `grid` for Codelynx product landings. Default to `vercel-simple` when the user references Vercel, Geist, or minimalist dark developer tools. Default to `linear` when the user references Linear, an issue tracker, or a dense sidebar + list + detail app shell. Default to `new-york-times` when the user references a newspaper, broadsheet, magazine, or serif editorial layout. Default to `anthropic` when the user references Anthropic, Claude, or a warm cream + serif AI-lab aesthetic. Default to `gumroad` when the user references Gumroad, neo-brutalism, hard offset shadows, or a loud yellow/pink bordered look. Default to `raycast` when the user references Raycast, a glossy dark page with glow gradients, a floating glass nav, or premium dark product marketing.
+Parse the style name from `$ARGUMENTS` or the message. Treat `split-auth`, `signin 2pages`, `signin-2pages`, `sign-in 2 pages`, `auth split`, and `two-column auth` as `split-auth`. Treat `list`, `styles`, `available styles`, and missing style names with no implicit match as a request to list available styles and ask the user to choose before designing. Default to `grid` for Codelynx product landings. Default to `vercel-simple` when the user references Vercel, Geist, or minimalist dark developer tools. Default to `linear` when the user references Linear, an issue tracker, or a dense sidebar + list + detail app shell. Default to `new-york-times` when the user references a newspaper, broadsheet, magazine, or serif editorial layout. Default to `anthropic` when the user references Anthropic, Claude, or a warm cream + serif AI-lab aesthetic. Default to `gumroad` when the user references Gumroad, neo-brutalism, hard offset shadows, or a loud yellow/pink bordered look. Default to `raycast` when the user references Raycast, a glossy dark page with glow gradients, a floating glass nav, or premium dark product marketing. Default to `dusk` when the user references Attio, a dark CRM/data dashboard floating on a twilight/aurora backdrop, vivid-blue charts, or colorful category pills. Default to `split-auth` when the user asks for a polished login, sign-in, signup, OAuth, magic-code, or password-reset page with a two-panel visual layout.
+
+If the parsed style is `list`, or if no style can be inferred, do not load a style file. Reply with the available styles table below, add one short line asking which style to use, and stop until the user chooses.
 
 ## Workflow
 
@@ -34,6 +36,8 @@ Parse the style name from `$ARGUMENTS` or the message. Default to `grid` for Cod
 | `anthropic` | `styles/anthropic.md` | Warm AI-lab. Cream `#f0efe9` paper, bold grotesque sans display + reading serif, clay-coral `#cc785c` accent, big soft-rounded dark panels, pill buttons. Light marketing + dark Claude app surfaces. |
 | `gumroad` | `styles/gumroad.md` | Loud neo-brutalist commerce. Yellow `#ffc900` + pink `#ff90e8`, thick black borders, hard offset shadows `4px 4px 0 #000`, flat fills, bold geometric sans, pill buttons. Light marketplace + dark dashboard surfaces. |
 | `raycast` | `styles/raycast.md` | Glossy dark product marketing. Near-black `#0a0a0a` + red `#ff6363` glow, floating glass nav (`backdrop-blur`), oversized bold pricing, large-radius `rounded-3xl` cards, soft glow over hard shadows. |
+| `dusk` | `styles/dusk.md` | Refined dark data app (Attio-style). Rounded near-black window floating on a twilight gradient backdrop, vivid sky-blue `#38bdf8` charts, `#3b6eff` primary, colorful category pills, Inter + mono numbers. |
+| `split-auth` | `styles/split-auth.md` | Two-column auth and OAuth pages. Left visual brand panel with optimized bitmap background, right clean form panel, monochrome social buttons, compact code inputs. |
 
 Add new styles as `styles/<name>.md` and register them here.
 

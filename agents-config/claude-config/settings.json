@@ -50,5 +50,11 @@
   "preferredNotifChannel": "ghostty",
   "teammateMode": "in-process",
   "remoteControlAtStartup": false,
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "mcpServers": {
+    "wc26": {
+      "command": "npx",
+      "args": ["-y", "wc26-mcp"]
+    }
+  }
 }

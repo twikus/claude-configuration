@@ -21,9 +21,9 @@ next_step: steps/step-06-resolve.md
 
 ## EXECUTION PROTOCOLS:
 
-- 🎯 Launch 4+ parallel review agents via Task tool in ONE message (unless economy_mode)
-- 🛑 NEVER launch only 1 review agent — you MUST launch Security + Logic + Clean Code + Thermo-Nuclear as separate agents
-- 🛑 NEVER skip the Thermo-Nuclear quality audit — it is the final maintainability gate
+- 🎯 Launch 4+ parallel review sub-agents in ONE message (unless economy_mode)
+- 🛑 NEVER launch only 1 review agent - you MUST launch Security + Logic + Clean Code + Thermo-Nuclear as separate agents
+- 🛑 NEVER skip the Thermo-Nuclear quality audit - it is the final maintainability gate
 - 💾 Document all findings with severity
 - 📖 Create todos for each finding
 - 🚫 FORBIDDEN to skip security analysis
@@ -36,7 +36,7 @@ next_step: steps/step-06-resolve.md
 - All tests pass
 - Now looking for issues that tests miss
 - Adversarial mindset - assume bugs exist
-- **If `{teams_mode}` = true:** Agent team is still alive. Do NOT shutdown teammates — that happens in step-09-finish only.
+- **If `{teams_mode}` = true:** Agent team is still alive. Do NOT shutdown teammates - that happens in step-09-finish only.
 
 ## YOUR TASK:
 
@@ -117,20 +117,20 @@ Group files: source, tests, config, other.
 ```
 
 **If `{economy_mode}` = false:**
-→ Launch parallel review agents using the **Task tool**
+→ Launch parallel review sub-agents.
 
-**🛑 CRITICAL: You MUST launch ALL 4 agents (or 5 if Next.js) in a SINGLE message using MULTIPLE Task tool calls. DO NOT launch them one at a time. DO NOT use only 1 agent. Each agent reviews a DIFFERENT aspect. The Thermo-Nuclear agent is MANDATORY and runs alongside the others.**
+**🛑 CRITICAL: You MUST launch ALL 4 agents (or 5 if Next.js) in a SINGLE message using MULTIPLE sub-agent launches. DO NOT launch them one at a time. DO NOT use only 1 agent. Each agent reviews a DIFFERENT aspect. The Thermo-Nuclear agent is MANDATORY and runs alongside the others.**
 
 First, gather the list of modified files:
 ```bash
 git diff --name-only HEAD~1
 ```
 
-Then, in **ONE message with 4+ parallel Task tool calls**, launch:
+Then, in **ONE message with 4+ parallel sub-agent launches**, launch:
 
 ---
 
-**Agent 1: Security Review** — `subagent_type: "code-reviewer"`
+**Agent 1: Security Review** - sub-agent profile/type: `code-reviewer`
 ```
 prompt: |
   You are a SECURITY reviewer. Review ONLY the following files for security vulnerabilities:
@@ -150,7 +150,7 @@ prompt: |
 
 ---
 
-**Agent 2: Logic & Edge Cases Review** — `subagent_type: "code-reviewer"`
+**Agent 2: Logic & Edge Cases Review** - sub-agent profile/type: `code-reviewer`
 ```
 prompt: |
   You are a LOGIC reviewer. Review ONLY the following files for logic correctness:
@@ -170,7 +170,7 @@ prompt: |
 
 ---
 
-**Agent 3: Clean Code & Quality Review** — `subagent_type: "code-reviewer"`
+**Agent 3: Clean Code & Quality Review** - sub-agent profile/type: `code-reviewer`
 ```
 prompt: |
   You are a CLEAN CODE reviewer. Review ONLY the following files for code quality:
@@ -190,11 +190,11 @@ prompt: |
 
 ---
 
-**Agent 4: Thermo-Nuclear Code Quality Review** (MANDATORY — launch alongside Agents 1-3)
+**Agent 4: Thermo-Nuclear Code Quality Review** (MANDATORY - launch alongside Agents 1-3)
 
 This is the **final verification gate**. After the other reviewers find issues, this agent performs an extremely strict maintainability audit using the `thermo-nuclear-code-quality-review` skill. It is **not optional** and must run on every examine pass.
 
-`subagent_type: "thermo-nuclear-code-quality-review"`
+Sub-agent profile/type: `thermo-nuclear-code-quality-review`
 ```
 prompt: |
   Perform a Thermo-Nuclear Code Quality Review on the current branch's changes.
@@ -218,14 +218,14 @@ prompt: |
   For each finding, provide: file:line, severity (CRITICAL/HIGH/MEDIUM/LOW), description, and a concrete restructuring suggestion (prefer DELETING complexity over rearranging it).
 
   Be ambitious, direct, and demanding. Do not soften major maintainability issues.
-  Apply the skill's Approval Bar strictly — flag presumptive blockers explicitly.
+  Apply the skill's Approval Bar strictly - flag presumptive blockers explicitly.
 
   If no significant maintainability issues found, explicitly state "No thermo-nuclear findings."
 ```
 
 ---
 
-**Agent 5: Vercel/Next.js Best Practices** (CONDITIONAL — launch alongside Agents 1-4)
+**Agent 5: Vercel/Next.js Best Practices** (CONDITIONAL - launch alongside Agents 1-4)
 
 → **Detection:** Check if modified files match Next.js/Vercel patterns:
 ```
@@ -237,9 +237,9 @@ prompt: |
 - Server components, client components
 ```
 
-→ **If Next.js/Vercel code detected:** Add a 5th parallel Task tool call:
+→ **If Next.js/Vercel code detected:** Add a 5th parallel review sub-agent:
 
-`subagent_type: "code-reviewer"`
+Sub-agent profile/type: `code-reviewer`
 ```
 prompt: |
   You are a NEXT.JS / REACT PERFORMANCE reviewer. Review ONLY the following files:
@@ -262,7 +262,7 @@ prompt: |
 
 ---
 
-**🛑 REMINDER: You MUST have 4+ Task tool calls in a SINGLE response (Security + Logic + Clean Code + Thermo-Nuclear, plus Next.js if applicable). If you only launched 1-3 agents, you are doing it WRONG. Go back and launch all agents. The Thermo-Nuclear agent is MANDATORY — never skip it.**
+**🛑 REMINDER: You MUST have 4+ sub-agent launches in a SINGLE response (Security + Logic + Clean Code + Thermo-Nuclear, plus Next.js if applicable). If you only launched 1-3 agents, you are doing it WRONG. Go back and launch all agents. The Thermo-Nuclear agent is MANDATORY - never skip it.**
 
 ### 4. Classify Findings
 
@@ -360,8 +360,8 @@ Append to `{output_dir}/05-examine.md`:
 
 ## FAILURE MODES:
 
-❌ **CRITICAL**: Launching only 1 review agent instead of 4+ — each category (Security, Logic, Clean Code, Thermo-Nuclear) MUST be a separate agent
-❌ **CRITICAL**: Skipping the Thermo-Nuclear maintainability review — it is the mandatory final verification gate
+❌ **CRITICAL**: Launching only 1 review agent instead of 4+ - each category (Security, Logic, Clean Code, Thermo-Nuclear) MUST be a separate agent
+❌ **CRITICAL**: Skipping the Thermo-Nuclear maintainability review - it is the mandatory final verification gate
 ❌ Combining multiple review categories into a single agent prompt
 ❌ Skipping security review
 ❌ Not classifying by severity

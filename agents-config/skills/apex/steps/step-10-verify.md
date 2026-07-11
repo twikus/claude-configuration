@@ -11,8 +11,10 @@ next_step: steps/step-09-finish.md
 
 - 🛑 NEVER skip verification - that defeats the purpose
 - 🛑 NEVER claim feature works without actually testing it
+- 📐 ALWAYS read the project's recommended verification rules FIRST (`.agents/rules/`, `AGENTS.md`, `CLAUDE.md`) and follow them
 - ✅ ALWAYS launch a verifier agent to test through real surface
 - ✅ ALWAYS compare results against original user request
+- 📸 ALWAYS capture 1+ screenshots proving the feature works - verification is INCOMPLETE without visual proof
 - ✅ ALWAYS fix issues before proceeding (unless user skips)
 - 📋 YOU ARE A VERIFIER, not an implementer
 - 💬 FOCUS on "Does the feature actually work for a real user?"
@@ -80,17 +82,33 @@ Collect all information the verifier agent needs:
 4. Implementation summary from step-03/04
 ```
 
+### 2b. Load Recommended Verification Rules
+
+Look for project-specific verification conventions and **follow them**. They override the defaults below. Check in order:
+
+1. `.agents/rules/` — any rule file about verification, testing, QA, or e2e (e.g. `verify.md`, `testing.md`)
+2. `AGENTS.md` — verification / commands sections
+3. `CLAUDE.md` — verification preferences (e.g. "Prefer /dev-browser for verification")
+4. `README.md` + `package.json` scripts — how to launch / test
+
+```bash
+ls .agents/rules/ 2>/dev/null
+cat AGENTS.md CLAUDE.md 2>/dev/null
+```
+
+Capture the recommended launch command, auth/login steps, test URLs/credentials, and any required evidence into `{verification_rules}` and pass it to the verifier. If nothing is documented, fall back to detecting the dev/start command from `package.json`.
+
 ### 3. Launch Verifier Agent
 
 **If `{economy_mode}` = true:**
--> Self-verify: manually test the feature using available tools (dev-browser, curl, shell commands). Follow the verification process below directly instead of launching an agent.
+-> Self-verify: manually test the feature using available tools (dev-browser, curl, shell commands). FOLLOW the recommended verification rules from step 2b, capture 1+ screenshots as proof, and include the screenshots directly in the chat using Markdown image syntax with absolute local paths. Follow the verification process below directly instead of launching an agent.
 
 **If `{economy_mode}` = false:**
--> Launch verifier agent using Task tool:
+-> Launch a verifier sub-agent:
 
 ```
-Task tool call:
-  subagent_type: "verifier"
+Sub-agent:
+  profile/type: "verifier"
   prompt: |
     ## Feature Verification
 
@@ -105,18 +123,27 @@ Task tool call:
     **Implementation Summary:**
     {brief summary of what was done}
 
+    **Recommended Verification Rules (FOLLOW THESE):**
+    {verification_rules - or "none documented; use defaults"}
+
     Verify this feature works correctly by:
-    1. Launch the app (check package.json for dev/start command)
-    2. Navigate to the relevant pages/endpoints
-    3. Test each acceptance criterion through real interaction
-    4. Use /dev-browser for web UI, curl for APIs, shell for CLI tools
-    5. Report your findings with PASS/FAIL for each AC
-    6. List anything missing compared to the original request
+    1. FOLLOW the recommended verification rules above (launch command, auth, URLs)
+    2. Launch the app (rules first, else package.json dev/start command)
+    3. Navigate to the relevant pages/endpoints
+    4. Test each acceptance criterion through real interaction
+    5. Use /dev-browser for web UI (capture screenshots), curl for APIs, shell for CLI tools
+    6. 📸 MANDATORY: Capture 1+ screenshots proving the finished feature works. For web UI use dev-browser saveScreenshot; for non-visual surfaces capture the terminal output / response as evidence
+    7. Output the screenshot(s) directly in the chat using Markdown image syntax with absolute local paths, e.g. `![Feature verification](/absolute/path/screenshot.png)`. Do NOT only list paths.
+    8. Report your findings with PASS/FAIL for each AC, listing the screenshot paths below the inline images
+    9. List anything missing compared to the original request
 ```
 
 ### 4. Process Verification Results
 
 Parse the verifier agent's report:
+
+**If no screenshot / evidence was captured or screenshots are only listed as paths without inline chat images:**
+-> Verification is INCOMPLETE. Re-run capture (or send the verifier back) before accepting any PASS verdict.
 
 **If all ACs PASS:**
 -> Display success summary and proceed
@@ -135,6 +162,8 @@ Parse the verifier agent's report:
 |----|--------|---------|
 | AC1 | ✓ PASS | Working as expected |
 | AC2 | ✗ FAIL | {what went wrong} |
+
+**Screenshots:** {inline Markdown image(s) REQUIRED, then list screenshot paths - at least 1}
 
 **Verdict:** {PASS or FAIL}
 ```
@@ -211,6 +240,7 @@ Append to `{output_dir}/10-verify.md`:
 **Status:** ✓ Complete
 **Verdict:** {PASS/FAIL}
 **Rounds:** {count}
+**Screenshots:** {inline Markdown image(s) first, then paths - at least 1}
 **Failing ACs:** {list or "none"}
 **Timestamp:** {ISO timestamp}
 ```
@@ -223,8 +253,10 @@ bash {skill_dir}/scripts/update-progress.sh "{task_id}" "10" "verify" "complete"
 
 ## SUCCESS METRICS:
 
+✅ Recommended verification rules followed
 ✅ Feature tested through real user surface
 ✅ Each AC verified with actual interaction
+✅ 1+ screenshots captured as visual proof
 ✅ Failures identified with clear descriptions
 ✅ Fixes applied and re-verified (if needed)
 ✅ User informed of verification status
@@ -232,6 +264,8 @@ bash {skill_dir}/scripts/update-progress.sh "{task_id}" "10" "verify" "complete"
 ## FAILURE MODES:
 
 ❌ Claiming verification passed without actually testing
+❌ Ignoring the project's recommended verification rules
+❌ No screenshot / visual proof of the feature working
 ❌ Not launching the app
 ❌ Testing only happy path, ignoring ACs
 ❌ Auto-proceeding with FAIL verdict (without user OK)
@@ -240,7 +274,9 @@ bash {skill_dir}/scripts/update-progress.sh "{task_id}" "10" "verify" "complete"
 
 ## VERIFICATION PROTOCOLS:
 
+- Follow the project's recommended verification rules first (`.agents/rules/`, `AGENTS.md`, `CLAUDE.md`)
 - Test through REAL user surface (browser, CLI, API)
+- Capture 1+ screenshots as proof - no PASS verdict without evidence
 - Compare against ORIGINAL request, not just code
 - Fix and re-verify, don't just fix and hope
 - Be honest about failures

@@ -268,5 +268,5 @@ Based on flags (check in order):
 
 <critical>
 Remember: NEVER proceed with failing checks - fix everything first!
-If teams_mode is active: NEVER shutdown teammates — they stay alive until step-09-finish!
+If teams_mode is active: NEVER shutdown teammates - they stay alive until step-09-finish!
 </critical>

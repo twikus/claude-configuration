@@ -104,14 +104,14 @@ IMPORTANT: Claude Code Agent Teams is an EXPERIMENTAL feature.
 Ensure CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 is set in settings.json.
 
 The team "apex-{feature_name}" was ALREADY created in step-02-plan BEFORE the TaskList.
-Do NOT call TeamCreate again — it would reset the task list and lose all tasks.
+Do NOT call TeamCreate again - it would reset the task list and lose all tasks.
 </critical>
 
-**Spawn teammates using the Task tool with `subagent_type: "implementer"`:**
+**Spawn teammates as sub-agents with the `implementer` profile/type:**
 
 <critical>
-MANDATORY: Always use `subagent_type: "implementer"` for ALL teammates.
-The `implementer` agent is the dedicated APEX executor — it knows how to:
+MANDATORY: Always use the `implementer` sub-agent profile/type for ALL teammates.
+The `implementer` agent is the dedicated APEX executor - it knows how to:
 - Claim tasks from TaskList via TaskUpdate
 - Stay within its assigned file boundaries
 - Report via SendMessage (not plain text)
@@ -119,8 +119,8 @@ The `implementer` agent is the dedicated APEX executor — it knows how to:
 NEVER use `general-purpose` or other agent types.
 </critical>
 
-For each teammate, spawn via the Task tool:
-- `subagent_type`: `"implementer"` (MANDATORY)
+For each teammate, launch a sub-agent with the harness-equivalent of:
+- sub-agent profile/type: `"implementer"` (MANDATORY)
 - `team_name`: `"apex-{feature_name}"`
 - `name`: `"impl-{group-name}"` (e.g., `impl-backend`, `impl-frontend`)
 - `mode`: `"bypassPermissions"`
@@ -128,11 +128,11 @@ For each teammate, spawn via the Task tool:
 
 ### 5. Spawn Teammates with Assignments
 
-**Spawn template (one Task call per teammate):**
+**Spawn template (one teammate sub-agent):**
 
 ```
-Task:
-  subagent_type: "implementer"
+Sub-agent:
+  profile/type: "implementer"
   team_name: "apex-{feature_name}"
   name: "impl-{group-name}"
   mode: "bypassPermissions"
@@ -149,7 +149,7 @@ Task:
     ### Plan
     {implementation steps from task file}
 
-    ### Files to Modify (YOUR boundary — only touch these)
+    ### Files to Modify (YOUR boundary - only touch these)
     {file list from task file}
 
     ### Acceptance Criteria
@@ -159,7 +159,7 @@ Task:
     {relevant patterns from step-01 analysis}
 
     ### Skill Hint
-    {skill to invoke, if applicable — e.g., "Use /frontend-design for UI components"}
+    {skill to invoke, if applicable - e.g., "Use /frontend-design for UI components"}
 
     ### Dependencies
     {list of completed dependencies and their outputs}
@@ -168,17 +168,17 @@ Task:
 ```
 
 **Spawn rules:**
-- Spawn all INDEPENDENT teammates in PARALLEL (single message, multiple Task calls)
+- Spawn all INDEPENDENT teammates in PARALLEL (single message, multiple sub-agent launches)
 - Each teammate gets ALL context (they can't see your conversation)
 - Use `mode: "bypassPermissions"` to avoid permission prompt interruptions
 - As tasks with dependencies complete, spawn teammates for dependent tasks
-- 2-4 teammates for most tasks — more adds overhead, not speed
+- 2-4 teammates for most tasks - more adds overhead, not speed
 
 ### 6. Monitor Progress
 
 **While tasks are running:**
 
-Messages from teammates arrive AUTOMATICALLY — no need to poll or check periodically.
+Messages from teammates arrive AUTOMATICALLY - no need to poll or check periodically.
 
 1. Wait for teammate messages (completion reports or blocker reports)
 2. If a teammate reports a blocker:
@@ -186,7 +186,7 @@ Messages from teammates arrive AUTOMATICALLY — no need to poll or check period
    - Send guidance via SendMessage
    - If blocker requires another task's output, check TaskList for its status
 3. If a teammate reports completion, verify via TaskList that the task is marked `completed`
-   (The `implementer` agent marks its own tasks complete — you don't need to do it)
+   (The `implementer` agent marks its own tasks complete - you don't need to do it)
 4. As tasks complete, spawn teammates for newly-unblocked dependent tasks
 
 ### 7. Handle Completion
@@ -196,7 +196,7 @@ Messages from teammates arrive AUTOMATICALLY — no need to poll or check period
 <critical>
 NEVER clean up or dismiss the team here.
 The team MUST stay alive through validation (step-04), examine (step-05), resolve (step-06), and finish (step-09).
-Team shutdown happens ONLY in step-09-finish.md — the very last step of the APEX workflow.
+Team shutdown happens ONLY in step-09-finish.md - the very last step of the APEX workflow.
 </critical>
 
 **If `{auto_mode}` = true:**
@@ -266,7 +266,7 @@ bash {skill_dir}/scripts/update-progress.sh "{task_id}" "03" "execute-teams" "co
 
 ❌ Team lead writing implementation code
 ❌ Cleaning up or dismissing the team
-❌ **CRITICAL**: Calling TeamCreate again (team already exists from step-02-plan — re-creating resets TaskList!)
+❌ **CRITICAL**: Calling TeamCreate again (team already exists from step-02-plan - re-creating resets TaskList!)
 ❌ Using any agent type other than `implementer` for teammates
 ❌ Not providing enough context to teammates
 ❌ Assigning tasks with unmet dependencies
@@ -287,9 +287,9 @@ After all tasks complete, load `./step-04-validate.md`
 
 <critical>
 Remember:
-- You are the TEAM LEAD — NEVER implement code yourself
-- ALWAYS use `subagent_type: "implementer"` when spawning teammates
-- Keep the team ALIVE — shutdown happens ONLY in step-09-finish.md
+- You are the TEAM LEAD - NEVER implement code yourself
+- ALWAYS use the `implementer` sub-agent profile/type when spawning teammates
+- Keep the team ALIVE - shutdown happens ONLY in step-09-finish.md
 - NEVER send shutdown_request to teammates in this step
 - Each teammate needs FULL context (plan, patterns, file references)
 - The `implementer` agent handles TaskList claiming, SendMessage reporting, and file boundaries automatically

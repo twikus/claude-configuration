@@ -55,10 +55,11 @@ Use direct tools instead:
 - Glob to find files
 - Grep to search content
 - Read to examine files
-- WebSearch only if absolutely necessary
+- find-docs only if current technical docs are necessary
+- exa-search only if broader online research is necessary
 ```
 
-**NEVER use Task tool with subagent_type in economy mode.**
+**NEVER launch sub-agents in economy mode.**
 
 ---
 
@@ -79,10 +80,12 @@ Instead of launching exploration agents, use this pattern:
    - Read the most relevant 3-5 files
    - Focus on files matching the task
 
-4. WebSearch ONLY if:
+4. Online research ONLY if:
    - Library documentation needed
    - Unknown API or pattern
    - Limit to 1-2 searches max
+   - Use /Users/melvynx/.agents/skills/find-docs/SKILL.md for technical docs
+   - Use /Users/melvynx/.agents/skills/exa-search/SKILL.md for broader web research
 ```
 
 ---
@@ -168,7 +171,7 @@ DO:
 1. Glob "**/*{keyword}*" for task-related files
 2. Grep for specific patterns in src/
 3. Read top 3-5 most relevant files
-4. Skip web research unless stuck
+4. Skip online research unless stuck. If needed, use find-docs for technical docs and exa-search for broader web research.
 ```
 
 ### Step 02: Plan (Economy)
@@ -236,7 +239,7 @@ This reminds both Claude and the user that economy mode is active.
 
 <success_metrics>
 Economy mode is successful when:
-- No Task tool calls with subagent_type
+- No sub-agent launches
 - Direct Glob/Grep/Read usage instead
 - Fewer than 3 WebSearch calls total
 - Implementation still correct and working

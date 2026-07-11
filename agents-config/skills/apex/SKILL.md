@@ -114,6 +114,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 - **Follow next_step directive** at end of each step
 - **Save outputs** if `{save_mode}` = true (each step appends to its file)
 - **Use parallel agents** for independent exploration (step-01)
+- **Use online research intentionally**: default harness tools for local code first, `/Users/melvynx/.agents/skills/find-docs/SKILL.md` for current technical docs, and `/Users/melvynx/.agents/skills/exa-search/SKILL.md` for broader web research or cited sources
 </execution_rules>
 
 <entry_point>

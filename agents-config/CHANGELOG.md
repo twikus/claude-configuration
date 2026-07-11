@@ -1,5 +1,31 @@
 # Claude Code Config Changelog
 
+## [2026-06-20 14:02:10] - Skills sync with ~/.agents
+
+### New Skill Files
+- `skills/environments-manager/references/convex.md`
+- `skills/environments-manager/references/postgresql.md`
+- `skills/use-style/examples/dusk.html`
+- `skills/use-style/examples/luma.html`
+- `skills/use-style/examples/split-auth.html`
+- `skills/use-style/examples/testspirite.html`
+- `skills/use-style/styles/dusk.md`
+- `skills/use-style/styles/ios-app.md`
+- `skills/use-style/styles/luma.md`
+- `skills/use-style/styles/split-auth.md`
+- `skills/use-style/styles/testspirite.md`
+
+### Updated Skills
+- `skills/agents-manager/SKILL.md`
+- `skills/apex/`
+- `skills/environments-manager/`
+- `skills/oneshot/SKILL.md`
+- `skills/rules-manager/SKILL.md`
+- `skills/skill-manager/SKILL.md`
+- `skills/use-style/SKILL.md`
+
+---
+
 ## [2026-05-16] - Skills sync with ~/.agents
 
 ### New Skills (synced from `~/.agents/skills/`)

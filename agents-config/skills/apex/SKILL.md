@@ -1,7 +1,6 @@
 ---
 name: apex
-description: Systematic implementation using APEX methodology (Analyze-Plan-Execute-eXamine) with parallel agents, self-validation, and optional adversarial review. Use when implementing features, fixing bugs, or making code changes that benefit from structured workflow.
-argument-hint: "[-a] [-x] [-s] [-t] [-v] [-b] [-pr] [-i] [-m] [-r <task-id>] <task description>"
+description: Systematic implementation using APEX methodology (Analyze-Plan-Execute-eXamine) with parallel agents, self-validation, optional adversarial review, and proof-backed feature verification. Use when implementing features, fixing bugs, or making code changes that benefit from a structured workflow, especially when the result must be proven through the real user flow.
 ---
 
 <objective>
@@ -34,7 +33,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 | `-x` | `-X` | `--examine` | Adversarial code review |
 | `-s` | `-S` | `--save` | Save outputs to `.claude/output/apex/` |
 | `-t` | `-T` | `--test` | Include test creation + runner |
-| `-v` | `-V` | `--verify` | Launch app and verify feature works |
+| `-v` | `-V` | `--verify` | Prove the feature works through its real flow, with a screenshot of every observable step |
 | `-e` | `-E` | `--economy` | No subagents, save tokens |
 | `-b` | `-B` | `--branch` | Verify not on main, create branch |
 | `-pr` | `-PR` | `--pull-request` | Create PR at end (enables -b) |
@@ -56,7 +55,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 7. **Tests** → Create + run tests (if -t)
 8. **Examine** → Adversarial review (if -x) - Security + Logic + Clean Code + Thermo-Nuclear maintainability audit in parallel
 9. **Resolve** → Fix findings (if examine found issues)
-10. **Verify** → Launch app, test feature (if -v)
+10. **Verify** → Prove the feature works with end-to-end interaction and step-by-step visual evidence (if -v)
 11. **Finish** → Create PR (if -pr)
 </workflow>
 
@@ -80,7 +79,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 | 07 | `steps/step-07-tests.md` | Test analysis and creation |
 | 08 | `steps/step-08-run-tests.md` | Test runner loop |
 | 09 | `steps/step-09-finish.md` | Create pull request |
-| 10 | `steps/step-10-verify.md` | Launch & verify feature |
+| 10 | `steps/step-10-verify.md` | Prove the feature works through the real user flow |
 
 </step_files>
 
@@ -115,6 +114,7 @@ Execute systematic implementation workflows using the APEX methodology with prog
 - **Save outputs** if `{save_mode}` = true (each step appends to its file)
 - **Use parallel agents** for independent exploration (step-01)
 - **Use online research intentionally**: default harness tools for local code first, `/Users/melvynx/.agents/skills/find-docs/SKILL.md` for current technical docs, and `/Users/melvynx/.agents/skills/exa-search/SKILL.md` for broader web research or cited sources
+- **Treat `-v` as a proof gate**: do not finish while the feature is merely believed or asserted to work; finish only after every acceptance criterion and observable flow step is proven with current evidence
 </execution_rules>
 
 <entry_point>

@@ -1,5 +1,15 @@
 # Claude Code Config Changelog
 
+## [2026-07-17 13:25:21] - Proof-driven verification skills
+
+### New Skills
+- `skills/verify/` - Prove features through complete runtime flows and step-by-step evidence
+
+### Updated Skills
+- `skills/apex/` - Make `-v` a mandatory proof gate with a screenshot for every observable step
+
+---
+
 ## [2026-06-20 14:02:10] - Skills sync with ~/.agents
 
 ### New Skill Files

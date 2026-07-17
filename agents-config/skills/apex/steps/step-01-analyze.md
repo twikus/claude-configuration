@@ -160,6 +160,8 @@ Task: {task_description}
 
 **Launch ALL chosen agents in ONE message.**
 
+If the current harness exposes a model selector for sub-agents, set it explicitly on every launch instead of inheriting a default. Use the local repo/AGENTS preference when present; otherwise default to Claude `opus`, Cursor `Composer 2.5`, and Codex `gpt-5.6-terra` with medium reasoning. In Codex `spawn_agent` calls, set `agent_type` for the role and never use an unsupported `agent_profile` field.
+
 **Agent Prompts:**
 
 **`explore-codebase`** - Use for finding existing code:

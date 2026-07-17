@@ -120,7 +120,8 @@ NEVER use `general-purpose` or other agent types.
 </critical>
 
 For each teammate, launch a sub-agent with the harness-equivalent of:
-- sub-agent profile/type: `"implementer"` (MANDATORY)
+- sub-agent profile/type: `"implementer"` (MANDATORY). In Codex, this means `agent_type`; never send an unsupported `agent_profile` field.
+- model: explicit preferred model if the harness exposes model selection. Use local repo/AGENTS guidance when present; otherwise Claude `opus`, Cursor `Composer 2.5`, Codex `gpt-5.6-terra` with medium reasoning.
 - `team_name`: `"apex-{feature_name}"`
 - `name`: `"impl-{group-name}"` (e.g., `impl-backend`, `impl-frontend`)
 - `mode`: `"bypassPermissions"`
@@ -133,6 +134,7 @@ For each teammate, launch a sub-agent with the harness-equivalent of:
 ```
 Sub-agent:
   profile/type: "implementer"
+  model: "<preferred model per local AGENTS or harness default: opus / Composer 2.5 / gpt-5.6-terra medium>"
   team_name: "apex-{feature_name}"
   name: "impl-{group-name}"
   mode: "bypassPermissions"

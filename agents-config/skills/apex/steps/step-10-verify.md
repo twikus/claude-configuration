@@ -1,296 +1,234 @@
 ---
 name: step-10-verify
-description: Launch app and verify feature works through real user surface
+description: Prove the feature works through the real user flow with step-by-step evidence
 prev_step: steps/step-04-validate.md
 next_step: steps/step-09-finish.md
 ---
 
-# Step 10: Verify (Feature Validation)
+# Step 10: Verify (Proof of Functionality)
 
-## MANDATORY EXECUTION RULES (READ FIRST):
+## Objective
 
-- 🛑 NEVER skip verification - that defeats the purpose
-- 🛑 NEVER claim feature works without actually testing it
-- 📐 ALWAYS read the project's recommended verification rules FIRST (`.agents/rules/`, `AGENTS.md`, `CLAUDE.md`) and follow them
-- ✅ ALWAYS launch a verifier agent to test through real surface
-- ✅ ALWAYS compare results against original user request
-- 📸 ALWAYS capture 1+ screenshots proving the feature works - verification is INCOMPLETE without visual proof
-- ✅ ALWAYS fix issues before proceeding (unless user skips)
-- 📋 YOU ARE A VERIFIER, not an implementer
-- 💬 FOCUS on "Does the feature actually work for a real user?"
-- 🚫 FORBIDDEN to proceed with FAIL verdict without user confirmation
+Prove that the feature works. Do not merely decide, infer, or state that it works.
 
-## EXECUTION PROTOCOLS:
+`-v` creates a mandatory proof gate. The workflow cannot finish until current evidence demonstrates that every acceptance criterion and every observable step of the real user flow works.
 
-- 🎯 Launch verifier agent with full context
-- 💾 Log verification results (if save_mode)
-- 📖 Compare each AC against real behavior
-- 🚫 FORBIDDEN to fake verification
+## Mandatory Rules
 
-## CONTEXT BOUNDARIES:
+- Never replace runtime proof with code inspection, typecheck, lint, unit tests, mocks, or confidence.
+- Read and follow the project's verification rules first: `.agents/rules/`, `AGENTS.md`, `CLAUDE.md`, then `README.md` and project scripts.
+- Exercise the feature through the same surface a real user uses: browser, native app, CLI, or API client.
+- Build the complete flow before testing it. Include setup, each user action or transition, meaningful intermediate states, final outcome, and relevant negative or regression paths.
+- Capture a screenshot for every observable visual step. One final screenshot is not sufficient.
+- Give every non-visual step an equivalent durable artifact such as raw terminal output, HTTP response, log, trace, or generated file; also capture the terminal when the harness supports it.
+- Never reuse stale evidence after a change invalidates it. Re-run and recapture every affected step.
+- Never mark PASS while any acceptance criterion, flow step, or required artifact is missing, stale, ambiguous, or failing.
+- Never offer “skip verification”, “accept current state”, or “fix without re-verifying”.
+- Never proceed to Finish while the proof gate is not PASS.
+- If verification exposes a product issue, switch from verifier to implementer, fix it, validate the fix, then restart the affected flow from a clean state.
 
-- Implementation is complete, validated, and reviewed
-- All typecheck/lint/tests pass
-- Now testing the REAL user experience
-- **If `{teams_mode}` = true:** Agent team is still alive. Do NOT shutdown teammates - that happens in step-09-finish only.
+## Proof Standard
 
-## YOUR TASK:
+A feature is **proven functional** only when all of the following are true:
 
-Launch the application, test the feature through real user interaction, and verify it matches the original request.
+1. The real application or service was launched or reached in the intended environment.
+2. Every acceptance criterion maps to at least one exercised flow step.
+3. Every flow step produced its expected observable result.
+4. Every observable visual step has its own current screenshot.
+5. Every non-visual step has current raw evidence.
+6. Relevant console errors, page errors, failed requests, crashes, and regressions were checked and none invalidate the result.
+7. The evidence is organized so another person can follow the flow and independently see that it works.
 
----
+Tests support this proof, but tests alone never satisfy it.
 
-<available_state>
-From previous steps:
+## Available State
 
 | Variable | Description |
-|----------|-------------|
+|---|---|
 | `{task_description}` | Original user request |
 | `{task_id}` | Kebab-case identifier |
 | `{acceptance_criteria}` | Success criteria from analysis |
-| `{auto_mode}` | Skip confirmations |
 | `{save_mode}` | Save outputs to files |
-| `{economy_mode}` | No subagents |
-| `{output_dir}` | Path to output (if save_mode) |
-| Files modified | From step-03 |
-</available_state>
+| `{economy_mode}` | Verify directly without a sub-agent |
+| `{output_dir}` | Output path when save mode is enabled |
+| Files modified | Implementation produced by Step 3 |
 
----
+## Execution Sequence
 
-## EXECUTION SEQUENCE:
+### 1. Start the proof gate
 
-### 1. Initialize Save Output (if save_mode)
+Set `{proof_gate}` to `NOT_PROVEN`.
 
-**If `{save_mode}` = true:**
+If `{save_mode}` is true:
 
 ```bash
 bash {skill_dir}/scripts/update-progress.sh "{task_id}" "10" "verify" "in_progress"
 ```
 
-Append results to `{output_dir}/10-verify.md` as you work.
+Append all proof work to `{output_dir}/10-verify.md`. Do not mark this step complete until `{proof_gate}` is `PASS`.
 
-### 2. Gather Context for Verifier
+### 2. Load project verification rules
 
-Collect all information the verifier agent needs:
+Inspect in this order:
 
-```
-1. Original task description: {task_description}
-2. Acceptance criteria: {acceptance_criteria}
-3. Modified files (from git):
-   git diff --name-only HEAD~1
-   git status --porcelain
-4. Implementation summary from step-03/04
-```
+1. `.agents/rules/` files about verification, testing, QA, browser, simulator, or E2E
+2. `AGENTS.md`
+3. `CLAUDE.md`
+4. `README.md`, package scripts, launch configuration, and test configuration
 
-### 2b. Load Recommended Verification Rules
+Record the launch command, target environment, authentication path, seed or fixture requirements, URLs, credentials source, approved browser or simulator, and required evidence.
 
-Look for project-specific verification conventions and **follow them**. They override the defaults below. Check in order:
+Do not restart an already-running app unless the project rules or the task require it. Check reachability first.
 
-1. `.agents/rules/` — any rule file about verification, testing, QA, or e2e (e.g. `verify.md`, `testing.md`)
-2. `AGENTS.md` — verification / commands sections
-3. `CLAUDE.md` — verification preferences (e.g. "Prefer /dev-browser for verification")
-4. `README.md` + `package.json` scripts — how to launch / test
+### 3. Build the proof matrix before interacting
 
-```bash
-ls .agents/rules/ 2>/dev/null
-cat AGENTS.md CLAUDE.md 2>/dev/null
-```
+Create a row for every step that must be observed:
 
-Capture the recommended launch command, auth/login steps, test URLs/credentials, and any required evidence into `{verification_rules}` and pass it to the verifier. If nothing is documented, fall back to detecting the dev/start command from `package.json`.
+| ID | Acceptance criterion | Starting state | User action or request | Expected observable result | Required evidence | Status |
+|---|---|---|---|---|---|---|
+| F01 | AC1 | ... | ... | ... | Screenshot | NOT PROVEN |
 
-### 3. Launch Verifier Agent
+The matrix must include:
 
-**If `{economy_mode}` = true:**
--> Self-verify: manually test the feature using available tools (dev-browser, curl, shell commands). FOLLOW the recommended verification rules from step 2b, capture 1+ screenshots as proof, and include the screenshots directly in the chat using Markdown image syntax with absolute local paths. Follow the verification process below directly instead of launching an agent.
+- the initial state that proves the correct surface was reached;
+- every user action, screen transition, submitted request, or meaningful state change;
+- the visible result immediately after each step;
+- the final successful outcome;
+- relevant validation, failure, permission, refresh, persistence, or regression paths implied by the request.
 
-**If `{economy_mode}` = false:**
--> Launch a verifier sub-agent:
+Do not compress multiple observable steps into one row merely to reduce evidence work.
 
-```
-Sub-agent:
-  profile/type: "verifier"
-  prompt: |
-    ## Feature Verification
+### 4. Choose the verifier
 
-    **Original Request:** {task_description}
+- If an independent verifier is allowed and useful, give it the original request, acceptance criteria, modified files, project verification rules, and the full proof matrix.
+- If sub-agents are unavailable, disallowed, or `{economy_mode}` is true, perform the same protocol directly.
 
-    **Acceptance Criteria:**
-    {acceptance_criteria - list each one}
+Delegation never transfers responsibility for the proof gate. Inspect every returned artifact yourself before accepting it.
 
-    **Files Modified:**
-    {list of modified files}
+### 5. Exercise and capture the complete flow
 
-    **Implementation Summary:**
-    {brief summary of what was done}
+For each proof-matrix row, in order:
 
-    **Recommended Verification Rules (FOLLOW THESE):**
-    {verification_rules - or "none documented; use defaults"}
+1. Establish the documented starting state.
+2. Perform the real action through the real user surface.
+3. Wait for the observable result; do not infer completion from the click or request alone.
+4. Check relevant console errors, page errors, failed requests, crashes, and logs.
+5. Capture evidence immediately:
+   - Visual application: save one screenshot for this row.
+   - CLI or API: preserve the raw output or response and capture the terminal when available.
+   - Persistent behavior: reload, relaunch, or re-read state, then capture the persisted result.
+6. Record the environment, route or command, action, observed result, timestamp, and absolute artifact path.
+7. Mark the row PASS only when its expected result is plainly visible in the evidence.
 
-    Verify this feature works correctly by:
-    1. FOLLOW the recommended verification rules above (launch command, auth, URLs)
-    2. Launch the app (rules first, else package.json dev/start command)
-    3. Navigate to the relevant pages/endpoints
-    4. Test each acceptance criterion through real interaction
-    5. Use /dev-browser for web UI (capture screenshots), curl for APIs, shell for CLI tools
-    6. 📸 MANDATORY: Capture 1+ screenshots proving the finished feature works. For web UI use dev-browser saveScreenshot; for non-visual surfaces capture the terminal output / response as evidence
-    7. Output the screenshot(s) directly in the chat using Markdown image syntax with absolute local paths, e.g. `![Feature verification](/absolute/path/screenshot.png)`. Do NOT only list paths.
-    8. Report your findings with PASS/FAIL for each AC, listing the screenshot paths below the inline images
-    9. List anything missing compared to the original request
+Use ordered artifact names such as `F01-initial-state.png`, `F02-submit.png`, and `F03-success.png`. Include screenshots inline in the final report with absolute local paths.
+
+### 6. Evaluate the proof gate
+
+Set `{proof_gate}` to `PASS` only if:
+
+```text
+all acceptance criteria are covered
+AND all proof-matrix rows are PASS
+AND all required evidence exists and is current
+AND no observed error invalidates the flow
 ```
 
-### 4. Process Verification Results
+Otherwise `{proof_gate}` remains `NOT_PROVEN`.
 
-Parse the verifier agent's report:
+### 7. Continue until proven
 
-**If no screenshot / evidence was captured or screenshots are only listed as paths without inline chat images:**
--> Verification is INCOMPLETE. Re-run capture (or send the verifier back) before accepting any PASS verdict.
+While `{proof_gate}` is not `PASS`:
 
-**If all ACs PASS:**
--> Display success summary and proceed
+1. Identify the exact missing proof or failing behavior.
+2. Diagnose the root cause using the shortest real feedback loop.
+3. Apply the necessary in-scope fix.
+4. Run relevant static checks and tests.
+5. Relaunch or reset to a clean verification state.
+6. Re-exercise every affected flow step.
+7. Replace invalidated evidence with new captures.
+8. Re-evaluate the entire proof matrix.
 
-**If any ACs FAIL:**
--> Display failure details
+There is no retry limit. Do not stop because verification is difficult, slow, or has already failed several times.
 
-### 5. Present Verification Report
+If a genuine external dependency prevents progress after safe alternatives are exhausted, do not claim completion. Report `BLOCKED — NOT PROVEN`, show the exact blocker and attempts, request the precise access or action needed, and keep the proof objective open. Only an explicit user cancellation can end the objective without proof.
+
+### 8. Present the proof report
 
 ```markdown
-## Verification Results
+## Proof of Functionality
 
 **Feature:** {task_description}
+**Environment:** {environment and URL/device}
 
-| AC | Status | Details |
-|----|--------|---------|
-| AC1 | ✓ PASS | Working as expected |
-| AC2 | ✗ FAIL | {what went wrong} |
+| Step | AC | Action | Observed result | Evidence | Status |
+|---|---|---|---|---|---|
+| F01 | AC1 | ... | ... | `F01-initial-state.png` | PASS |
 
-**Screenshots:** {inline Markdown image(s) REQUIRED, then list screenshot paths - at least 1}
+### Evidence Gallery
 
-**Verdict:** {PASS or FAIL}
+![F01 - Initial state](/absolute/path/F01-initial-state.png)
+![F02 - Result after action](/absolute/path/F02-result.png)
+
+### Runtime Checks
+
+- Console/page errors: none
+- Failed requests: none relevant
+- Persistence/reload: PASS
+
+**Proof Gate:** PASS
 ```
 
-### 6. Handle Failures
+The gallery must follow the flow order and contain every required screenshot. A list of paths without inline images is incomplete.
 
-**If verdict = PASS:**
--> Proceed to next step
+### 9. Complete the step only after proof
 
-**If verdict = FAIL:**
+If `{save_mode}` is true and `{proof_gate}` is `PASS`, append:
 
-**If `{auto_mode}` = true:**
--> Auto-fix: Apply fixes for each failing AC, then re-verify (max 2 retry rounds)
-
-**If `{auto_mode}` = false:**
-
-```yaml
-questions:
-  - header: "Verify"
-    question: "Verification found issues. How would you like to proceed?"
-    options:
-      - label: "Fix and re-verify (Recommended)"
-        description: "Apply fixes for failing ACs and verify again"
-      - label: "Fix without re-verify"
-        description: "Apply fixes but skip second verification"
-      - label: "Skip verification"
-        description: "Accept current state, proceed anyway"
-      - label: "Discuss issues"
-        description: "Let me review the findings first"
-    multiSelect: false
-```
-
-### 7. Fix Loop (if user chooses to fix)
-
-```
-max_verify_rounds = 3
-round = 0
-
-WHILE round < max_verify_rounds AND verdict = FAIL:
-    round += 1
-
-    1. Read each failing AC
-    2. Identify the root cause
-    3. Apply the fix
-    4. Run typecheck + lint to ensure no regressions
-    5. Re-launch verifier agent (or self-verify if economy_mode)
-    6. Update verdict
-```
-
-**If still failing after 3 rounds:**
-
-```yaml
-questions:
-  - header: "Stuck"
-    question: "Verification still failing after {round} fix rounds. How proceed?"
-    options:
-      - label: "Keep trying"
-        description: "Continue fixing"
-      - label: "Accept current state"
-        description: "Proceed with known issues"
-      - label: "I'll fix manually"
-        description: "Let me investigate"
-    multiSelect: false
-```
-
-### 8. Complete Save Output (if save_mode)
-
-**If `{save_mode}` = true:**
-
-Append to `{output_dir}/10-verify.md`:
 ```markdown
 ---
 ## Step Complete
-**Status:** ✓ Complete
-**Verdict:** {PASS/FAIL}
-**Rounds:** {count}
-**Screenshots:** {inline Markdown image(s) first, then paths - at least 1}
-**Failing ACs:** {list or "none"}
+**Status:** Complete
+**Proof Gate:** PASS
+**Acceptance Criteria:** all proven
+**Flow Steps:** all proven
+**Evidence:** complete and current
 **Timestamp:** {ISO timestamp}
 ```
+
+Then run:
 
 ```bash
 bash {skill_dir}/scripts/update-progress.sh "{task_id}" "10" "verify" "complete"
 ```
 
----
+Never write a Step Complete marker for `FAIL`, `BLOCKED`, or `NOT_PROVEN`.
 
-## SUCCESS METRICS:
+## Success Metrics
 
-✅ Recommended verification rules followed
-✅ Feature tested through real user surface
-✅ Each AC verified with actual interaction
-✅ 1+ screenshots captured as visual proof
-✅ Failures identified with clear descriptions
-✅ Fixes applied and re-verified (if needed)
-✅ User informed of verification status
+- The real feature flow was exercised end to end.
+- Every acceptance criterion is linked to runtime evidence.
+- Every observable visual step has its own inline screenshot.
+- Every non-visual step has durable raw evidence.
+- Evidence was refreshed after every affecting fix.
+- The final report lets another person independently follow and confirm the flow.
+- The proof gate is PASS.
 
-## FAILURE MODES:
+## Failure Modes
 
-❌ Claiming verification passed without actually testing
-❌ Ignoring the project's recommended verification rules
-❌ No screenshot / visual proof of the feature working
-❌ Not launching the app
-❌ Testing only happy path, ignoring ACs
-❌ Auto-proceeding with FAIL verdict (without user OK)
-❌ Not comparing against original user request
-❌ **CRITICAL**: Not using AskUserQuestion for failure decisions
+- Declaring success from code review, tests, or confidence.
+- Capturing only the final screen instead of every observable step.
+- Omitting intermediate, negative, persistence, or regression behavior required by the request.
+- Reusing screenshots captured before the latest fix.
+- Ignoring console errors, failed requests, or crashes.
+- Asking to skip, accept, or finish without proof.
+- Stopping after an arbitrary number of attempts.
+- Marking the workflow complete while blocked or not proven.
 
-## VERIFICATION PROTOCOLS:
+## Next Step
 
-- Follow the project's recommended verification rules first (`.agents/rules/`, `AGENTS.md`, `CLAUDE.md`)
-- Test through REAL user surface (browser, CLI, API)
-- Capture 1+ screenshots as proof - no PASS verdict without evidence
-- Compare against ORIGINAL request, not just code
-- Fix and re-verify, don't just fix and hope
-- Be honest about failures
+Proceed only when `{proof_gate}` is `PASS`:
 
----
+- If `{pr_mode}` is true, load `./step-09-finish.md`.
+- Otherwise, finish the workflow with the full proof report.
 
-## NEXT STEP:
-
-Based on flags:
-- **If pr_mode:** Load `./step-09-finish.md` to create pull request
-- **Otherwise:** Workflow complete - show summary
-
-<critical>
-Remember: The whole point of verify is to catch things that code review and tests miss.
-Test the feature like a real user would - don't just check the code!
-If teams_mode is active: NEVER shutdown teammates - they stay alive until step-09-finish!
-</critical>
+If `{proof_gate}` is not `PASS`, remain in this step.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify"
+  short_description: "Prove a feature works with runtime evidence"
+  default_prompt: "Use $verify to prove this feature works through its real flow."

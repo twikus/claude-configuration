@@ -119,6 +119,8 @@ Group files: source, tests, config, other.
 **If `{economy_mode}` = false:**
 → Launch parallel review sub-agents.
 
+If the current harness exposes a model selector for sub-agents, set it explicitly on every launch instead of inheriting a default. Use the local repo/AGENTS preference when present; otherwise default to Claude `opus`, Cursor `Composer 2.5`, and Codex `gpt-5.6-terra` with medium reasoning. In Codex `spawn_agent` calls, set `agent_type` for the reviewer role and never use an unsupported `agent_profile` field.
+
 **🛑 CRITICAL: You MUST launch ALL 4 agents (or 5 if Next.js) in a SINGLE message using MULTIPLE sub-agent launches. DO NOT launch them one at a time. DO NOT use only 1 agent. Each agent reviews a DIFFERENT aspect. The Thermo-Nuclear agent is MANDATORY and runs alongside the others.**
 
 First, gather the list of modified files:

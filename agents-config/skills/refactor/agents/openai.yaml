@@ -1,0 +1,7 @@
+interface:
+  display_name: "Refactor"
+  short_description: "Refactor code across the codebase using parallel Snipper agents"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#BB6F93"
+  default_prompt: "Use $refactor to help with this task."

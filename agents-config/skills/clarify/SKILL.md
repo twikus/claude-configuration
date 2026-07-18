@@ -1,8 +1,6 @@
 ---
 name: clarify
 description: Improve unclear UX copy, error messages, microcopy, labels, and instructions. Makes interfaces easier to understand and use.
-user-invocable: true
-argument-hint: "[target]"
 ---
 
 Identify and improve unclear, confusing, or poorly written interface text to make the product easier to understand and use.
@@ -80,6 +78,12 @@ Refine text across these common areas:
 - Use active voice (verb + noun)
 - Match user's mental model
 - Be specific ("Save" is better than "OK")
+
+**Stateful or operational controls**:
+- If a button changes a live system state (pause/activate, archive/restore, disable/enable), the label must name the action and the surrounding copy must explain the consequence.
+- Put the consequence at the decision point with a tooltip, helper text, or confirmation copy; do not rely on a separate docs page when the user needs to decide now.
+- Confirm the result with state-specific success text, not a generic "Updated" toast.
+- Example: `Pause` plus tooltip "Stops new subscribers from entering. Existing subscribers pause before their next step. Nothing is canceled or deleted."
 
 ### Help Text & Tooltips
 **Bad**: "This is the username field"

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Dev Browser"
+  short_description: "Browser automation with persistent page state using..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#91BDC9"
+  default_prompt: "Use $dev-browser to help with this task."

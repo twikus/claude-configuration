@@ -1,0 +1,7 @@
+interface:
+  display_name: "Fix Grammar"
+  short_description: "Fix grammar and spelling errors in one or multiple files..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#D82930"
+  default_prompt: "Use $fix-grammar to help with this task."

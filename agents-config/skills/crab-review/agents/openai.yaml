@@ -1,0 +1,7 @@
+interface:
+  display_name: "Crab Review"
+  short_description: "Run consensus code review with parallel specialist agents"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#E25932"
+  default_prompt: "Use $crab-review to help with this task."

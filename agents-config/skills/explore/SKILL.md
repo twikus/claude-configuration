@@ -33,10 +33,10 @@ Detect mode from query:
 ```
 
 **Optimized queries:**
-- Function: `functionName\s*[=:(]`
-- Component: `(function|const)\s+ComponentName`
+- Function: `functionName/s*[=:(]`
+- Component: `(function|const)/s+ComponentName`
 - Import chain: `from ['"].*moduleName`
-- Type/interface: `(type|interface)\s+TypeName`
+- Type/interface: `(type|interface)/s+TypeName`
 
 ### Docs Mode
 

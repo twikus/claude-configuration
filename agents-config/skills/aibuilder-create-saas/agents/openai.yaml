@@ -1,0 +1,7 @@
+interface:
+  display_name: "Aibuilder Create Saas"
+  short_description: "Complete SaaS ideation to implementation workflow - from..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#D7DDFC"
+  default_prompt: "Use $aibuilder-create-saas to help with this task."

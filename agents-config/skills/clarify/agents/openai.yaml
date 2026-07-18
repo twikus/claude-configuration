@@ -1,0 +1,7 @@
+interface:
+  display_name: "Clarify"
+  short_description: "Improve unclear UX copy, error messages, microcopy, labels,..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#9CCC31"
+  default_prompt: "Use $clarify to help with this task."

@@ -1,5 +1,35 @@
 # Claude Code Config Changelog
 
+## [2026-07-18 10:15:11] - Premium skills refresh
+
+### New Skills
+- `skills/use-artifacts/` - Create portable Claude-style HTML artifact workspaces under `~/.agents/artifacts`
+- `skills/web-pentest/` - Run explicitly authorized web security assessments with implicit invocation disabled
+
+### Updated Skills
+- `skills/apex/` - Shorten discovery metadata to the supported 300-character limit
+- `skills/verify/` - Add Codex icon and interface metadata
+- `skills/clarify/`
+- `skills/clean-code/`
+- `skills/copywritting/`
+- `skills/dev-browser/`
+- `skills/exa-search/`
+- `skills/explore/`
+- `skills/grill-me/`
+- `skills/marketing/`
+- `skills/skill-manager/`
+- `skills/use-style/` - Add `black-grid` and `vercel`; retire the older `split-auth` and `vercel-simple` variants
+
+### Codex Packaging
+- Added canonical `agents/openai.yaml` and `assets/codex-icon.svg` metadata across the existing premium skill set
+
+### Removed Skills
+- `skills/caveman/` - Removed from the canonical skill tree
+- `skills/to-issues/` - Removed from the canonical skill tree
+- `skills/frontend-design/` - No longer has a canonical `SKILL.md`
+
+---
+
 ## [2026-07-17 13:25:21] - Proof-driven verification skills
 
 ### New Skills

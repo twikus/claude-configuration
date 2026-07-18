@@ -1,0 +1,7 @@
+interface:
+  display_name: "Review Code"
+  short_description: "Run deep multi-agent code or PR review"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#234BF1"
+  default_prompt: "Use $review-code to help with this task."

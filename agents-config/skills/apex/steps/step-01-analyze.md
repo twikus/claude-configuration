@@ -98,7 +98,7 @@ These keywords guide exploration - NOT planning.
 1. Glob to find files: **/*{keyword}*
 2. Grep to search content in likely locations
 3. Read the most relevant 3-5 files
-4. Skip web research unless stuck
+4. Skip online research unless stuck. If needed, use find-docs for technical docs and exa-search for broader web research.
 ```
 
 **If `{economy_mode}` = false:**
@@ -141,8 +141,8 @@ Task: {task_description}
 | Agent | Use When |
 |-------|----------|
 | `explore-codebase` | Need to find existing patterns, related files, utilities |
-| `explore-docs` | Unfamiliar library API, need current syntax, complex feature |
-| `websearch` | Need common approaches, best practices, gotchas |
+| `explore-docs` | Unfamiliar library API, current syntax, complex feature. Must use `/Users/melvynx/.agents/skills/find-docs/SKILL.md`, with `/Users/melvynx/.agents/skills/exa-search/SKILL.md` only as fallback for source discovery. |
+| `websearch` | Common approaches, best practices, gotchas, recent context. Must use `/Users/melvynx/.agents/skills/exa-search/SKILL.md`, with `/Users/melvynx/.agents/skills/find-docs/SKILL.md` first for technical docs. |
 
 **Decision Matrix:**
 
@@ -159,6 +159,8 @@ Task: {task_description}
 ### 🚀 STEP 3C: LAUNCH AGENTS IN PARALLEL
 
 **Launch ALL chosen agents in ONE message.**
+
+If the current harness exposes a model selector for sub-agents, set it explicitly on every launch instead of inheriting a default. Use the local repo/AGENTS preference when present; otherwise default to Claude `opus`, Cursor `Composer 2.5`, and Codex `gpt-5.6-terra` with medium reasoning. In Codex `spawn_agent` calls, set `agent_type` for the role and never use an unsupported `agent_profile` field.
 
 **Agent Prompts:**
 
@@ -183,6 +185,10 @@ Find:
 1. Current API for {specific_feature}
 2. Code examples
 3. Configuration needed
+
+Required tool routing:
+- Use /Users/melvynx/.agents/skills/find-docs/SKILL.md first.
+- Use /Users/melvynx/.agents/skills/exa-search/SKILL.md only if docs are missing or broader source discovery is needed.
 ```
 
 **`websearch`** - Use for approaches and gotchas:
@@ -190,6 +196,10 @@ Find:
 Search: {specific_question_or_approach}
 
 Find common patterns and pitfalls.
+
+Required tool routing:
+- Use /Users/melvynx/.agents/skills/exa-search/SKILL.md first.
+- Use /Users/melvynx/.agents/skills/find-docs/SKILL.md first instead when the question is about a specific library, framework, SDK, CLI, cloud service, API, or code example.
 ```
 
 ---
@@ -198,24 +208,24 @@ Find common patterns and pitfalls.
 
 **Simple task** (fix button styling) → 1 agent:
 ```
-[Task: explore-codebase - find button components and styling patterns]
+[Sub-agent: explore-codebase - find button components and styling patterns]
 ```
 
 **Medium task** (add user profile page) → 3 agents:
 ```
-[Task: explore-codebase - find user-related components and data fetching patterns]
-[Task: explore-codebase - find page layout and routing patterns]
-[Task: websearch - Next.js profile page best practices]
+[Sub-agent: explore-codebase - find user-related components and data fetching patterns]
+[Sub-agent: explore-codebase - find page layout and routing patterns]
+[Sub-agent: websearch - Next.js profile page best practices]
 ```
 
 **Complex task** (add Stripe subscriptions) → 6 agents:
 ```
-[Task: explore-codebase - find existing payment/billing code]
-[Task: explore-codebase - find user account and settings patterns]
-[Task: explore-docs - Stripe subscription API and webhooks]
-[Task: explore-docs - Stripe Customer Portal integration]
-[Task: websearch - Stripe subscriptions Next.js implementation]
-[Task: websearch - Stripe webhook security best practices]
+[Sub-agent: explore-codebase - find existing payment/billing code]
+[Sub-agent: explore-codebase - find user account and settings patterns]
+[Sub-agent: explore-docs - Stripe subscription API and webhooks]
+[Sub-agent: explore-docs - Stripe Customer Portal integration]
+[Sub-agent: websearch - Stripe subscriptions Next.js implementation]
+[Sub-agent: websearch - Stripe webhook security best practices]
 ```
 
 ### 4. Synthesize Findings + Save to File

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Apex"
+  short_description: "Implement systematically and prove the real flow"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#CD0DC1"
+  default_prompt: "Use $apex -v to implement this task and prove every flow step works."

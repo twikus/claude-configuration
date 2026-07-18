@@ -219,5 +219,5 @@ This is the final step of the APEX workflow. No next step to load.
 <critical>
 Remember: This step handles git operations, PR creation, AND team shutdown (if teams_mode).
 All code changes should have been completed in earlier steps.
-Team shutdown MUST happen here — step 0 of execution sequence — before git operations.
+Team shutdown MUST happen here - step 0 of execution sequence - before git operations.
 </critical>

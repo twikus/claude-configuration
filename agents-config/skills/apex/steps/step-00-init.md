@@ -52,7 +52,7 @@ auto_mode: false # -a: Skip confirmations, use recommended options
 examine_mode: false # -x: Auto-proceed to adversarial review
 save_mode: false # -s: Save outputs to .claude/output/apex/
 test_mode: false # -t: Include test creation and runner steps
-verify_mode: false # -v: Launch app and verify feature works via real user surface
+verify_mode: false # -v: Prove the feature works via the real user flow, with screenshot evidence for every observable step
 economy_mode: false # -e: No subagents, save tokens (for limited plans)
 branch_mode: false # -b: Verify not on main, create branch if needed
 pr_mode: false # -pr: Create pull request at end (enables -b)
@@ -100,7 +100,7 @@ Enable flags (lowercase - turn ON):
   -x or --examine  → {examine_mode} = true
   -s or --save     → {save_mode} = true
   -t or --test     → {test_mode} = true
-  -v or --verify   → {verify_mode} = true
+  -v or --verify   → {verify_mode} = true (proof gate: real flow + step-by-step evidence)
   -e or --economy  → {economy_mode} = true
 
 Disable flags (UPPERCASE - turn OFF):

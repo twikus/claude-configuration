@@ -173,8 +173,8 @@ Use the **Edit tool** to write the FULL plan to `{output_dir}/02-plan.md`. Repla
 
 <critical>
 If `{teams_mode}` = true, you MUST create the team BEFORE creating any tasks.
-TeamCreate resets the task list — so the team must exist first, then tasks are added to it.
-Do NOT spawn any agents yet — that happens in step-03-execute-teams.
+TeamCreate resets the task list - so the team must exist first, then tasks are added to it.
+Do NOT spawn any agents yet - that happens in step-03-execute-teams.
 </critical>
 
 **If `{teams_mode}` = true:**
@@ -194,7 +194,7 @@ TeamCreate:
 <critical>
 You MUST create a TaskList using TaskCreate for every planned change.
 This is NOT optional - the task list tracks progress through execution.
-If teams_mode is enabled, the team was already created in step 5 — tasks go into the team's task list.
+If teams_mode is enabled, the team was already created in step 5 - tasks go into the team's task list.
 </critical>
 
 **Create one task per file change from the plan:**
@@ -394,7 +394,7 @@ questions:
 **If `{auto_mode}` = false:**
 
 <critical>
-Use EnterPlanMode / ExitPlanMode for plan approval — NOT AskUserQuestion.
+Use EnterPlanMode / ExitPlanMode for plan approval - NOT AskUserQuestion.
 This gives the user proper plan review UI and supports "Execute and clear context".
 </critical>
 
@@ -407,7 +407,7 @@ This transitions into plan mode so the user can review and approve.
 The system will provide a plan file path. Write the FULL plan to it, including APEX state for context survival.
 
 <critical>
-The plan file must contain ALL details from step 4 — do NOT strip sections.
+The plan file must contain ALL details from step 4 - do NOT strip sections.
 Include everything: Overview, Prerequisites, File Changes, Testing Strategy, Acceptance Criteria Mapping, Risks & Considerations, Key Decisions.
 </critical>
 
@@ -455,7 +455,7 @@ Include everything: Overview, Prerequisites, File Changes, Testing Strategy, Acc
 
 ## File Changes
 
-[Full file-by-file plan from step 4 — every file with specific actions, line references, patterns to follow, edge cases]
+[Full file-by-file plan from step 4 - every file with specific actions, line references, patterns to follow, edge cases]
 
 ## Testing Strategy
 
@@ -498,14 +498,14 @@ If the user chooses "Execute and clear context":
 - Context is cleared but the plan file survives
 - The agent re-reads the plan file on the next turn
 - The APEX Workflow Context section in the plan file tells the agent:
-  1. This is an APEX workflow — restore all state variables from the table
+  1. This is an APEX workflow - restore all state variables from the table
   2. Load the next step file indicated in "Next Step After Approval"
   3. Continue the workflow as normal
 
 <critical>
 The plan file MUST contain ALL state variables, the next step path, AND the full detailed plan.
 Without this, "Execute and clear context" breaks the APEX workflow.
-Never strip sections from the plan file — it must be the complete implementation reference.
+Never strip sections from the plan file - it must be the complete implementation reference.
 </critical>
 
 ### 11. Complete Save Output (if save_mode)
@@ -588,6 +588,6 @@ Append to `{output_dir}/02-plan.md`:
 
 <critical>
 Remember: Planning is ONLY about designing the approach - save all implementation for step-03!
-When auto_mode=false, ALWAYS use EnterPlanMode/ExitPlanMode for approval — never AskUserQuestion.
+When auto_mode=false, ALWAYS use EnterPlanMode/ExitPlanMode for approval - never AskUserQuestion.
 The plan file MUST contain APEX state variables so "Execute and clear context" works.
 </critical>

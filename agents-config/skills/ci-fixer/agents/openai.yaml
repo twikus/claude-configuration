@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ci Fixer"
+  short_description: "Automated CI/CD pipeline fixer - watches CI, fixes errors..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#D6D514"
+  default_prompt: "Use $ci-fixer to help with this task."

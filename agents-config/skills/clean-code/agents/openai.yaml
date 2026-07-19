@@ -1,0 +1,7 @@
+interface:
+  display_name: "Clean Code"
+  short_description: "Clean Code rules for TypeScript, React, and Next.js"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#987340"
+  default_prompt: "Use $clean-code to help with this task."

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Thermo Nuclear Code Quality Review"
+  short_description: "Run an extremely strict maintainability review for..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#84B110"
+  default_prompt: "Use $thermo-nuclear-code-quality-review to help with this task."

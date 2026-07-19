@@ -1,0 +1,7 @@
+interface:
+  display_name: "Skill Workflow Manager"
+  short_description: "Create multi-step workflow skills with progressive step..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#BE21FA"
+  default_prompt: "Use $skill-workflow-manager to help with this task."

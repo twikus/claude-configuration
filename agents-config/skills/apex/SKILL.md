@@ -1,6 +1,6 @@
 ---
 name: apex
-description: Systematic implementation using APEX methodology (Analyze-Plan-Execute-eXamine) with parallel agents, self-validation, optional adversarial review, and proof-backed feature verification. Use when implementing features, fixing bugs, or making code changes that benefit from a structured workflow, especially when the result must be proven through the real user flow.
+description: Run structured APEX implementation (Analyze, Plan, Execute, eXamine) with parallel agents, tests, adversarial review, and proof-backed verification. Use for features, bug fixes, or code changes that need disciplined execution and real-flow evidence.
 ---
 
 <objective>

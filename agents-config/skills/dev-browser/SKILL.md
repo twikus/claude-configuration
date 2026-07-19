@@ -14,10 +14,26 @@ Scripts run in QuickJS WASM sandbox - not Node.js. No `require`, `fetch`, `fs`, 
 ## Setup
 
 If `dev-browser` is not found:
+
+- First check the repository's package-manager rules. If the repo forbids npm
+  or requires pnpm-only commands, do not run `npm install -g`.
+- In Codex, prefer the bundled workspace runtime when available: use the local
+  Node/Playwright/Chromium dependencies to perform the same page-load,
+  screenshot, console-error, and interaction checks without installing
+  anything.
+- Only install the CLI when npm is allowed for the current workspace and the
+  task really needs `dev-browser` persistence or CDP attachment that the
+  bundled browser runtime cannot provide.
+
 ```bash
 npm install -g dev-browser
 dev-browser install
 ```
+
+When falling back to Playwright, preserve the same proof standard: record the
+URL, title, console/page errors, screenshots or output artifacts, and the exact
+interaction steps that were executed. State clearly that the `dev-browser` CLI
+was unavailable and that the fallback used real browser automation.
 
 ## Core Pattern
 
@@ -50,6 +66,8 @@ EOF
 | `browser.closePage(name)` | Close named page |
 
 ## File I/O (restricted to `~/.dev-browser/tmp/`)
+
+Never pass absolute paths to `saveScreenshot` or `writeFile`. If a task asks for screenshots or reports in a scratchpad/output directory, save with a relative name first, then copy the returned `~/.dev-browser/tmp/...` file to the requested path from the shell.
 
 | Method | Description |
 |--------|-------------|

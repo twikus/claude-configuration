@@ -107,6 +107,17 @@ For researched guidance and examples, see [references/description-recommandation
 
 **Canonical personal skills:** `~/.agents/skills/` is the single source of truth (git repo `Melvynx/agents-config`). It is an official user-level root for both Cursor and Codex, so they read it directly. Write new personal skills only under `~/.agents/skills/<name>/`.
 
+### Codex profile activity icons
+
+Codex's Profile activity view does not resolve standalone skill icons from `agents/openai.yaml`. It resolves known built-in skill icons or the logo of a matching installed plugin. After creating, renaming, or changing the icon metadata of a personal skill, sync the identity-only personal plugin wrappers:
+
+```bash
+bun ~/.agents/scripts/sync-codex-profile-icons.ts --install
+bun ~/.agents/scripts/audit-codex-profile-icons.ts
+```
+
+The wrappers intentionally contain no executable skills, so they provide `logo` / `logoDark` metadata without duplicating skill discovery. Keep `~/plugins` linked to `~/.agents/plugins/plugins`; the sync script creates the link when absent.
+
 Per the official Cursor docs ([cursor.com/docs/skills](https://cursor.com/docs/skills)), user-level roots are `~/.agents/skills/` and `~/.cursor/skills/`, plus compat dirs `~/.claude/skills/` and `~/.codex/skills/`. `~/.cursor/skills-cursor/` is NOT a documented path; do not use it.
 
 Because `~/.agents/skills/` is read directly, the only symlinks needed are the compat dirs for agents that do not read `~/.agents/skills/` themselves:

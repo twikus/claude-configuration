@@ -1,0 +1,7 @@
+interface:
+  display_name: "Find Docs"
+  short_description: "Retrieve current technical docs, API references, config..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#EB2802"
+  default_prompt: "Use $find-docs to help with this task."

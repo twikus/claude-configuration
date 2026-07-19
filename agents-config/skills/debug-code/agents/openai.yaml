@@ -1,0 +1,7 @@
+interface:
+  display_name: "Debug Code"
+  short_description: "Systematic error debugging with analysis, solution..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#4A88BE"
+  default_prompt: "Use $debug-code to help with this task."

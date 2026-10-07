@@ -1,0 +1,5 @@
+{
+  "name": "portly-ports",
+  "version": "0.2.0",
+  "description": "Shows Portly's running ports, most recently started first, in the status line"
+}

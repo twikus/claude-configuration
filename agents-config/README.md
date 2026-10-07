@@ -38,8 +38,11 @@ copies them to `~/.claude/mods/`, and `settings.json` enables them with
 | Mod | Purpose |
 | --- | --- |
 | `agent4everything` | Links every `.agents/skills` skill (global and per project) into `.claude/skills` without duplicating existing ones. |
+| `aiblueprint` | Usage band above the prompt: session context and cost, 5-hour and weekly limits with pace and reset time. The ⚙ chip toggles each part. It also seeds the statusline's limits cache. |
+| `portly-ports` | Shows Portly's running ports in the status line; `/portly-ports` toggles it. Stays silent when Portly is not installed. |
+| `cache-line` | Prompt-cache meter above the prompt (hit rate, countdown, prompt size); `/cache` opens the per-turn table. MIT, by claude-code-templates. |
 
-Each mod ships only `.claude-plugin/plugin.json` and `hooks/`. Run
+Each mod ships `.claude-plugin/plugin.json`, `hooks/`, and its `types/` contract when it has one. Run
 `claude plugin validate <mod folder>` after editing one.
 
 ## Scripts

@@ -1,6 +1,6 @@
 # Review output format
 
-This is the format for a review `better-interface` orchestrates. A domain skill reporting on its own carries its own smaller format, in its `## Reporting` section.
+Use this format for an explicit review-only request or a detailed review requested alongside implementation. The `better` entrypoint defaults to implementing fixes and returning a concise change-and-verification summary; this format must not delay implementation or create an approval gate. A domain skill reporting on its own carries its own smaller format in its `## Reporting` section.
 
 ## Scope and coverage
 
@@ -10,7 +10,7 @@ State the exact scope, stack and styling conventions, the project convention doc
 | --- | --- | --- |
 | Accessibility | Files, components, states, or checks | Findings count or `Clear` |
 
-Include every domain listed under `better-interface`'s **Use domain skills as the sources of truth**. `Clear` means inspected with no actionable finding; `Not reviewed` must explain why.
+Include all six domain guides listed in `better/SKILL.md`. `Clear` means inspected with no actionable finding; `Not reviewed` must explain why.
 
 ## Findings
 
@@ -20,7 +20,7 @@ One table, ordered by severity, then by reach:
 | --- | --- | --- | --- | --- | --- |
 | HIGH | Accessibility | `src/Dialog.tsx:42` | `<button><XIcon /></button>` | Add `aria-label="Close"` and hide the icon from the accessibility tree | The icon-only control has no accessible name |
 
-- **Severity** comes from `better-interface`'s **Rank by user impact**.
+- **Severity** comes from the HIGH, MEDIUM, and LOW definitions in `better/SKILL.md`.
 - **Location** cites `path/to/file:line`. Cite the exact screen and component when the artifact has no source files.
 - **Before / After** show the current implementation and an actionable replacement. Never split them into separate "Before:" and "After:" lines.
 - **Why** names the violated principle and its user impact.

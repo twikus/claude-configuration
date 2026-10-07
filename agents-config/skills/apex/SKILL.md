@@ -1,7 +1,6 @@
 ---
 name: apex
 description: Run the configurable APEX one-shot workflow. Use when the user invokes $apex or /apex to analyze, plan, implement, optionally review code, and verify a change.
-disable-model-invocation: true
 argument-hint: "[-a] [-v] [-x] <request>"
 ---
 

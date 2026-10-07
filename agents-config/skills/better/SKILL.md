@@ -1,17 +1,19 @@
 ---
 name: better
-description: Route a holistic interface review across accessibility, layout, writing, typography, colors, and UI polish. Use when reviewing a screen, flow, feature, or product interface, or for a11y, copy, type, color, or polish findings.
+description: Improve and implement interfaces across accessibility, layout, writing, typography, colors, and UI polish. Use when asked to make a screen or flow better, smarter, clearer, or more polished; audit only when explicitly requested.
 ---
 
-Review one resolved screen, flow, feature, or product interface. Orchestrate only; never duplicate or override the domain guides.
+Improve one resolved screen, flow, feature, or product interface. Default to implementation: inspect, identify the concrete fixes, apply them, and verify the result in the same task. Use the domain guides for design principles and checks; this entrypoint owns workflow, authorization, severity, and reporting.
 
-A request naming a branch, PR, commit range, or uncommitted changes is a change review. Stop and tell the user to run `interface-review`. When that skill hands a review back, keep its scope and status labels; rank and verdict here cover `Introduced` and `Regression` only.
+Treat `$better`, "better this UI", and "make this smarter" as requests to implement. Do not stop after findings, propose work instead of doing it, or ask whether to proceed. Ask only for essential missing information that cannot be resolved from context; continue independent work while waiting. Honor explicit "audit", "review only", "read-only", "plan only", or "no edits" requests as non-mutating boundaries.
 
-State the scope. If it is too large to inspect, narrow to one complete flow and name what was excluded. Cover empty, loading, error, and narrow-width states where they exist. Cap the report at 15 findings.
+For an explicit change review of a branch, PR, commit range, or uncommitted changes, use `interface-review` and preserve its scope and status labels. A version-control reference in an improvement request identifies the implementation scope; it does not turn the request into a read-only review or require another invocation.
+
+State the scope briefly. Inspect one complete flow at a time; continue through the requested scope rather than silently dropping work. Cover empty, loading, error, and narrow-width states where they exist. Keep a concrete finding list as implementation scope; apply all actionable in-scope fixes, not only HIGH findings. Cap reported findings at 15, not the work performed.
 
 Identify the stack, tokens, viewports, and preview command. Read project interface docs (`CONTRIBUTING.md`, `AGENTS.md`, design-system, Storybook). A documented convention does not retire a finding; report a shared-token cause once against that source.
 
-Load and finish every available guide in this order before consolidating:
+Load the available guides in this order, identify the fixes, then implement:
 
 1. `references/accessibility/guide.md`
 2. `references/layout/guide.md`
@@ -26,4 +28,6 @@ Cite `path/to/file:line` and show the current implementation. Do not report a co
 
 `HIGH` blocks a task, misleads, hides content, risks data loss, or is a confirmed trigger: unnamed control, missing focus, pointer-only path, ignored `prefers-reduced-motion`, clip at 320px or 200% zoom, failing contrast, color-only meaning, unconfirmed destructive action, unreachable truncated content, undisclosed overflow, error with no recovery, semantic color used against its meaning, motion-only state. `MEDIUM` harms comprehension, efficiency, adaptability, or consistency. `LOW` is isolated polish. Rank triggers first, then reach. Prefer delete → platform → existing token → correct value → add. One root cause is one row. Never pad to reach the cap.
 
-Stay read-only unless asked to implement. Then keep this report as the change scope and re-verify. Report through `references/review-format.md` and stop.
+Implement with existing components and tokens, preserve unrelated work, and re-verify after changes. Distinguish verified behavior from untested states and unrelated check failures. An implementation request does not itself authorize deployment, sending messages, or other external operations.
+
+For implementation, return a concise account of what changed, checks and remaining blockers, with a rendered preview when available. Do not offer to implement work that is already in scope. Use `references/review-format.md` for explicit review-only requests or when a detailed review is requested alongside implementation. Finish when the requested fixes and feasible verification are complete, or explain the concrete blocker.

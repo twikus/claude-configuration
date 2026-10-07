@@ -11,3 +11,5 @@ Inspect the repository, current behavior, applicable rules, and nearby prior art
 Return the problem, desired behavior, evidence, constraints, risks, measurable acceptance criteria, and unresolved decisions.
 
 Stop when the request is understood well enough to plan. Do not plan or implement.
+
+Run as many sub-agents as you need to avoid flooding the context.

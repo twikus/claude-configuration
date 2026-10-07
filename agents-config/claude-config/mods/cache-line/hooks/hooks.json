@@ -1,0 +1,6 @@
+{
+  "description": "cache-line: one-line cache meter in the AbovePrompt band, composed with the plugins beneath",
+  "modules": [
+    "./register.tsx"
+  ]
+}

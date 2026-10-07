@@ -8,6 +8,7 @@ user-invocable: true
 Create or draft one persistent Goal only when the user asked for Goal mode. A Goal is bigger than one prompt and smaller than an open-ended project; do not use one for a loose backlog.
 
 Identify the platform, then open the matching reference before drafting or creating:
+
 - Codex → `references/codex-goal.md` for `get_goal` / `create_goal`, CLI `/goal`, and completion rules
 - Claude Code → `references/claude-code-goal.md` for manual `/goal`, evaluator behavior, and dispatch limits
 - Unknown → return a plain `/goal ...` and say the user must run it in the target agent
